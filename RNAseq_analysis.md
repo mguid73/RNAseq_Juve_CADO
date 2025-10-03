@@ -189,10 +189,17 @@ Notes:
 ```{bash}
 mkdir trimmed_reads
 
+#loop through all files
+for fq in *.1.fq.gz
+do
+    # get sample name (everything before ".1.fq.gz")
+    sample=$(basename "$fq" .1.fq.gz)
 
-## make this into a for loop tho so everything is named properly & rename (1->F) and (2->R)
+    fastp -i ${sample}.1.fq.gz -I ${sample}.2.fq.gz -o trimmed_reads/${sample}.F.trim.fq.gz -O trimmed_reads/${sample}.R.trim.fq.gz -f 9 -j trimmed_reads/${sample}.json -h trimmed_reads/${sample}.html
+done
 
-fastp -i *1.fq.gz -I *2.fq.gz -o trimmed_reads/*F.trim.fq.gz -O trimmed_reads/*R.trim.fq.gz  -f 9 -j trimmed_reads/*.json -h trimmed_reads/*.html
+#one sample
+#fastp -i sampleA.1.fq.gz -I sampleA.2.fq.gz -o trimmed_reads/sampleA.F.trim.fq.gz -O trimmed_reads/sampleA.R.trim.fq.gz  -f 9 -j trimmed_reads/sampleA.json -h trimmed_reads/sampleA.html
 ```
 
 Notes to self:   
