@@ -1,0 +1,351 @@
+---
+title: "DESeq2_analysis"
+author: "Megan Delatte-Guidry"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Differential gene expression analysis with DESeq2
+DESeq2 estimates variance-mean dependence in count data and tests for differential expression base on a negative binomial distribution model.   
+
+DESeq2 for Analyzing RNAseq data manual:
+https://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html
+
+Input files:
+- non-normalized count matrix
+- metadata file
+
+Note on non-normalized data from DESeq2 manual: "As input, the DESeq2 package expects count data as obtained, e.g., from RNA-seq or another high-throughput sequencing experiment, in the form of a matrix of integer values. The value in the i-th row and the j-th column of the matrix tells how many reads can be assigned to gene i in sample j. Analogously, for other types of assays, the rows of the matrix might correspond e.g. to binding regions (with ChIP-Seq) or peptide sequences (with quantitative mass spectrometry). We will list method for obtaining count matrices in sections below.
+
+The values in the matrix should be un-normalized counts or estimated counts of sequencing reads (for single-end RNA-seq) or fragments (for paired-end RNA-seq). The RNA-seq workflow describes multiple techniques for preparing such count matrices. It is important to provide count matrices as input for DESeq2’s statistical model (Love, Huber, and Anders 2014) to hold, as only the count values allow assessing the measurement precision correctly. The DESeq2 model internally corrects for library size, so transformed or normalized values such as counts scaled by library size should not be used as input."
+
+
+Load libraries
+```{r, message=FALSE, warning=FALSE}
+library(DESeq2)
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(reshape2)
+library(apeglm)
+library(ggplot2)
+library(vsn)
+library(pheatmap)
+library(RColorBrewer)
+library(genefilter)
+library(rsconnect)
+library(gplots)
+library(ashr)
+library(limma)
+```
+
+## Load in data
+```{r}
+# load in metadata
+sample_info <- read.csv("juve_cado_metadata.csv", header=TRUE, sep=",", row.names=1)
+head(sample_info)
+```
+
+```{r}
+# load in gene count matrix and set the row names header as "gene_id"
+gene_counts <- as.data.frame(read.csv("gene_count_matrix.csv", row.names="gene_id"))
+head(gene_counts, 10)
+```
+
+## Check sample names
+Manual: "It is absolutely critical that the columns of the count matrix and the rows of the column data (information about samples) are in the same order. DESeq2 will not make guesses as to which column of the count matrix belongs to which row of the column data, these must be provided to DESeq2 already in consistent order."  
+
+The sample names in `sample_info` and `gene_counts` have to match up and be in the exact same order!
+```{r}
+# remove the "_F" in the column names of `gene_counts`
+colnames(gene_counts) <- sub("_F", "", colnames(gene_counts))
+head(gene_counts)
+
+#check that the sample names are the same in both places
+all(rownames(sample_info) %in% colnames(gene_counts))
+#check the order of the samples
+all(rownames(sample_info) == colnames(gene_counts))
+```
+
+## Pre-filtering with genefilter
+While pre-filtering of low count genes isn't necessary, it can be useful for 2 reasons:    
+1. reduce size of the `dds` data object (thus increase speed of count modeling).  
+2. improve visualizations by making them a little cleaner
+```{r}
+###filtering values for PoverA
+#set filter values for PoverA (P percent of the samples have counts over A)
+# here P = 0.04 and A = 5 (4% of samples would be 3 out of 72 samples)
+filt <- filterfun(pOverA(0.04,5))
+
+#create filter for the counts data
+tfil <- genefilter(gene_counts, filt)
+
+#identify transcripts to keep by count filter
+keep <- gene_counts[tfil,]
+
+#identify gene names in transcript list to keep
+gn.keep <- rownames(keep)
+
+#data filtered in PoverA, P percent of the samples have counts over A
+filt_gene_counts <- as.data.frame(gene_counts[which(rownames(gene_counts) %in% gn.keep),])
+#write.csv(filt_gene_counts, file="filtered_gene_count_matrix.csv")
+head(filt_gene_counts,10)
+```
+#> nrow(gene_counts)
+#[1] 97257
+#> nrow(filt_gene_counts)
+#[1] 70981
+
+## Building DESeq2 matrix
+Need to determine how to to design our DESeq2 matrix. Here I have it designed by a combined phase.treat per recommendation from the "Interactions" section of the manual which described this as the simplest way to pull out all of the possible interactions
+
+########## RUN DESEQ ON DIFFERENT PHASES ###########
+```{r}
+dm2 <- DESeqDataSetFromMatrix(countData = filt_gene_counts,
+                             colData = sample_info,
+                             design = ~ phase.treat)
+dm2$phase.treat <- factor(dm2$phase.treat, levels = c("1_control", "1_stress","2_control", "2_naive","2_recovery", "2_stress"))
+levels(dm2$phase.treat)
+dm2
+```
+
+
+## Running DESeq2
+```{r}
+dds <- DESeq(dm2) #take a couple minutes to run
+res<-results(dds) 
+head(res)
+summary(res)
+resultsNames(dds)
+
+# look at specific results for treatment effect in each phase - can change this out to any combo
+results(dds, contrast=c("phase.treat", "1_control", "1_stress"))
+```
+## Investigating the models 
+To investigate the models, logfold shrinkage was viewed with MAplots. 
+
+
+```{r}
+dds_1_cs <- lfcShrink(dds, contrast =c("phase.treat","1_control", "1_stress"), type="ashr")
+dds_1s2s <- lfcShrink(dds, contrast =c("phase.treat","1_stress", "2_stress"), type="ashr")
+dds_2s2n <- lfcShrink(dds, contrast =c("phase.treat","2_stress", "2_naive"), type="ashr")
+## using 'ashr' for LFC shrinkage. If used in published research, please cite:
+##     Stephens, M. (2016) False discovery rates: a new deal. Biostatistics, 18:2.
+##     https://doi.org/10.1093/biostatistics/kxw041
+```
+
+**plotMA** 
+"In DESeq2, the function plotMA shows the log2 fold changes attributable to a given variable over the mean of normalized counts for all the samples in the DESeqDataSet.   
+Points will be colored red if the adjusted p value is less than 0.1. Points which fall out of the window are plotted as open triangles pointing either up or down." Using the ashr shrinkage option allows for specifying the contrasts in the results object."
+```{r}
+DESeq2::plotMA(dds_2s2n, ylim=c(-5,5))
+```
+## Setting the alpha value and creating results sets
+
+Here I'll set the alpha value as a more conservative 0.05 (compared to the default 0.1). 
+Note: It is important to specific the correct order in the contrasts, with the name of the numerator level for the fold change, and the name of the denominator level for the fold change for the comparison.
+```{r}
+summary(res)
+sum(res$padj!=0, na.rm=TRUE) #58551 DEGs total
+sum(res$padj<0.1, na.rm=TRUE) #4267 DEGs pass the filter with 0.1 cutoff
+sum(res$padj<0.05, na.rm=TRUE) #3010 DEGs pass the filter with 0.05 cutoff
+```
+
+```{r}
+#filtering based on alpha = 0.05 (which is the cutoff value for the adjusted p-value) where to be included the DEG's have to have an adj. p-value less than alpha
+resultsNames(dds)
+
+res_p1 <- results(dds, alpha=0.05, contrast=c("phase.treat","1_control","1_stress"))
+res_p2cs <- results(dds, alpha=0.05, contrast=c("phase.treat","2_control", "2_stress"))
+res_p2cn <- results(dds, alpha=0.05, contrast=c("phase.treat","2_control", "2_naive")) 
+res_p2cr <- results(dds, alpha=0.05, contrast=c("phase.treat","2_control", "2_recovery"))
+res_p2sr <- results(dds, alpha=0.05, contrast=c("phase.treat","2_stress", "2_recovery"))
+res_p2sn <- results(dds, alpha=0.05, contrast=c("phase.treat","2_stress", "2_naive"))
+res_p2rn <- results(dds, alpha=0.05, contrast=c("phase.treat","2_recovery", "2_naive"))
+
+```
+
+```{r}
+summary(res_p1)   #  151 up; 119 down
+summary(res_p2cs) #  646 up; 1850 down
+summary(res_p2cn) #  135 up; 127 down
+summary(res_p2cr) #  131 up; 432 down
+summary(res_p2sr) #  847 up; 1033 down
+summary(res_p2sn) #  1807 up; 452 down
+summary(res_p2rn) #  885 up; 445 down
+
+#then lets save these results set for later use (pretty sure this is what I'll use for the GO term analysis)
+write.table(res_p1,"outputs/res_p1.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
+write.table(res_p2cs,"outputs/res_p2cs.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
+write.table(res_p2cn,"outputs/res_p2cn.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
+write.table(res_p2cr,"outputs/res_p2cr.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
+write.table(res_p2sr,"outputs/res_p2sr.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
+write.table(res_p2sn,"outputs/res_p2sn.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
+write.table(res_p2rn,"outputs/res_p2rn.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
+```
+
+
+
+Next, I'll subset each results set to only be significantly DEGs and order then by the adjusted p value (small to large)
+```{r}
+sig_res_p1 <- subset(res_p1, padj<0.05) #identify signficant pvalues with 5%FDR
+sig_res_p2cs <- subset(res_p2cs, padj<0.05)
+sig_res_p2cn <- subset(res_p2cn, padj<0.05)
+sig_res_p2cr <- subset(res_p2cr, padj<0.05)
+sig_res_p2sr <- subset(res_p2sr, padj<0.05)
+sig_res_p2sn <- subset(res_p2sn, padj<0.05)
+sig_res_p2rn <- subset(res_p2rn, padj<0.05)
+
+
+#order by padj
+ordered_sig_p1 <-sig_res_p1[ order(sig_res_p1$padj ), ] 
+ordered_sig_p2cs <-sig_res_p2cs[ order(sig_res_p2cs$padj ), ]
+ordered_sig_p2cn <-sig_res_p2cn[ order(sig_res_p2cn$padj ), ]
+ordered_sig_p2cr <-sig_res_p2cr[ order(sig_res_p2cr$padj ), ]
+ordered_sig_p2sr <-sig_res_p2sr[ order(sig_res_p2sr$padj ), ]
+ordered_sig_p2sn <-sig_res_p2sn[ order(sig_res_p2sn$padj ), ]
+ordered_sig_p2rn <-sig_res_p2rn[ order(sig_res_p2rn$padj ), ]
+
+
+#these ordered lists were written to files for potential later use - like with gProfiler
+#write.table(ordered_sig_p1,"outputs/ordered_sig_p1.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
+#write.table(ordered_sig_p2cs,"outputs/ordered_sig_p2cs.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
+#write.table(ordered_sig_p2cn,"outputs/ordered_sig_p2cn.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
+#write.table(ordered_sig_p2cr,"outputs/ordered_sig_p2cr.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
+#write.table(ordered_sig_p2sr,"outputs/ordered_sig_p2sr.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
+#write.table(ordered_sig_p2sn,"outputs/ordered_sig_p2sn.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
+#write.table(ordered_sig_p2rn,"outputs/ordered_sig_p2rn.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
+```
+
+
+## Visualization
+For most of the analysis/visualization I wanted to compare the treatments accross all significant DEGs between all the treatments. So I combined the significant subsets and removed duplicates by using the original matrix, as well as regularize log transformed the list for the PCA and heatmap visualization.
+
+```{r}
+#combine significant DEGs for all treatment contrasts
+combine <- rbind(sig_res_p1, sig_res_p2cs, sig_res_p2cn, sig_res_p2cr, sig_res_p2sr, sig_res_p2sn, sig_res_p2rn)
+combine_list <- dm2[which(rownames(dm2) %in% rownames(combine)),] #combined list from the original matrix so dupicates are removed 
+combine_rlog <- rlog(combine_list, blind=FALSE) #setting blind to FALSE takes into account levels and contrasts
+vsd <- vst(combine_list, blind=FALSE)
+```
+
+########Using limma to resolve batch influence - SEQ LANE effect????
+```{r}
+# mat <- assay(vsd)
+# mm <- model.matrix(~phase.treat, colData(vsd))
+# mat <- limma::removeBatchEffect(mat, batch=vsd$batch, design=mm)
+# assay(vsd) <- mat
+```
+
+```{r}
+# Quick PCA plot to start
+plotPCA(combine_vst, intgroup=c("phase.treat")) # same PCA as below but less pretty, use this for knowing the PC loadings for the labels in the below PCA
+
+# prettier pca
+pcaData <- plotPCA(combine_vst, intgroup=c("phase.treat"), returnData=TRUE)
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+percentVar
+ggplot(pcaData, aes(PC1, PC2, color=phase.treat, label=name)) +
+  geom_point(size=3) +
+  #geom_text() +
+  coord_fixed() + ylab("PC2: 15% Variance Explained") +
+  xlab("PC1:29% Variance Explained") +
+  theme_linedraw() #+ 
+  #scale_color_manual(values = c("1_control" = "#aa2faa", "1_stress" = "#2e5aaa", "2_control" = "#593959", "2_naive" = "#41a08e", "2_recovery" = "blue", "2_stress" = "green"))
+
+ggsave("pca.png", last_plot(), width=7, height=5)
+```
+
+plotting other PCs
+```{r}
+# Get matrix of transformed counts
+vst_mat <- assay(combine_vst)
+
+# Transpose for PCA: samples in rows
+pca <- prcomp(t(vst_mat))
+
+# Build a data frame with metadata and all PCs
+pcaData <- as.data.frame(pca$x)
+pcaData$phase.treat <- colData(combine_vst)$phase.treat
+pcaData$name <- colnames(combine_vst)
+
+# Get percent variance for axis labels
+percentVar <- pca$sdev^2 / sum(pca$sdev^2) * 100
+
+# Plot PC3 vs PC4
+ggplot(pcaData, aes(PC3, PC4, color=phase.treat, label=name)) +
+  geom_point(size=3) +
+  coord_fixed() +
+  ylab(paste0("PC4: ", round(percentVar[4]), "% Variance Explained")) +
+  xlab(paste0("PC3: ", round(percentVar[3]), "% Variance Explained")) +
+  theme_linedraw()
+```
+
+Heatmap of rlog transformed difference in expression compared to the average across all samples, using adjusted p value of 0.00001 or less. Many thanks to Hollie Putnam for the code of how to make this heatmap.
+```{r}
+sig.num <- sum(combine$padj <0.00001, na.rm=T) #set the p value cut off very low here, 1174 of 9060
+sum(combine$padj <0.00001, na.rm=T)
+sum(combine$padj!=0)
+topVarGenes <- head(order(rowVars(assay(combine_rlog)),decreasing=TRUE),sig.num) #sort by decreasing sig
+mat <- assay(combine_rlog)[ topVarGenes, ] #make an expression object
+mat <- mat - rowMeans(mat) #difference in expression compared to average across all samples
+#col.order <- c("CASE_J03", "CASE_J09", "CASE_J12", "CASE_J13", "CA_J06",   "CA_J08",   "CA_J11",   "CA_J18",   "CON_J02",  "CON_J05" , "CON_J10" , "SE_J01" ,  "SE_J04",   "SE_J07")
+#mat <- mat[,col.order]
+df1 <- as.data.frame(colData(combine_rlog)[c("treatment")]) #make dataframe for column naming 
+
+
+colfunc <- colorRampPalette(c("deepskyblue", "white", "violetred3")) #make function for the color gradient 
+ann_colors <- list( treatment= c(control="#41a08e", stress ="#2e5aaa", naive= "#aa2faa", recovery= "#593959"))
+breakss <- c(-2, -1.9, -1.8, -1.7, -1.6, -1.5, -1.4, -1.3, -1.2, -1.1, -1, -.9, -.8, -.7, -.6, -.5, -.4, -.3, -.2, -.1, 0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2) #this looks very extra but this is how the colors in the heatmap were broken up 
+
+png("heatmapbytreatment.png", units= "in", width=20, height=20, res = 600)
+pheatmap(mat, annotation_col=df1, annotation_colors=ann_colors, annotation_names_col = F, clustering_method = "average", 
+         clustering_distance_rows="euclidean", show_rownames =FALSE, cluster_cols=F,
+         show_colnames =F, breaks= breakss, color = colfunc(40), annotation_legend = F) 
+dev.off()
+```
+
+
+Let's make a Venn diagram of the significant DEGs that overlap across treatments and count how many overlap between the treatments. This is using modified code from [here](https://www.biostars.org/p/288028/).
+```{r}
+sig_res_p1genes <- row.names(sig_res_p1) #just gets the names of the genes, which is all that is needed to compare
+sig_res_p2csgenes <- row.names(sig_res_p2cs)
+
+
+comb3 <- c(sig_res_p1genes, sig_res_p1genes) #combine the list
+
+comb3_list <- dm2[which(rownames(dm2) %in% comb3),] #gets rid of any duplicates 
+
+comb3_row <- row.names(comb3_list) #make just the names of the genes again
+
+# Comparing each individual list with the combined list
+sig_res_p1genes.2 <- comb3_row %in% sig_res_p1genes
+sig_res_p2csgenes.2 <- comb3_row %in% sig_res_p2csgenes 
+
+
+
+# Generating venn counts to plot venn diagram
+counts3 <- cbind(sig_res_p1genes.2, sig_res_p2csgenes.2)
+ven3 <- vennCounts(counts3)
+png("venn-diagram-all.png", 1000, 1000)
+vennDiagram(ven3, cex = 1,names = c("phase1", "phase2"), circle.col = c("#2e5eaa", "pink"))
+dev.off()
+```
+
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
