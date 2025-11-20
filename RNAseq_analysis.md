@@ -302,7 +302,8 @@ Range of ________% alignment rate across samples. Alignment summaries stored in 
 ## 6. Assembly with [StringTie](https://ccb.jhu.edu/software/stringtie/index.shtml?t=manual)
 **Purpose:** Assemble the mapped reads with StringTie's network flow algorithm from multiple splice variants at a gene locus into probable transcripts. From there, transcript expression abundance can be quantified and analyzed.  
 
-Performing a reference-guided assembly of the mapped reads following StringTie's recommended workflow which includes the `-e` flag allowing for novel transcript discovery.
+Performing a reference-guided assembly of the mapped reads following StringTie's recommended workflow which includes the `-e` flag allowing for novel transcript discovery.    
+
 ![stringtie-workflow](images/workflows/DE_pipeline.png)
 
 Steps for StringTie analysis:
@@ -460,3 +461,10 @@ File name: `juve_cado_metadata.csv`
 ## 9. DESeq2 and further analysis
 Moving on to DESeq2, I worked in the R studio server on KITT with the count matrices and the metadata file in the de_analysis directory.    
 See R markdown (`DESeq2_analysis.Rmd`) for futher analysis steps. 
+
+* DESeq2
+* GO terms associated with treatments
+* GO MWU analysis
+* Volcano plots (to look at up and downregulation) - see link from Amy 
+* bubble plots to visualize gene counts?
+* notes from CERF on other analyses?
