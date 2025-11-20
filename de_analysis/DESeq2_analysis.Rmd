@@ -53,8 +53,10 @@ tail(sample_info)
 
 ```{r}
 # load in gene count matrix and set the row names header as "gene_id"
-gene_counts <- as.data.frame(read.csv("gene_count_matrix.csv", row.names="gene_id"))
-head(gene_counts, 10)
+#gene_counts <- as.data.frame(read.csv("gene_count_matrix.csv", row.names="gene_id"))
+gene_counts <- read.csv("gene_count_matrix.csv", row.names = 1, check.names = FALSE)
+head(rownames(gene_counts))
+head(gene_counts[,1:6])
 ```
 
 ## Check sample names
@@ -113,11 +115,11 @@ p2_gn.keep <- rownames(p2_keep)
 
 #data filtered in PoverA, P percent of the samples have counts over A
 p1_filt_gene_counts <- as.data.frame(p1_gene_counts[which(rownames(p1_gene_counts) %in% p1_gn.keep),])
-#write.csv(p1_filt_gene_counts, file="p1_filtered_gene_count_matrix.csv")
+write.csv(p1_filt_gene_counts, file="p1_filtered_gene_count_matrix.csv")
 head(p1_filt_gene_counts,10)
 
 p2_filt_gene_counts <- as.data.frame(p2_gene_counts[which(rownames(p2_gene_counts) %in% p2_gn.keep),])
-#write.csv(p2_filt_gene_counts, file="p2_filtered_gene_count_matrix.csv")
+write.csv(p2_filt_gene_counts, file="p2_filtered_gene_count_matrix.csv")
 head(p2_filt_gene_counts,10)
 ```
 #> nrow(gene_counts)
@@ -189,7 +191,7 @@ res1_comp <- results(dds1, alpha=0.05, contrast=c("treatment","control", "stress
 summary(res1_comp)   
 
 #then lets save these results set for later use (pretty sure this is what I'll use for the GO term analysis)
-#write.table(res1_comp,"outputs/phase1_res_stress.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
+#write.csv(res1_comp,"outputs/phase1_res_stress.csv")
 ```
 
 Next, I'll subset each results set to only be significantly DEGs and order then by the adjusted p value (small to large)
@@ -200,8 +202,9 @@ summary(sig_res1_comp)
 ordered_sig_res1_comp <-sig_res1_comp[ order(sig_res1_comp$padj ), ] 
 
 #these ordered lists were written to files for potential later use - like with gProfiler
-#write.table(ordered_sig_res1_comp,"outputs/ordered_sig_res1_comp.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
+write.csv(ordered_sig_res1_comp,"outputs/sig_phase1_res_stress.csv")
 ```
+
 #### Visualization
 For most of the analysis/visualization I wanted to compare the treatments accross all significant DEGs between all the treatments. So I combined the significant subsets and removed duplicates by using the original matrix, as well as regularize log transformed the list for the PCA and heatmap visualization.
 
@@ -232,8 +235,8 @@ percentVar
 ggplot(pcaData, aes(PC1, PC2, color=treatment, label=name)) +
   geom_point(aes(fill=treatment), pch = 21, size = 7, color= "white") +
   #geom_text() +
-  coord_fixed() + ylab("PC2: 15% Variance Explained") +
-  xlab("PC1:35% Variance Explained") +
+  coord_fixed() + ylab("PC2: 10% Variance Explained") +
+  xlab("PC1:37% Variance Explained") +
   #theme_linedraw() +
   scale_fill_manual(values = c(control="#A29BAD", stress ="#D29F13")) +
   theme_minimal(base_size = 20) +
@@ -250,7 +253,7 @@ ggplot(pcaData, aes(PC1, PC2, color=treatment, label=name)) +
     )
 
 
-ggsave("pca_plots/phase1_pca_5batch_colorbytreatment_blk.png", last_plot(), width=7, height=7)
+ggsave("pca_plots/phase1_pca_5batch_colorbytreatment_blk_ann.png", last_plot(), width=7, height=7)
 ```
 
 Heatmap of rlog transformed difference in expression compared to the average across all samples, using adjusted p value of 0.00001 or less. Many thanks to Hollie Putnam for the code of how to make this heatmap.
@@ -278,7 +281,33 @@ p <- pheatmap(mat, annotation_col=df1, annotation_colors=ann_colors, annotation_
 dev.off()
 ```
 
+GO terms
+```{r}
+library(gprofiler2)
 
+# Assuming your DESeq2-ready matrix has rownames like "COX1|gene39493"
+gene_list_1 <- rownames(ordered_sig_res1_comp)
+
+# Extract everything before the "|" character
+gene_list_clean_1 <- sub("\\|.*", "", gene_list_1)
+
+# Check
+head(gene_list_clean_1)
+
+
+# Perform enrichment
+go_1 <- gost(
+  query       = gene_list_clean_1,  # vector of gene IDs
+  organism    = "cvgca002022765v4",       # replace with your organism, e.g., "drerio" for zebrafish
+  sources     = c("GO:BP", "GO:MF", "GO:CC"),  # Biological process, molecular function, cellular component
+  user_threshold = 0.05,          # significance cutoff
+  correction_method = "fdr",# multiple testing correction
+  significant = FALSE 
+)
+
+# View results
+head(go_1$result)
+```
 
 
 
@@ -387,7 +416,9 @@ For most of the analysis/visualization I wanted to compare the treatments accros
 combine2 <- rbind(sig_res_stress, sig_res_naive, sig_res_recovery)
 combine_list2 <- dm2[which(rownames(dm2) %in% rownames(combine2)),] #combined list from the original matrix so dupicates are removed 
 #combine_rlog <- rlog(combine_list, blind=FALSE) #setting blind to FALSE takes into account levels and contrasts
-vsd2 <- vst(combine_list2, blind=FALSE)
+vsd2 <- varianceStabilizingTransformation(combine_list2, blind=FALSE)
+
+dim(combine_list2)
 ```
 
 limma removeBatchEffect()
@@ -410,7 +441,7 @@ ggplot(pcaData, aes(PC1, PC2, color=treatment, label=name)) +
   geom_point(aes(fill=treatment), pch = 21, size = 7, color= "white") +
   #geom_text() +
   coord_fixed() + ylab("PC2: 8% Variance Explained") +
-  xlab("PC1:33% Variance Explained") +
+  xlab("PC1:34% Variance Explained") +
   #theme_linedraw() +
   scale_fill_manual(values = c(control="#A29BAD", stress ="#D29F13", naive= "#6BA84C", recovery= "#65A6E2")) +
   theme_minimal(base_size = 20) +
@@ -426,7 +457,7 @@ ggplot(pcaData, aes(PC1, PC2, color=treatment, label=name)) +
     panel.background = element_rect(fill = alpha("white", 0.1))
     )
 
-ggsave("phase2_pca_5batch_colorbytreatment_blk.png", last_plot(), width=7, height=7)
+ggsave("phase2_pca_5batch_colorbytreatment_blk_ann.png", last_plot(), width=7, height=7)
 ```
 
 plotting other PCs
