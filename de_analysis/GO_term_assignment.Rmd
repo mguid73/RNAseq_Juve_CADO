@@ -1,0 +1,96 @@
+---
+title: "GO_term_assignments"
+author: "Megan Delatte-Guidry"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Many thanks to Sam Gurr for sharing the GO term table `Cviginiva_GOterms.csv`!!!**
+
+
+## PHASE I DEGs
+Merge GO Terms (from 'go_terms') into 'deg' table based on the GeneID names
+GeneID column in 'go_terms' corresponds to the string after the "|" in the rownames of 'gene_counts'
+```{r}
+library(stringr)
+
+# read in GO term table 
+go_terms <- read.csv("Cviginiva_GOterms.csv")
+
+# read in DEG list from DESeq2
+deg1 <- read.csv("outputs/sig_phase1_res_stress.csv")
+
+# make a new column called "GeneID" in the 'deg' df that is only the gene ID
+deg1$GeneID <- str_extract(deg1$X, "[^|]+$")
+
+deg1_with_GO <- merge(deg1, go_terms, by = "GeneID", all.x = TRUE)
+
+write.csv(deg1_with_GO, "sig_deg_phase1_wGO.csv")
+```
+
+## PHASE II "stress" DEGs
+Merge GO Terms (from 'go_terms') into 'deg' table based on the GeneID names
+GeneID column in 'go_terms' corresponds to the string after the "|" in the rownames of 'gene_counts'
+```{r}
+library(stringr)
+
+# read in GO term table from Sam Gurr
+go_terms <- read.csv("Cviginiva_GOterms.csv")
+
+# read in DEG list from DESeq2
+deg2_stress <- read.csv("outputs/sig_phase2_res_stress.csv")
+
+# make a new column called "GeneID" in the 'deg' df that is only the gene ID
+deg2_stress$GeneID <- str_extract(deg2_stress$X, "[^|]+$")
+
+deg2_stress_with_GO <- merge(deg2_stress, go_terms, by = "GeneID", all.x = TRUE)
+
+write.csv(deg2_stress_with_GO, "outputs/deg_phase2_stress_wGO.csv")
+```
+
+
+## PHASE II "naive" DEGs
+Merge GO Terms (from 'go_terms') into 'deg' table based on the GeneID names
+GeneID column in 'go_terms' corresponds to the string after the "|" in the rownames of 'gene_counts'
+```{r}
+library(stringr)
+
+# read in GO term table from Sam Gurr
+go_terms <- read.csv("Cviginiva_GOterms.csv")
+
+# read in DEG list from DESeq2
+deg2_naive <- read.csv("outputs/sig_phase2_res_naive.csv")
+
+# make a new column called "GeneID" in the 'deg' df that is only the gene ID
+deg2_naive$GeneID <- str_extract(deg2_naive$X, "[^|]+$")
+
+deg2_naive_with_GO <- merge(deg2_naive, go_terms, by = "GeneID", all.x = TRUE)
+
+write.csv(deg2_naive_with_GO, "outputs/deg_phase2_naive_wGO.csv")
+```
+
+
+## PHASE II "recovery" DEGs
+Merge GO Terms (from 'go_terms') into 'deg' table based on the GeneID names
+GeneID column in 'go_terms' corresponds to the string after the "|" in the rownames of 'gene_counts'
+```{r}
+library(stringr)
+
+# read in GO term table from Sam Gurr
+go_terms <- read.csv("Cviginiva_GOterms.csv")
+
+# read in DEG list from DESeq2
+deg2_recovery <- read.csv("outputs/sig_phase2_res_recovery.csv")
+
+# make a new column called "GeneID" in the 'deg' df that is only the gene ID
+deg2_recovery$GeneID <- str_extract(deg2_recovery$X, "[^|]+$")
+
+deg2_recovery_with_GO <- merge(deg2_recovery, go_terms, by = "GeneID", all.x = TRUE)
+
+write.csv(deg2_recovery_with_GO, "outputs/deg_phase2_recovery_wGO.csv")
+```
+

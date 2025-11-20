@@ -281,36 +281,6 @@ p <- pheatmap(mat, annotation_col=df1, annotation_colors=ann_colors, annotation_
 dev.off()
 ```
 
-GO terms
-```{r}
-library(gprofiler2)
-
-# Assuming your DESeq2-ready matrix has rownames like "COX1|gene39493"
-gene_list_1 <- rownames(ordered_sig_res1_comp)
-
-# Extract everything before the "|" character
-gene_list_clean_1 <- sub("\\|.*", "", gene_list_1)
-
-# Check
-head(gene_list_clean_1)
-
-
-# Perform enrichment
-go_1 <- gost(
-  query       = gene_list_clean_1,  # vector of gene IDs
-  organism    = "cvgca002022765v4",       # replace with your organism, e.g., "drerio" for zebrafish
-  sources     = c("GO:BP", "GO:MF", "GO:CC"),  # Biological process, molecular function, cellular component
-  user_threshold = 0.05,          # significance cutoff
-  correction_method = "fdr",# multiple testing correction
-  significant = FALSE 
-)
-
-# View results
-head(go_1$result)
-```
-
-
-
 ## PHASE II - DESeq2 analysis & visualization
 
 Building DESeq2 matrix
