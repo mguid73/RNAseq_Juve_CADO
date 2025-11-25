@@ -463,8 +463,8 @@ Moving on to DESeq2, I worked in the R studio server on KITT with the count matr
 See R markdown (`DESeq2_analysis.Rmd`) for futher analysis steps. 
 
 * DESeq2
-* GO terms associated with treatments
-* GO MWU analysis
-* Volcano plots (to look at up and downregulation) - see link from Amy 
-* bubble plots to visualize gene counts?
+* GO terms associated with treatments - GO MWU analysis
+* KEGG function pathway analysis?
+* WGCNA
+* Volcano plots of up and down regulated genes/GO terms
 * notes from CERF on other analyses?
