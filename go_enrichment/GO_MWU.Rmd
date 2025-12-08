@@ -1,0 +1,145 @@
+---
+title: "GO_MWU"
+author: "Megan Delatte-Guidry"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Rank-based Gene Ontology analysis of gene expression data with [`GO_MWU`](https://github.com/z0on/GO_MWU) 
+
+##Short Guide (pulled from package github):
+1. Put all this into the same directory:
+  * scripts: GO_MWU.R, gomwu_a.pl, gomwu_b.pl, gomwu.functions.R
+  * GO hierarchy file (go.obo, http://www.geneontology.org/GO.downloads.ontology.shtml)
+  * table of GO annotations for your sequences: two-column (gene id - GO terms), tab-delimited, one line per gene, multiple GO terms separated by semicolon. If you have multiple lines per gene, use nrify_GOtable.pl to merge them. Do NOT include genes without GO annotations.
+  * table of measure of interest for your sequences: two columns of comma-separated values: gene id, continuous measure of change such as                 log(fold-change). To perform standard GO enrichment analysis based on Fisher's exact test, use binary measure (1 or 0, i.e., either sgnificant or not). To analyze modules derived from WGCNA, specify 0 for genes not included in the module and the kME value (number between 0 and 1, module membership score) for genes included in the module.
+
+It is important to have the latter two tables representing the whole genome (or transcriptome) - at least the portion that was measured - rather than some select group of genes since the test relies on comparing the behavior of individual GO categories to the whole.
+
+## Workflow attempt #1 
+- generate full DEG table (for each phase) w/o removing n.s. data with de_analysis/DESeq2_analysis.Rmd
+- assign GO terms with de_analysis/GO_term_assignment.Rmd script
+- reformat GO term table and LFC table (see steps below)
+- remove duplicates with the nrify_GOtable.pl
+
+### Files needed
+DEG table generated with DESeq2 with assigned GO terms  
+*reformatted into a GO term table and a LFC table below*
+
+**Formatting GO annotation file**
+```{bash}
+cd table_formatting
+cp ../../de_analysis/outputs/deg_phase1_wGO.csv .
+#convert to tab delimited
+sed 's/,/\t/g' deg_phase1_wGO.csv > deg_phase1_wGO.tsv
+#remove quotes
+#sed 's/"//g' deg_phase1_wGO.tsv > deg_phase1_forGOMWU.tsv
+```
+
+**More formatting - easier for me to do in R**
+```{r}
+#library(dplyr)
+#read in file (setting empty strings and NAs as "NA")
+#table <- read.table("table_formatting/deg_phase1_wGO.tsv", sep="\t", header=TRUE, na.strings = c("", "NA"))
+#table <- read.table("table_formatting/deg_phase1_wGO.tsv", sep="\t", header=TRUE)
+#pull out only GeneID column and Annotation_GO_ID column
+#table2 <- table[, c("GeneID","Annotation_GO_ID")]
+#clean up the table (remove rows with NAs)
+#table_clean <- na.omit(table2)
+#write out table
+#write.table(table_clean, "phase1_GOtable.tsv", sep="\t", row.names = FALSE, quote = FALSE)
+
+#load packages
+library(dplyr)
+# read in file
+table <- read.table("table_formatting/deg_phase1_wGO.tsv",
+                    sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+#pull out only GeneID column and Annotation_GO_ID column
+table2 <- table %>% select(GeneID, Annotation_GO_ID)
+#clean up table - reassign blank or NA GO annotations as "unknown"
+table_clean <- table2 %>%
+  mutate(Annotation_GO_ID = as.character(Annotation_GO_ID)) %>%
+  mutate(Annotation_GO_ID = ifelse(
+    is.na(Annotation_GO_ID) | Annotation_GO_ID == "",
+    "unknown",
+    Annotation_GO_ID
+  ))
+#write out table with out vector numbers and quotations
+write.table(table_clean, "table_formatting/phase1_GOtable.tsv",
+            sep = "\t", row.names = FALSE, quote = FALSE)
+```
+
+
+**Formatting LFC table**
+```{r}
+#read in file (setting empty strings and NAs as "NA")
+lfc <- read.table("table_formatting/deg_phase1_wGO.tsv", sep="\t", header=TRUE, na.strings = c("", "NA"))
+#pull out only GeneID column and Annotation_GO_ID column
+lfc2 <- lfc[, c("GeneID","log2FoldChange")]
+#clean up the table (remove rows with NAs) - omitting this step bc these were changed to 'unknown' in GO table not removed
+#lfc_clean <- na.omit(lfc2)
+#write out table
+write.csv(lfc2, "table_formatting/phase1_lfc_table.csv", row.names = FALSE, quote= FALSE)
+```
+
+Check for repeated lines for the same gene in data! GO MWU doesn't like duplicates, so we'll run the nrify_GOtable.pl script to deal with duplicates before proceeding with the GO_MWU.R script.  
+nrify_GOtable.pl will merge the repeated lines. 
+```{r}
+#check for duplicates in GO table
+sum(duplicated(table_clean$GeneID))
+
+#check for duplicates in LFC table
+sum(duplicated(lfc2$GeneID))
+```
+
+Remove duplicates in GeneID column for GO table. Don't think I have to remove the duplicates in the LFC table?
+
+"The table must contain just a single line per gene. If you have a table in which a gene appears on several lines, use the included perl script nrify_GOtable.pl to compile a non-redundant table. nrify_GOtable.pl takes a single argument, which is the filename to process, and prints the result to STDOUT, so use it like this: nrify_GOtable.pl [filename of the redundant table] > [filename of the non-redundant table]"
+
+```
+perl nrify_GOtable.pl table_formatting/phase1_GOtable.tsv > dup_phase1_GOtable.tsv
+#perl nrify_GOtable.pl table_formatting/phase1_lfc_table.csv > dup_phase1_lfc_table.csv
+```
+
+Check
+```{r}
+dup_GO <- read.table("dup_phase1_GOtable.tsv")
+#check for duplicates in GO table
+sum(duplicated(dup_GO$GeneID))
+
+#dup_lfc <- read.csv("dup_phase1_lfc_table.csv")
+#check for duplicates in LFC table
+#sum(duplicated(dup_lfc$GeneID))
+
+dim(dup_GO)
+dim(lfc2)
+```
+
+
+2. Make sure you have perl and R. Windows-based people: install perl from here and specify your perl.exe file with full path to it as the perlPath argument to function gomwuStats (inside the GO_MWU.R script). The R part requires package "ape", which you might need to install prior to running this method.
+
+3. Open GO_MWU.R script; edit the input file names, mark and execute bits of code separated by blank lines one by one. Follow instructions given as comments in the script.
+
+4. Drag corner of the plot to rescale and match text and tree. After this, to achieve better "word map" effect, rerun gomwuPlot with modified "txtsize" parameter.
+
+5. Save the plot as pdf file.
+
+
+
+## Workflow attempt #2 
+- generate full DEG table (for each phase) w/o removing n.s. data with de_analysis/DESeq2_analysis.Rmd
+- reformat GeneID column of DEG table
+- calculate signed negative log p-value and output table with gene id and signed neg log p-value
+- remove duplicates from DEG table with the nrify_GOtable.pl
+
+- reformat large GO annotation table (from Sam) 
+- pull only GeneID & Annotation_GO_ID columns
+- blank -> unknown
+- csv -> .tab
+
+
+

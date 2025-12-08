@@ -22,14 +22,14 @@ library(stringr)
 go_terms <- read.csv("Cviginiva_GOterms.csv")
 
 # read in DEG list from DESeq2
-deg1 <- read.csv("outputs/sig_phase1_res_stress.csv")
+deg1 <- read.csv("outputs/phase1_res_stress.csv")
 
 # make a new column called "GeneID" in the 'deg' df that is only the gene ID
 deg1$GeneID <- str_extract(deg1$X, "[^|]+$")
 
 deg1_with_GO <- merge(deg1, go_terms, by = "GeneID", all.x = TRUE)
 
-write.csv(deg1_with_GO, "sig_deg_phase1_wGO.csv")
+write.csv(deg1_with_GO, "outputs/deg_phase1_wGO.csv")
 ```
 
 ## PHASE II "stress" DEGs

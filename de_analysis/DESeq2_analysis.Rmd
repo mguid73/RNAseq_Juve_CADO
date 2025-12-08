@@ -170,6 +170,12 @@ Points will be colored red if the adjusted p value is less than 0.1. Points whic
 DESeq2::plotMA(dds1_shrink, ylim=c(-5,5))
 ```
 
+
+```{r}
+#then lets save these results set for later use (pretty sure this is what I'll use for the GO term analysis)
+#write.csv(res1,"outputs/phase1_res_stress.csv")
+```
+
 Setting the alpha value and creating results sets
 Here I'll set the alpha value as a more conservative 0.05 (compared to the default 0.1). 
 Note: It is important to specific the correct order in the contrasts, with the name of the numerator level for the fold change, and the name of the denominator level for the fold change for the comparison.
@@ -183,15 +189,8 @@ sum(res1$padj<0.05, na.rm=TRUE) #304 pass the filter with 0.05 cutoff
 ```{r}
 #filtering based on alpha = 0.05 (which is the cutoff value for the adjusted p-value) where to be included the DEG's have to have an adj. p-value less than alpha
 resultsNames(dds1)
-
 res1_comp <- results(dds1, alpha=0.05, contrast=c("treatment","control", "stress"))
-```
-
-```{r}
 summary(res1_comp)   
-
-#then lets save these results set for later use (pretty sure this is what I'll use for the GO term analysis)
-#write.csv(res1_comp,"outputs/phase1_res_stress.csv")
 ```
 
 Next, I'll subset each results set to only be significantly DEGs and order then by the adjusted p value (small to large)
@@ -201,7 +200,8 @@ summary(sig_res1_comp)
 #order by padj
 ordered_sig_res1_comp <-sig_res1_comp[ order(sig_res1_comp$padj ), ] 
 
-#these ordered lists were written to files for potential later use - like with gProfiler
+head(sig_res1_comp)
+#these ordered lists were written to files for potential later use - GO analysis
 write.csv(ordered_sig_res1_comp,"outputs/sig_phase1_res_stress.csv")
 ```
 
@@ -281,6 +281,8 @@ p <- pheatmap(mat, annotation_col=df1, annotation_colors=ann_colors, annotation_
 dev.off()
 ```
 
+
+
 ## PHASE II - DESeq2 analysis & visualization
 
 Building DESeq2 matrix
@@ -352,9 +354,9 @@ summary(res_recovery)
 
 
 #then lets save these results set for later use (pretty sure this is what I'll use for the GO term analysis)
-#write.table(res_stress,"outputs/res_stress.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
-#write.table(res_naive,"outputs/res_naive.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
-#write.table(res_recovery,"outputs/res_recovery.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
+#write.csv(res_stress,"outputs/phase2_res_stress.csv")
+#write.csv(res_naive,"outputs/phase2_res_naive.csv")
+#write.csv(res_recovery,"outputs/phase2_res_recovery.csv")
 ```
 
 Next, I'll subset each results set to only be significantly DEGs and order then by the adjusted p value (small to large)
@@ -370,10 +372,10 @@ ordered_sig_res_stress <-sig_res_stress[ order(sig_res_stress$padj ), ]
 ordered_sig_res_naive <-sig_res_naive[ order(sig_res_naive$padj ), ]
 ordered_sig_res_recovery <-sig_res_recovery[ order(sig_res_recovery$padj ), ]
 
-#these ordered lists were written to files for potential later use - like with gProfiler
-#write.table(ordered_sig_res_stress,"outputs/ordered_sig_res_stress.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
-#write.table(ordered_sig_res_naive,"outputs/ordered_sig_res_naive.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
-#write.table(ordered_sig_res_recovery,"outputs/ordered_sig_res_recovery.txt",quote=FALSE,col.names=TRUE,row.names=TRUE,sep="\t")
+#these ordered lists were written to files for potential later use - GO analysis
+#write.csv(ordered_sig_res_stress,"outputs/sig_phase2_res_stress.csv")
+#write.csv(ordered_sig_res_naive,"outputs/sig_phase2_res_naive.csv")
+#write.csv(ordered_sig_res_recovery,"outputs/sig_phase2_res_recovery.csv")
 
 ```
 
