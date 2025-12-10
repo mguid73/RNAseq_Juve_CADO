@@ -307,6 +307,17 @@ res2<-results(dds2)
 head(res2)
 summary(res2)
 resultsNames(dds2)
+
+
+
+res_stress_all <- results(dds2, contrast=c("treatment","control", "stress"))
+res_naive_all <- results(dds2, contrast=c("treatment","control", "naive")) 
+res_recovery_all <- results(dds2, contrast=c("treatment","control", "recovery"))
+
+#then lets save these results set for later use (pretty sure this is what I'll use for the GO term analysis)
+write.csv(res_stress_all,"outputs/phase2_res_stress.csv")
+write.csv(res_naive_all,"outputs/phase2_res_naive.csv")
+write.csv(res_recovery_all,"outputs/phase2_res_recovery.csv")
 ```
 
 Investigating the models 
@@ -351,12 +362,6 @@ res_recovery <- results(dds2, alpha=0.05, contrast=c("treatment","control", "rec
 summary(res_stress)   
 summary(res_naive) 
 summary(res_recovery) 
-
-
-#then lets save these results set for later use (pretty sure this is what I'll use for the GO term analysis)
-#write.csv(res_stress,"outputs/phase2_res_stress.csv")
-#write.csv(res_naive,"outputs/phase2_res_naive.csv")
-#write.csv(res_recovery,"outputs/phase2_res_recovery.csv")
 ```
 
 Next, I'll subset each results set to only be significantly DEGs and order then by the adjusted p value (small to large)
