@@ -1,0 +1,70 @@
+---
+title: "WGCNA Juve CADO"
+author: "Megan Delatte-Guidry"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# Weighed Gene Co-Network Analysis (WGCNA) for Juvenile CADO RNAseq project
+
+__________________________
+### Steps:
+1. [Load packages and data](#1-load-packages-and-data)
+2. [Pre-processing data]()
+3. [Determine outliers with cluster tree]()
+4. [Cut outliers and replot tree]()
+5. [Update matrices for following analyses]()
+6. [Prepare trait data]()
+7. [Cluster samples by trait]()
+8. [Set softpower threshold]()
+9. [Stepwise module construction]()
+10. [Prepare for module trait associations]()
+11. [Module trait coorelation]()
+12. [Hub genes]()
+13. [Heatmaps]()
+
+
+__________________________
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1. Load packages and data
+
+Load packages
+```{r, results="hide"}
+library(WGCNA) # Jon installed version 1.63 on KITT for me 
+library(dplyr)
+library(zoo)
+library(DESeq2)
+# for heatmap
+library(devtools)
+install_github("jokergoo/ComplexHeatmap") #first run these - commented out to avoid running a second time...
+library(ComplexHeatmap) # cannot install
+library(circlize) # cannot install
+library(reshape)
+library(ggplot2)
+library(hrbrthemes) # cannot install
+```
+
+Load data - Raw count matrix file and treatment/metadata file. 
+This is the same files that went into DESeq. You could start with the filtered count file that you wrote out in the DESeq script, but we'll just do that same filtering of the raw counts below.
+```{r}
+#count matrix with rownames=sample ID and colnames=gene ID
+##these are my raw counts, will filter in next steps
+count_data <- as.data.frame(read.csv("gene_count_matrix.csv", row.names="gene_id"))
+dim(count_data)
+
+#metadata about the treatments
+treatment_data <- read.csv(file="treatment_data.csv", sep=',', header=TRUE)
+```
+
+The following setting is important, do not omit. (as recommended by WGCNA authors - view tutorial)
+```{r}
+options(stringsAsFactors = FALSE)
+```
+
+## 2. Pre-processing data
+
+
