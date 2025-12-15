@@ -2,13 +2,13 @@
 title: "WGCNA Juve CADO"
 author: "Megan Delatte-Guidry"
 date: "`r Sys.Date()`"
-output: html_document
+output: github_document
 ---
 
 # Weighed Gene Co-Network Analysis (WGCNA) for Juvenile CADO RNAseq project
 
-__________________________
-### Steps:
+
+## Steps: 
 1. [Load packages and data](#1-load-packages-and-data)
 2. [Pre-processing data]()
 3. [Determine outliers with cluster tree]()
@@ -23,8 +23,7 @@ __________________________
 12. [Hub genes]()
 13. [Heatmaps]()
 
-
-__________________________
+------------------------------------------------------------------------
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -33,38 +32,503 @@ knitr::opts_chunk$set(echo = TRUE)
 ## 1. Load packages and data
 
 Load packages
+
 ```{r, results="hide"}
-library(WGCNA) # Jon installed version 1.63 on KITT for me 
+library(WGCNA) # Jon installed version 1.63 on KITT R version 4.3.2 (2023-10-31)
 library(dplyr)
 library(zoo)
 library(DESeq2)
-# for heatmap
-library(devtools)
-install_github("jokergoo/ComplexHeatmap") #first run these - commented out to avoid running a second time...
-library(ComplexHeatmap) # cannot install
-library(circlize) # cannot install
+#library(devtools)
+library(ComplexHeatmap)
+library(circlize)
 library(reshape)
 library(ggplot2)
-library(hrbrthemes) # cannot install
+library(genefilter)
+#library(hrbrthemes)
 ```
 
-Load data - Raw count matrix file and treatment/metadata file. 
-This is the same files that went into DESeq. You could start with the filtered count file that you wrote out in the DESeq script, but we'll just do that same filtering of the raw counts below.
+Load data - Raw count matrix file and treatment/metadata file. This is the same files that went into DESeq. You could start with the filtered count file that you wrote out in the DESeq script, but I showed that same process below.
+
 ```{r}
 #count matrix with rownames=sample ID and colnames=gene ID
 ##these are my raw counts, will filter in next steps
-count_data <- as.data.frame(read.csv("gene_count_matrix.csv", row.names="gene_id"))
+count_data <- as.data.frame(read.csv("../de_analysis/gene_count_matrix.csv", row.names = 1, check.names = FALSE))
+# remove the "_F" from the sample name 
+colnames(count_data) <- sub("_F", "", colnames(count_data))
+head(count_data)
 dim(count_data)
 
 #metadata about the treatments
-treatment_data <- read.csv(file="treatment_data.csv", sep=',', header=TRUE)
+treatment_data <- read.csv(file="../de_analysis/juve_cado_metadata_w_batches.csv", sep=',', header=TRUE, row.names=1)
+dim(treatment_data)
+
+#check that the sample names are the same in both places
+all(rownames(treatment_data) %in% colnames(count_data))
+#check the order of the samples
+all(rownames(treatment_data) == colnames(count_data))
 ```
 
 The following setting is important, do not omit. (as recommended by WGCNA authors - view tutorial)
+
 ```{r}
 options(stringsAsFactors = FALSE)
 ```
 
 ## 2. Pre-processing data
 
+Preliminary filtering of the counts with P over A.\
+I want to remove all rows that have less than 4% of samples with less than 5 counts. I am starting with the raw counts ('count_data' variable).
 
+While pre-filtering of low count genes isn't necessary, it can be useful for 2 reasons:\
+1. reduce size of the data object (thus increase speed of modeling).\
+2. improve visualizations by making them a little cleaner
+
+[Read here for the pre processing steps using WGCNA!](https://bmcbioinformatics.biomedcentral.com/track/pdf/10.1186/1471-2105-9-559.pdf)
+
+genefilter() was not available for version 4.3.2 of R so I read in the filtered gene count matrix files (see next code chunk) from when I created them in version 3.6.0 with `de_analysis/DESeq2_analysis.Rmd`.
+
+```{r}
+#Filtering the count data
+#set filter values for PoverA, P percent of the samples have counts over A
+# filt <- filterfun(pOverA(0.04,5))
+# 
+# #create filter for the counts data
+# tfil <- genefilter(count_data, filt)
+# 
+# #identify transcripts to keep by count filter
+# keep <- count_data[tfil,]
+# 
+# #identify transcript list
+# gn.keep <- rownames(keep)
+# 
+# #data filtered in PoverA, P percent of the samples have counts over A
+# count_data_filt <- as.data.frame(count_data[which(rownames(count_data) %in% gn.keep),])
+# dim(count_data) #97257 
+# dim(count_data_filt) #70981
+# head(count_data_filt,10)
+# 
+# # sanity check - make sure all of your samples in both datasets
+# dim(treatment_data)[1] ==  dim(count_data_filt)[2]
+# TRUE = count data and treatment data matrices contain all 72 samples - yay
+```
+
+**Reading in filtered gene counts and splitting by phase.**\
+IMPORTANT TO NOTE! These files were split by PHASE (1 or 2) which is pretty much a necessity with running DESeq2
+
+```{r}
+# subset metadata ('treatment_data') first
+treatment_data <- tibble::rownames_to_column(treatment_data, var = "sample.name")
+p1_treatment_data <- subset(treatment_data, phase=="phase1")
+p2_treatment_data <- subset(treatment_data, phase=="phase2")
+dim(p1_treatment_data)
+dim(p2_treatment_data)
+
+# read in filtered count data for each phase
+p1_count_data <- as.data.frame(read.csv("../de_analysis/outputs/p1_filtered_gene_count_matrix.csv", row.names = 1, check.names = FALSE))
+p2_count_data <- as.data.frame(read.csv("../de_analysis/outputs/p2_filtered_gene_count_matrix.csv", row.names = 1, check.names = FALSE))
+dim(p1_count_data)
+dim(p2_count_data)
+```
+
+> *Notes on data normalization!* The question of how to normalize this dataset came up. The creators of WGCNA insist that "properly normalized" data is required. It turns out transforming your data (ex vst or log) is a type of normalization method.
+
+> Here, I'll use a variance stabilizing transformation on just the raw counts. "Many common statistical methods for exploratory analysis of multidimensional data, especially methods for clustering and ordination (e.g., principal-component analysis and the like), work best for (at least approximately) homoskedastic data; this means that the variance of an observable quantity (i.e., here, the expression strength of a gene) does not depend on the mean. In RNA-Seq data, however, variance grows with the mean." <https://www.biostars.org/p/109104/> <http://www.nxn.se/valent/2017/10/15/variance-stabilizing-scrna-seq-counts> The count data is in no way normally distributed "The process of counting implies that variation will propagate as the number of events increase. The effect of this is that there will be an inherent relation between mean (expected value) and variance of counts" From what I can gather the vst transformation removes the relationship between the mean and the variance.
+
+> **We will use a variance stabilizing transformation here (vst transformation)** This transformation is recommended in the R documentation for using WGCNA on RNAseq data <https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/faq.html/>
+
+#### PHASE 1
+
+Create 'dds' object (DESeqDataSet) & vst transform the 'dds' object for WGCNA (following matrix contruction laid out in `de_analysis/DESeq2_analysis.Rmd`) Then we'll transform the data and select only the top most variable genes to look at in the analysis
+
+```{r}
+# assign the batch numbers as factors not integers
+p1_treatment_data$batch <- factor(p1_treatment_data$batch, levels = c("1", "2"))
+
+#build deseq matrix (dm#)
+dm1 <- DESeqDataSetFromMatrix(countData = p1_count_data,
+                             colData = p1_treatment_data,
+                             design = ~ batch + treatment)
+dm1$treatment <- factor(dm1$treatment, levels = c("control", "stress"))
+levels(dm1$treatment)
+dm1
+
+# transform the data  ========================================================== #
+# run in order (kept name as dm1_vst)
+dm1_vst <- vst(dm1) # transform it vst (variance stabilized transformation)
+dm1_vst <- assay(dm1_vst) # call only the transformed counts in the dds object
+dim(dm1_vst)
+
+# lets pair down to look at the top 5,000 most variable genes instead of the list of 68,435 genes
+MostVaryGenes <- head(order(rowVars(dm1_vst), decreasing = TRUE), 5000)
+# make that information into a matrix
+VMostVaryGenes_Mat <- dm1_vst[ MostVaryGenes, ] #which in the DESeq2 style matrix are those genes?
+dim(VMostVaryGenes_Mat)
+# make that matrix a dataframe
+dm1_vst_5000 <- as.data.frame(VMostVaryGenes_Mat)
+dim(dm1_vst_5000)
+# transpose columns to rows and vice versa
+dm1_mvg <- t(dm1_vst_5000) 
+dim(dm1_mvg)
+```
+
+
+## 3. Determine outliers with cluster tree
+
+WGCNA Sample tree - omit outlier sample(s)
+```{r}
+# checks before we start....
+dim(dm1_mvg) #  24 samples; 5000 genes
+gsg = goodSamplesGenes(dm1_mvg, verbose = 3);  # We first check for genes and samples with too many missing values:
+gsg$allOK # If the statement returns TRUE, all genes have passed the cuts. 
+```
+
+Plot cluster tree and look for potential outliers - look at the plotted tree!!
+```{r}
+# call the cluster and set window dimensions to view..
+sampleTree = hclust(dist(dm1_mvg), method = "average") # Next we cluster the samples (in contrast to clustering genes that will come later)  to see if there are any obvious outliers.
+options(bitmapType = 'cairo')
+sizeGrWindow(12,9) # The user should change the dimensions if the window is too large or too small.
+par(cex = 0.6);
+par(mar = c(0,4,2,0))
+# output the tree as .png file..
+png("outputs/sampleClusterTree_Precut.png", 1000, 1000, pointsize=20)
+plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5, 
+     cex.axis = 1.5, cex.main = 2) 
+abline(h = 100 , col = "red") # add line to plot to show the cut-off outlier samples 
+dev.off()
+```
+
+
+## 4. Cut outliers and replot tree
+
+**For now, I'll just cut that one outlier ('J1_14SC2_4')**
+
+Cutting the outlier(s) and re-plotting the tree. 
+I did not use these steps for these data given the lack of outliers. But in the event you have an outlier, you'd want to follow the code below to obtain a new data matrix sans outliers and make a new post-cut tree.
+```{r}
+# cut the tree and omit  ========================================================== #
+clust = cutreeStatic(sampleTree, cutHeight = 100, minSize = 10) # Determine cluster under the line
+table(clust) # 0 = cut; 1 = kept; says it will cut 1 and save 35; exactly what we want!
+keepSamples = (clust==1) # 'keepsamples' boolean to call the main dataset - notice there is one occurrence of FLASE - this is sample I am cutting
+
+# integrate keepsamples  ========================================================== #
+dm1_mvg = dm1_mvg[keepSamples, ] # integreat the boolean 'keepsamples' to ommit oultilers determined in the sample tree above
+nGenes = ncol(dm1_mvg) # number of genes == 5000
+nSamples = nrow(dm1_mvg) # number of samples == 23  - the cut tree removed 1 sample
+
+# plot the tree with the 'keep samples'  =========================================== #
+sampleTree2 = hclust(dist(dm1_mvg), method = "average") # Next we cluster the samples (in contrast to clustering genes that will come later)  to see if there are any obvious outliers.
+png("outputs/ClusterTree_Postcut.png", 1000, 1000, pointsize=20)
+plot(sampleTree2, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,
+     cex.axis = 1.5, cex.main = 2)
+dev.off()
+```
+
+## 5. Updating matrices for following analyses.  
+!!! do this whether or not you cut samples !!!
+```{r}
+dim(dm1_mvg)
+dim(p1_treatment_data)
+
+# Form a data frame analogous to expression data that will hold the clinical traits.
+samples = rownames(dm1_mvg);# start new variable 'd7.Samples' calling the row names of the gene data (sample as 'Mouse' in trait data)
+TreatRows = match(samples, treatment_data$sample); # match the names - calls the list number of 'd7.Samples' matching 'd7.Treatment.data$Sample.Name'
+Traits = treatment_data[TreatRows, -1]; # insert TreatRows as the row numbers in 'treatment_data'
+rownames(Traits) = treatment_data[TreatRows, 1]; # inserts the new TreatRows - matches sample IDs
+all(rownames(Traits) == rownames(dm1_mvg))  # should be TRUE
+dim(Traits)
+```
+
+
+## 6. Prepare trait data
+```{r}
+str_traits     <-  Traits %>% dplyr::select('treatment') %>% #treatment as control vs stress
+                            dplyr::mutate(control = as.factor(as.numeric(treatment == "control")))  %>%  # call occurrence of 'control' as 0s and 1s (factor)
+                            dplyr::mutate(stress = as.factor(as.numeric(treatment == "stress")))  %>%  # call occurrence of 'stress'  as 0s and 1s (factor)
+                            dplyr::select(-treatment)
+str_traits  # final dataset of 0,1 for treatment groups - stress only!
+```
+
+
+## 7. Cluster samples by trait
+*make sure you are using the right sample tree!!*
+Since I didn't cut any samples, I am using the original tree built.
+```{r}
+# phase 1 stress v control treatment
+png("outputs/phase1_ClusterTree.png", 1000, 1000, pointsize=20)
+p1_traitColors = labels2colors(str_traits); # Convert traits to a color representation: white means low, red means high, grey means missing entry
+plotDendroAndColors(sampleTree2, p1_traitColors, # Plot the sample dendrogram and the colors underneath.
+                    groupLabels = names(str_traits), 
+                    main = "PHASE 1 - Sample dendrogram and trait heatmap")
+dev.off()
+
+# write some of the data thus far.... 
+#save(dm1_mvg, Traits, file = "data/phase1_dataInput.RData")
+#write.csv(dm1_mvg, "data/phase1_vstTransformed_WGCNAdata.csv") # # write the vst transformed data 
+```
+
+## 8. Set softpower threshold
+The next thing to do is determine the power or soft threshold to apply for the adjacency matrix. This is because we want to make a weighted matrix, where each gene has a weighted connection, not a hard threshold of either connected or not. From my understanding, by raising connection/adjacency to a power there in lies the weighted-ness of their connection.
+
+I need to pick a power where scale free topology of the matrix is met. From some googling, this is similar to a scale free network. "A scale-free network can be constructed by progressively adding nodes to an existing network and introducing links to existing nodes with preferential attachment so that the probability of linking to a given node is proportional to the number of existing links that node has" So there is a higher chance of being connected to a node gene if it has more connections. That makes intuitive sense, which is why it has to reach this criterion to be passable for further analysis. <https://mathworld.wolfram.com/Scale-FreeNetwork.html>
+
+"If the scale-free topology fit index fails to reach values above 0.8 for reasonable powers (less than 15 for unsigned or signed hybrid networks, and less than 30 for signed networks) and the mean connectivity remains relatively high (in the hundreds or above), chances are that the data exhibit a strong driver that makes a subset of the samples globally different from the rest. The difference causes high correlation among large groups of genes which invalidates the assumption of the scale-free topology approximation."<https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/faq.html>
+
+"If the lack of scale-free topology fit turns out to be caused by an interesting biological variable that one does not want to remove (i.e., adjust the data for), the appropriate soft-thresholding power can be chosen based on the number of samples as in the table below. This table has been updated in December 2017 to make the resulting networks conservative." For a signed network with less than 15 samples, 18 is an appropriate power to use.
+
+<https://peterlangfelder.com/2018/11/25/signed-or-unsigned-which-network-type-is-preferable/>
+```{r}
+dim(dm1_mvg) # again double check you have the correct data...
+# Choose a set of soft-thresholding powers
+powers = c(c(1:10), seq(from = 12, to=20, by=2))
+# Call the network topology analysis function
+sft = pickSoftThreshold(dm1_mvg, powerVector = powers, verbose = 5) #...wait for this to finish (~4mins)
+#  pickSoftThreshold 
+#  performs the analysis of network topology and aids the
+#  user in choosing a proper soft-thresholding power.
+#  The user chooses a set of candidate powers (the function provides suitable default values)
+#  function returns a set of network indices that should be inspected
+
+# png to output 
+sizeGrWindow(9, 5) # set window size 
+png("outputs/phase1_ScaleTopology_SoftThresh.png", 1000, 1000, pointsize=20)
+        par(mfrow = c(1,2));
+        cex1 = 0.9;
+        
+        plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2], # Scale-free topology fit index as a function of the soft-thresholding power
+             xlab="Soft Threshold (power)",ylab="Scale Free Topology Model Fit,signed R^2",type="n",
+             main = paste("Scale independence"));
+        text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+             labels=powers,cex=cex1,col="red");
+        abline(h=0.95,col="red") # look at at cut off at power of 3 - this line corresponds to using an R^2 cut-off of h
+        
+        plot(sft$fitIndices[,1], sft$fitIndices[,5], # Mean connectivity as a function of the soft-thresholding power
+             xlab="Soft Threshold (power)",ylab="Mean Connectivity", type="n",
+             main = paste("Mean connectivity"))
+        text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
+dev.off() # output 
+
+
+# The left panel... shows the scale-free fit index (y-axis) 
+# as a function of the soft-thresholding power (x-axis). 
+# We choose the power 5, which is the lowest power for which the scale-free 
+# topology index curve flattens out upon reaching a high value (in this case, roughly 0.90).
+# The right panel.... displays the mean connectivity
+# (degree, y-axis) as a function of the soft-thresholding power (x-axis).
+```
+These data look good based on the plots here. 
+
+**I'll pick _5_ as my softpower threshold because this is where the Scale Free Topology R sq value is >=0.9 and the curve starts to flatten out.**
+
+
+## 9. Stepwise module construction
+#### Step 1 = create adjacency matrix 
+https://peterlangfelder.com/2018/11/25/signed-or-unsigned-which-network-type-is-preferable/
+https://www.rdocumentation.org/packages/WGCNA/10cpm/versions/1.69/topics/adjacency
+https://ramellose.github.io/networktutorials/wgcna.html
+https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/10cpm/TechnicalReports/signedTOM.pdf
+
+```{r}
+softPower = 5 # set your soft threshold based on the plots above 
+
+# signed - must call the type, defaults to unsigned
+adjacency_sign = adjacency(dm1_mvg, power = softPower, type="signed") # this takes a long time.. just wait...(~seconds)
+```
+
+#### Step 2: Turn adjacency into topological overlap matrix
+Calculation of the topological overlap matrix, (TOM)
+and the corresponding dissimilarity, from a given adjacency matrix.
+
+# signed matrix
+```{r}
+TOM_sign       = TOMsimilarity(adjacency_sign, TOMType="signed")  # this takes a long time.. just wait... (?)
+dissTOM_sign   = 1-TOM_sign
+```
+
+#### Step 3:Call the hierarchical clustering function - plot the tree
+```{r}
+#Call the hierarchical clustering function
+geneTree_sign   = hclust(as.dist(dissTOM_sign), method = "average");
+
+# Plot the resulting clustering tree (dendrogram)
+sizeGrWindow(12,9)
+plot(geneTree_sign, xlab="", sub="", main = "Gene clustering on TOM-based dissimilarity - SIGNED",
+     labels = FALSE, hang = 0.04)
+```
+#### Step 4: Set module size and 'cutreeDynamic' to create clusters 
+```{r}
+# We like large modules, so we set the minimum module size relatively high:
+minModuleSize = 100; # set this for the subseqent call - WGCNA authors recommend diligence when calling module size to avoid too many/too few modules...
+# Module identification using dynamic tree cut:
+dynamicMods_sign = cutreeDynamic(dendro = geneTree_sign, distM = dissTOM_sign,
+                                 deepSplit = 1, pamRespectsDendro = FALSE,
+                                 minClusterSize = minModuleSize);
+table(dynamicMods_sign) # view the number of genes per module 
+```
+
+#### Step 5: convert numeric network to colors and plot the dendrogram
+```{r}
+# Convert numeric labels into colors
+dynamicColors_sign = labels2colors(dynamicMods_sign) # add colors to module labels (previously numbers)
+table(dynamicColors_sign) # lets look at this table...
+
+# Plot the dendrogram and colors underneath
+sizeGrWindow(8,6)
+plotDendroAndColors(geneTree_sign, dynamicColors_sign, "Dynamic Tree Cut - SIGNED",
+                    dendroLabels = FALSE, hang = 0.03,
+                    addGuide = TRUE, guideHang = 0.05,
+                    main = "Gene dendrogram and module colors 'SIGNED'")
+```
+#### Step 6: Calculate Eigengenes - view their connectivity based on 'MEDiss = 1-cor(MEs)'
+```{r}
+# Calculate eigengenes ========================================================== # 
+
+# MEList = moduleEigengenes(dim1_mvg, colors = dynamicColors)
+MEList = moduleEigengenes(dm1_mvg, colors = dynamicColors_sign)
+MEs    = MEList$eigengenes # you can view MEs, condenses gene counts down to a single number for each sample representative of that expression pattern 
+
+#remove module grey (full of NAs)
+#MEs <- MEs[c(1,2,4,5)]
+
+# Calculate dissimilarity of module eigengenes
+MEDiss = 1-cor(MEs)
+METree = hclust(as.dist(MEDiss), method = "average") # Cluster module eigengenes
+
+# Plot the result ================================================================ #
+sizeGrWindow(7, 6)
+png("outputs/phase1_ClusterEigengenes.png", 1000, 1000, pointsize=20)
+plot(METree, main = "PHASE 1 Clustering of module eigengenes - SIGNED (dissimilarity calc = MEDiss = 1-cor(MEs))",
+     xlab = "", sub = "")
+dev.off()
+```
+
+#### Step 7: Specify the cut line for the dendrogram (module) - Calc MODULE EIGENGENES (mergeMEs)
+not necessary for this dataset - METree above looks to be parsed well into the 4 module (after removing the empty "catch all" module grey)
+*If you are skipping this step, move on to Step 9*
+
+#### Step 8: Plot dendrogram with the cut line 'MEDissThres' ---- NOT USING HERE!
+use 'mergedColors' we needed to merge related eigengene modules together 
+```{r}
+# sizeGrWindow(12, 9)
+# png("Analysis/Output/WGCNA/10cpm/Day7/Day7_ClusterDendrogram_signed.png", 1000, 1000, pointsize=20)
+# plotDendroAndColors(geneTree_sign, cbind(dynamicColors_sign, mergedColors),
+#                     c("Dynamic Tree Cut", "Merged dynamic"),
+#                     dendroLabels = FALSE, hang = 0.03,
+#                     addGuide = TRUE, guideHang = 0.05)
+# dev.off()
+```
+
+#### Step 9: Commit to mergedcolors as 'MEs' and 'moduleColors'
+```{r}
+# Rename to moduleColors
+moduleColors = dynamicColors_sign
+# Construct numerical labels corresponding to the colors
+#colorOrder = c("grey", standardColors(50));
+colorOrder = c(standardColors(50))
+moduleLabels = match(moduleColors, colorOrder)-1;
+
+# Save module colors and labels for use in subsequent parts
+#save(MEs, moduleLabels, moduleColors, file = "data/phase1_networkConstruction-stepByStep.RData")
+# write csv - save the module eigengenes
+#write.csv(MEs, file = "data/phase1_WGCNA_ModuleEigengenes.csv")
+```
+
+
+## 10. Prepare for module trait associations
+Identify modules that are significantly associated with the measured  traits (here as treatment)
+
+Since we already have a summary profile (eigengene) for each module,
+we simply correlate eigengenes with external traits and look for the  significant associations:
+```{r}
+# Define numbers of genes and samples
+nGenes = ncol(dm1_mvg); 
+nSamples = nrow(dm1_mvg); 
+# Recalculate MEs with color labels
+MEs0 = moduleEigengenes(dm1_mvg, moduleColors)$eigengenes
+MEs = orderMEs(MEs0) # reorders the columns (colors/modules)
+```
+
+## 11. Module trait coorelation 
+```{r}
+# ALL TRAIT DATA
+dim(Traits)  # 23  8
+dim(MEs)  # 23 5
+
+# stress treatment
+str_traits_asnum    <- data.frame(lapply(str_traits, function(x) as.numeric(as.character(x))),
+                                check.names=F, row.names = row.names(str_traits))
+moduleTraitCor_str      = cor(MEs, str_traits_asnum, use = "p");
+moduleTraitPvalue_str   = corPvalueStudent(moduleTraitCor_str, nSamples);
+print("stress Module Correlation p-values")
+moduleTraitPvalue_str
+```
+
+```{r}
+dds5 = as.data.frame((dm1_mvg))
+dim(dds5) 
+module_blue_genes <- names(dds5)[moduleColors=="blue"]
+length(module_blue_genes)
+
+#save list of module blue genes
+#write.csv(module_blue_genes, "phase1_module_blue_genes.csv", quote=F, row.names = FALSE)
+
+```
+
+
+## 12. Hub genes
+STILL NEED TO EXPLORE THIS!
+
+
+
+## 13. Heatmaps!
+
+```{r}
+sizeGrWindow(10,10)
+# Will display correlations and their p-values
+p1.matrix <-  paste(signif(moduleTraitCor_str, 2), "\n(",
+                                      signif(moduleTraitPvalue_str, 1), ")", sep = "")
+
+par(mar = c(8, 9.5, 5, 3));
+# Display the correlation values within a heatmap plot
+png("outputs/phase1_heatmap.png", 700, 800, pointsize=20)
+labeledHeatmap(Matrix = moduleTraitCor_str,
+               xLabels = names(str_traits),
+               yLabels = names(MEs),
+               ySymbols = names(MEs),
+               colorLabels = TRUE,
+               colors = blueWhiteRed(50),
+               textMatrix = p1.matrix,
+               setStdMargins = FALSE,
+               cex.text = 1,
+               zlim = c(-0.6,0.6),
+               main = paste("Module-trait relationships - phase 1"))
+dev.off()
+```
+
+
+```{r}
+# this heatmap looks better
+p1.text <-  as.matrix(signif(moduleTraitPvalue_str, 3))
+pa = cluster::pam(p1.text, k = 1)
+col_fun = colorRamp2(c(-0.5, 0, 0.5), c("blue", "white", "red"))
+pdf("outputs/phase1_heatmap_fancy.pdf", width=5, height=6)
+Heatmap(moduleTraitCor_CA, 
+        name = "gene_cor", 
+        rect_gp = gpar(col = "grey", lwd = 1),
+        column_title = "phase 1 WGCNA treatment", 
+        column_title_gp = gpar(fontsize = 12, fontface = "bold"),
+        # row_title = "WGCNA modules",
+        #row_km = 4, 
+        column_km = 1,
+        row_split = paste0("clstr", pa$clustering),
+        row_gap = unit(5, "mm"),
+        column_gap = unit(5, "mm"),
+        # grid.text(matrix(textMatrix)),
+        # border = TRUE,
+        border = TRUE,
+        col = col_fun,
+        cell_fun = function(j, i, x, y, width, height, fill) {
+          grid.text(sprintf("%.1f", CA.text[i, j]), x, y, gp = gpar(fontsize = 10))
+        })
+dev.off()
+```
