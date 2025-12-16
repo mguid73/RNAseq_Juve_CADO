@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 output: github_document
 ---
 
-# Weighed Gene Co-Network Analysis (WGCNA) for Juvenile CADO RNAseq project
+# PHASE 2 Weighed Gene Co-Network Analysis (WGCNA) for Juvenile CADO RNAseq project
 
 
 ## Steps: 
@@ -136,39 +136,39 @@ dim(p2_count_data)
 
 > **We will use a variance stabilizing transformation here (vst transformation)** This transformation is recommended in the R documentation for using WGCNA on RNAseq data <https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/faq.html/>
 
-#### PHASE 1
+#### PHASE 2
 
 Create 'dds' object (DESeqDataSet) & vst transform the 'dds' object for WGCNA (following matrix contruction laid out in `de_analysis/DESeq2_analysis.Rmd`) Then we'll transform the data and select only the top most variable genes to look at in the analysis
 
 ```{r}
 # assign the batch numbers as factors not integers
-p1_treatment_data$batch <- factor(p1_treatment_data$batch, levels = c("1", "2"))
+p2_treatment_data$batch <- factor(p2_treatment_data$batch, levels = c("2", "3", "4", "5"))
 
 #build deseq matrix (dm#)
-dm1 <- DESeqDataSetFromMatrix(countData = p1_count_data,
-                             colData = p1_treatment_data,
+dm2 <- DESeqDataSetFromMatrix(countData = p2_count_data,
+                             colData = p2_treatment_data,
                              design = ~ batch + treatment)
-dm1$treatment <- factor(dm1$treatment, levels = c("control", "stress"))
-levels(dm1$treatment)
-dm1
+dm2$treatment <- factor(dm2$treatment, levels = c("control", "stress"))
+levels(dm2$treatment)
+dm2
 
 # transform the data  ========================================================== #
-# run in order (kept name as dm1_vst)
-dm1_vst <- vst(dm1) # transform it vst (variance stabilized transformation)
-dm1_vst <- assay(dm1_vst) # call only the transformed counts in the dds object
-dim(dm1_vst)
+# run in order (kept name as dm2_vst)
+dm2_vst <- vst(dm2) # transform it vst (variance stabilized transformation)
+dm2_vst <- assay(dm2_vst) # call only the transformed counts in the dds object
+dim(dm2_vst)
 
-# lets pair down to look at the top 5,000 most variable genes instead of the list of 68,435 genes
-MostVaryGenes <- head(order(rowVars(dm1_vst), decreasing = TRUE), 5000)
+# lets pair down to look at the top 5,000 most variable genes instead of the list of 73,056 genes
+MostVaryGenes <- head(order(rowVars(dm2_vst), decreasing = TRUE), 5000)
 # make that information into a matrix
-VMostVaryGenes_Mat <- dm1_vst[ MostVaryGenes, ] #which in the DESeq2 style matrix are those genes?
+VMostVaryGenes_Mat <- dm2_vst[ MostVaryGenes, ] #which in the DESeq2 style matrix are those genes?
 dim(VMostVaryGenes_Mat)
 # make that matrix a dataframe
-dm1_vst_5000 <- as.data.frame(VMostVaryGenes_Mat)
-dim(dm1_vst_5000)
+dm2_vst_5000 <- as.data.frame(VMostVaryGenes_Mat)
+dim(dm2_vst_5000)
 # transpose columns to rows and vice versa
-dm1_mvg <- t(dm1_vst_5000) 
-dim(dm1_mvg)
+dm2_mvg <- t(dm2_vst_5000) 
+dim(dm2_mvg)
 ```
 
 ## 3. Determine outliers with cluster tree
@@ -176,15 +176,15 @@ dim(dm1_mvg)
 WGCNA Sample tree - omit outlier sample(s)
 ```{r}
 # checks before we start....
-dim(dm1_mvg) #  24 samples; 5000 genes
-gsg = goodSamplesGenes(dm1_mvg, verbose = 3);  # We first check for genes and samples with too many missing values:
+dim(dm2_mvg) #  48 samples; 5000 genes
+gsg = goodSamplesGenes(dm2_mvg, verbose = 3);  # We first check for genes and samples with too many missing values:
 gsg$allOK # If the statement returns TRUE, all genes have passed the cuts. 
 ```
 
 Plot cluster tree and look for potential outliers - look at the plotted tree!!
 ```{r}
 # call the cluster and set window dimensions to view..
-sampleTree = hclust(dist(dm1_mvg), method = "average") # Next we cluster the samples (in contrast to clustering genes that will come later)  to see if there are any obvious outliers.
+sampleTree = hclust(dist(dm2_mvg), method = "average") # Next we cluster the samples (in contrast to clustering genes that will come later)  to see if there are any obvious outliers.
 options(bitmapType = 'cairo')
 sizeGrWindow(12,9) # The user should change the dimensions if the window is too large or too small.
 par(cex = 0.6);
@@ -193,30 +193,30 @@ par(mar = c(0,4,2,0))
 png("outputs/sampleClusterTree_Precut.png", 1000, 1000, pointsize=20)
 plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5, 
      cex.axis = 1.5, cex.main = 2) 
-abline(h = 100 , col = "red") # add line to plot to show the cut-off outlier samples 
+abline(h = 105 , col = "red") # add line to plot to show the cut-off outlier samples 
 dev.off()
 ```
 
 
 ## 4. Cut outliers and replot tree
 
-**For now, I'll just cut that one outlier ('J1_14SC2_4')**
+**For now, I'll just cut that one outlier ('J2_14SS1_4')**
 
 Cutting the outlier(s) and re-plotting the tree. 
 I did not use these steps for these data given the lack of outliers. But in the event you have an outlier, you'd want to follow the code below to obtain a new data matrix sans outliers and make a new post-cut tree.
 ```{r}
 # cut the tree and omit  ========================================================== #
-clust = cutreeStatic(sampleTree, cutHeight = 100, minSize = 10) # Determine cluster under the line
-table(clust) # 0 = cut; 1 = kept; says it will cut 1 and save 35; exactly what we want!
+clust = cutreeStatic(sampleTree, cutHeight = 105, minSize = 10) # Determine cluster under the line
+table(clust) # 0 = cut; 1 = kept; says it will cut 1 and save 47; exactly what we want!
 keepSamples = (clust==1) # 'keepsamples' boolean to call the main dataset - notice there is one occurrence of FLASE - this is sample I am cutting
 
 # integrate keepsamples  ========================================================== #
-dm1_mvg = dm1_mvg[keepSamples, ] # integreat the boolean 'keepsamples' to ommit oultilers determined in the sample tree above
-nGenes = ncol(dm1_mvg) # number of genes == 5000
-nSamples = nrow(dm1_mvg) # number of samples == 23  - the cut tree removed 1 sample
+dm2_mvg = dm2_mvg[keepSamples, ] # integreat the boolean 'keepsamples' to ommit oultilers determined in the sample tree above
+nGenes = ncol(dm2_mvg) # number of genes == 5000
+nSamples = nrow(dm2_mvg) # number of samples == 47  - the cut tree removed 1 sample
 
 # plot the tree with the 'keep samples'  =========================================== #
-sampleTree2 = hclust(dist(dm1_mvg), method = "average") # Next we cluster the samples (in contrast to clustering genes that will come later)  to see if there are any obvious outliers.
+sampleTree2 = hclust(dist(dm2_mvg), method = "average") # Next we cluster the samples (in contrast to clustering genes that will come later)  to see if there are any obvious outliers.
 png("outputs/ClusterTree_Postcut.png", 1000, 1000, pointsize=20)
 plot(sampleTree2, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,
      cex.axis = 1.5, cex.main = 2)
@@ -226,24 +226,38 @@ dev.off()
 ## 5. Updating matrices for following analyses.  
 !!! do this whether or not you cut samples !!!
 ```{r}
-dim(dm1_mvg)
-dim(p1_treatment_data)
+dim(dm2_mvg)
+dim(p2_treatment_data)
 
 # Form a data frame analogous to expression data that will hold the clinical traits.
-samples = rownames(dm1_mvg);# start new variable 'd7.Samples' calling the row names of the gene data (sample as 'Mouse' in trait data)
+samples = rownames(dm2_mvg);# start new variable 'd7.Samples' calling the row names of the gene data (sample as 'Mouse' in trait data)
 TreatRows = match(samples, treatment_data$sample); # match the names - calls the list number of 'd7.Samples' matching 'd7.Treatment.data$Sample.Name'
 Traits = treatment_data[TreatRows, -1]; # insert TreatRows as the row numbers in 'treatment_data'
 rownames(Traits) = treatment_data[TreatRows, 1]; # inserts the new TreatRows - matches sample IDs
-all(rownames(Traits) == rownames(dm1_mvg))  # should be TRUE
+all(rownames(Traits) == rownames(dm2_mvg))  # should be TRUE
 dim(Traits)
 ```
 
 
-## 6. Prepare trait data
+## 6. Prepare trait data (split across 3 treatment groups: recovery, naive, stress)
 ```{r}
-str_traits     <-  Traits %>% dplyr::select('treatment') %>% #treatment as control vs stress
+rec_traits     <-  Traits %>% dplyr::select('treatment') %>% #treatment as control vs recovery
+                            dplyr::mutate(recovery = as.factor(as.numeric(treatment == "recovery")))  %>%  # call occurrence of 'recovery'  as 0s and 1s (factor)
                             dplyr::mutate(control = as.factor(as.numeric(treatment == "control")))  %>%  # call occurrence of 'control' as 0s and 1s (factor)
+                            dplyr::select(-treatment)
+rec_traits  # final dataset of 0,1 for treatment groups - recovery only!
+
+
+nai_traits     <-  Traits %>% dplyr::select('treatment') %>% #treatment as control vs naive
+                            dplyr::mutate(naive = as.factor(as.numeric(treatment == "naive")))  %>%  # call occurrence of 'naive'  as 0s and 1s (factor)
+                            dplyr::mutate(control = as.factor(as.numeric(treatment == "control")))  %>%  # call occurrence of 'control' as 0s and 1s (factor)
+                            dplyr::select(-treatment)
+nai_traits  # final dataset of 0,1 for treatment groups - naive only!
+
+
+str_traits     <-  Traits %>% dplyr::select('treatment') %>% #treatment as control vs stress
                             dplyr::mutate(stress = as.factor(as.numeric(treatment == "stress")))  %>%  # call occurrence of 'stress'  as 0s and 1s (factor)
+                            dplyr::mutate(control = as.factor(as.numeric(treatment == "control")))  %>%  # call occurrence of 'control' as 0s and 1s (factor)
                             dplyr::select(-treatment)
 str_traits  # final dataset of 0,1 for treatment groups - stress only!
 ```
@@ -251,19 +265,35 @@ str_traits  # final dataset of 0,1 for treatment groups - stress only!
 
 ## 7. Cluster samples by trait
 *make sure you are using the right sample tree!!*
-Since I didn't cut any samples, I am using the original tree built.
 ```{r}
-# phase 1 stress v control treatment
-png("outputs/phase1_ClusterTree.png", 1000, 1000, pointsize=20)
-p1_traitColors = labels2colors(str_traits); # Convert traits to a color representation: white means low, red means high, grey means missing entry
-plotDendroAndColors(sampleTree2, p1_traitColors, # Plot the sample dendrogram and the colors underneath.
+# phase 2 recovery v control treatment
+png("outputs/phase2_recovery_ClusterTree.png", 1000, 1000, pointsize=20)
+p2_traitColors = labels2colors(rec_traits); # Convert traits to a color representation: white means low, red means high, grey means missing entry
+plotDendroAndColors(sampleTree2, p2_traitColors, # Plot the sample dendrogram and the colors underneath.
+                    groupLabels = names(rec_traits), 
+                    main = "PHASE 2 recovery - Sample dendrogram and trait heatmap")
+dev.off()
+
+# phase 2 naive v control treatment
+png("outputs/phase2_naive_ClusterTree.png", 1000, 1000, pointsize=20)
+p2_traitColors = labels2colors(nai_traits); # Convert traits to a color representation: white means low, red means high, grey means missing entry
+plotDendroAndColors(sampleTree2, p2_traitColors, # Plot the sample dendrogram and the colors underneath.
+                    groupLabels = names(nai_traits), 
+                    main = "PHASE 2 naive - Sample dendrogram and trait heatmap")
+dev.off()
+
+
+# phase 2 stress v control treatment
+png("outputs/phase2_stress_ClusterTree.png", 1000, 1000, pointsize=20)
+p2_traitColors = labels2colors(str_traits); # Convert traits to a color representation: white means low, red means high, grey means missing entry
+plotDendroAndColors(sampleTree2, p2_traitColors, # Plot the sample dendrogram and the colors underneath.
                     groupLabels = names(str_traits), 
-                    main = "PHASE 1 - Sample dendrogram and trait heatmap")
+                    main = "PHASE 2 stress - Sample dendrogram and trait heatmap")
 dev.off()
 
 # write some of the data thus far.... 
-#save(dm1_mvg, Traits, file = "data/phase1_dataInput.RData")
-#write.csv(dm1_mvg, "data/phase1_vstTransformed_WGCNAdata.csv") # # write the vst transformed data 
+#save(dm2_mvg, Traits, file = "data/phase2_dataInput.RData")
+#write.csv(dm2_mvg, "data/phase2_vstTransformed_WGCNAdata.csv") # # write the vst transformed data 
 ```
 
 ## 8. Set softpower threshold
@@ -277,11 +307,11 @@ I need to pick a power where scale free topology of the matrix is met. From some
 
 <https://peterlangfelder.com/2018/11/25/signed-or-unsigned-which-network-type-is-preferable/>
 ```{r}
-dim(dm1_mvg) # again double check you have the correct data...
+dim(dm2_mvg) # again double check you have the correct data...
 # Choose a set of soft-thresholding powers
 powers = c(c(1:10), seq(from = 12, to=20, by=2))
 # Call the network topology analysis function
-sft = pickSoftThreshold(dm1_mvg, powerVector = powers, verbose = 5) #...wait for this to finish (~4mins)
+sft = pickSoftThreshold(dm2_mvg, powerVector = powers, verbose = 5) #...wait for this to finish (~4mins)
 #  pickSoftThreshold 
 #  performs the analysis of network topology and aids the
 #  user in choosing a proper soft-thresholding power.
@@ -290,7 +320,7 @@ sft = pickSoftThreshold(dm1_mvg, powerVector = powers, verbose = 5) #...wait for
 
 # png to output 
 sizeGrWindow(9, 5) # set window size 
-png("outputs/phase1_ScaleTopology_SoftThresh.png", 1000, 1000, pointsize=20)
+png("outputs/phase2_ScaleTopology_SoftThresh.png", 1000, 1000, pointsize=20)
         par(mfrow = c(1,2));
         cex1 = 0.9;
         
@@ -299,7 +329,7 @@ png("outputs/phase1_ScaleTopology_SoftThresh.png", 1000, 1000, pointsize=20)
              main = paste("Scale independence"));
         text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
              labels=powers,cex=cex1,col="red");
-        abline(h=0.95,col="red") # look at at cut off at power of 3 - this line corresponds to using an R^2 cut-off of h
+        abline(h=0.80,col="red") # look at at cut off at power of 3 - this line corresponds to using an R^2 cut-off of h
         
         plot(sft$fitIndices[,1], sft$fitIndices[,5], # Mean connectivity as a function of the soft-thresholding power
              xlab="Soft Threshold (power)",ylab="Mean Connectivity", type="n",
@@ -310,14 +340,14 @@ dev.off() # output
 
 # The left panel... shows the scale-free fit index (y-axis) 
 # as a function of the soft-thresholding power (x-axis). 
-# We choose the power 5, which is the lowest power for which the scale-free 
-# topology index curve flattens out upon reaching a high value (in this case, roughly 0.90).
+# We choose the power 4, which is the lowest power for which the scale-free 
+# topology index curve flattens out upon reaching a high value (in this case, roughly 0.85).
 # The right panel.... displays the mean connectivity
 # (degree, y-axis) as a function of the soft-thresholding power (x-axis).
 ```
 These data look good based on the plots here. 
 
-**I'll pick _5_ as my softpower threshold because this is where the Scale Free Topology R sq value is >=0.9 and the curve starts to flatten out.**
+**I'll pick _4_ as my softpower threshold because this is where the Scale Free Topology R sq value is >=0.85 and the curve starts to flatten out.**
 
 
 ## 9. Stepwise module construction
@@ -328,10 +358,10 @@ https://ramellose.github.io/networktutorials/wgcna.html
 https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/10cpm/TechnicalReports/signedTOM.pdf
 
 ```{r}
-softPower = 5 # set your soft threshold based on the plots above 
+softPower = 4 # set your soft threshold based on the plots above 
 
 # signed - must call the type, defaults to unsigned
-adjacency_sign = adjacency(dm1_mvg, power = softPower, type="signed") # this takes a long time.. just wait...(~seconds)
+adjacency_sign = adjacency(dm2_mvg, power = softPower, type="signed") # this takes a long time.. just wait...(~seconds)
 ```
 
 #### Step 2: Turn adjacency into topological overlap matrix
@@ -344,7 +374,7 @@ TOM_sign       = TOMsimilarity(adjacency_sign, TOMType="signed")  # this takes a
 dissTOM_sign   = 1-TOM_sign
 ```
 
-#### Step 3:Call the hierarchical clustering function - plot the tree
+#### Step 3: Call the hierarchical clustering function - plot the tree
 ```{r}
 #Call the hierarchical clustering function
 geneTree_sign   = hclust(as.dist(dissTOM_sign), method = "average");
@@ -382,8 +412,8 @@ plotDendroAndColors(geneTree_sign, dynamicColors_sign, "Dynamic Tree Cut - SIGNE
 ```{r}
 # Calculate eigengenes ========================================================== # 
 
-# MEList = moduleEigengenes(dim1_mvg, colors = dynamicColors)
-MEList = moduleEigengenes(dm1_mvg, colors = dynamicColors_sign)
+# MEList = moduleEigengenes(dm2_mvg, colors = dynamicColors)
+MEList = moduleEigengenes(dm2_mvg, colors = dynamicColors_sign)
 MEs    = MEList$eigengenes # you can view MEs, condenses gene counts down to a single number for each sample representative of that expression pattern 
 
 #remove module grey (full of NAs)
@@ -395,14 +425,14 @@ METree = hclust(as.dist(MEDiss), method = "average") # Cluster module eigengenes
 
 # Plot the result ================================================================ #
 sizeGrWindow(7, 6)
-png("outputs/phase1_ClusterEigengenes.png", 1000, 1000, pointsize=20)
-plot(METree, main = "PHASE 1 Clustering of module eigengenes - SIGNED (dissimilarity calc = MEDiss = 1-cor(MEs))",
+png("outputs/phase2_ClusterEigengenes.png", 1000, 1000, pointsize=20)
+plot(METree, main = "PHASE 2 Clustering of module eigengenes - SIGNED (dissimilarity calc = MEDiss = 1-cor(MEs))",
      xlab = "", sub = "")
 dev.off()
 ```
 
 #### Step 7: Specify the cut line for the dendrogram (module) - Calc MODULE EIGENGENES (mergeMEs)
-not necessary for this dataset - METree above looks to be parsed well into the 4 module (after removing the empty "catch all" module grey)
+not necessary for this dataset - METree above looks to be parsed well into the 4 modules
 *If you are skipping this step, move on to Step 9*
 
 #### Step 8: Plot dendrogram with the cut line 'MEDissThres' ---- NOT USING HERE!
@@ -427,9 +457,9 @@ colorOrder = c(standardColors(50))
 moduleLabels = match(moduleColors, colorOrder)-1;
 
 # Save module colors and labels for use in subsequent parts
-#save(MEs, moduleLabels, moduleColors, file = "data/phase1_networkConstruction-stepByStep.RData")
+#save(MEs, moduleLabels, moduleColors, file = "data/phase2_networkConstruction-stepByStep.RData")
 # write csv - save the module eigengenes
-#write.csv(MEs, file = "data/phase1_WGCNA_ModuleEigengenes.csv")
+#write.csv(MEs, file = "data/phase2_WGCNA_ModuleEigengenes.csv")
 ```
 
 
@@ -440,18 +470,37 @@ Since we already have a summary profile (eigengene) for each module,
 we simply correlate eigengenes with external traits and look for the  significant associations:
 ```{r}
 # Define numbers of genes and samples
-nGenes = ncol(dm1_mvg); 
-nSamples = nrow(dm1_mvg); 
+nGenes = ncol(dm2_mvg); 
+nSamples = nrow(dm2_mvg); 
 # Recalculate MEs with color labels
-MEs0 = moduleEigengenes(dm1_mvg, moduleColors)$eigengenes
+MEs0 = moduleEigengenes(dm2_mvg, moduleColors)$eigengenes
 MEs = orderMEs(MEs0) # reorders the columns (colors/modules)
 ```
 
 ## 11. Module trait coorelation 
 ```{r}
 # ALL TRAIT DATA
-dim(Traits)  # 23  8
-dim(MEs)  # 23 5
+dim(Traits)  # 47  8
+dim(MEs)  # 47 4
+
+
+# recovery treatment
+rec_traits_asnum    <- data.frame(lapply(rec_traits, function(x) as.numeric(as.character(x))),
+                                check.names=F, row.names = row.names(rec_traits))
+moduleTraitCor_rec      = cor(MEs, rec_traits_asnum, use = "p");
+moduleTraitPvalue_rec   = corPvalueStudent(moduleTraitCor_rec, nSamples);
+print("recovery Module Correlation p-values")
+moduleTraitPvalue_rec
+
+
+# naive treatment
+nai_traits_asnum    <- data.frame(lapply(nai_traits, function(x) as.numeric(as.character(x))),
+                                check.names=F, row.names = row.names(nai_traits))
+moduleTraitCor_nai      = cor(MEs, nai_traits_asnum, use = "p");
+moduleTraitPvalue_nai   = corPvalueStudent(moduleTraitCor_nai, nSamples);
+print("naive Module Correlation p-values")
+moduleTraitPvalue_nai
+
 
 # stress treatment
 str_traits_asnum    <- data.frame(lapply(str_traits, function(x) as.numeric(as.character(x))),
@@ -463,13 +512,26 @@ moduleTraitPvalue_str
 ```
 
 ```{r}
-dds5 = as.data.frame((dm1_mvg))
+dds5 = as.data.frame((dm2_mvg))
 dim(dds5) 
+
+module_brown_genes <- names(dds5)[moduleColors=="brown"]
+length(module_brown_genes)
+
+module_turquoise_genes <- names(dds5)[moduleColors=="turquoise"]
+length(module_turquoise_genes)
+
 module_blue_genes <- names(dds5)[moduleColors=="blue"]
 length(module_blue_genes)
 
+module_yellow_genes <- names(dds5)[moduleColors=="yellow"]
+length(module_yellow_genes)
+
 #save list of module blue genes
-#write.csv(module_blue_genes, "phase1_module_blue_genes.csv", quote=F, row.names = FALSE)
+#write.csv(module_brown_genes, "outputs/phase2_module_brown_genes.csv", quote=F, row.names = FALSE)
+#write.csv(module_turquoise_genes, "outputs/module_turquoise_genes.csv", quote=F, row.names = FALSE)
+#write.csv(module_blue_genes, "outputs/phase2_module_blue_genes.csv", quote=F, row.names = FALSE)
+#write.csv(module_yellow_genes, "outputs/phase2_module_yellow_genes.csv", quote=F, row.names = FALSE)
 
 ```
 
@@ -481,29 +543,78 @@ STILL NEED TO EXPLORE THIS!
 
 ## 13. Heatmaps!
 
+phase 2- recovery
 ```{r}
 sizeGrWindow(10,10)
 # Will display correlations and their p-values
-p1.matrix <-  paste(signif(moduleTraitCor_str, 2), "\n(",
+p2.matrix <-  paste(signif(moduleTraitCor_rec, 2), "\n(",
+                                      signif(moduleTraitPvalue_rec, 1), ")", sep = "")
+
+par(mar = c(8, 9.5, 5, 3));
+# Display the correlation values within a heatmap plot
+png("outputs/phase2_recovery_heatmap.png", 700, 800, pointsize=20)
+labeledHeatmap(Matrix = moduleTraitCor_rec,
+               xLabels = names(rec_traits),
+               yLabels = names(MEs),
+               ySymbols = names(MEs),
+               colorLabels = TRUE,
+               colors = blueWhiteRed(50),
+               textMatrix = p2.matrix,
+               setStdMargins = FALSE,
+               cex.text = 1,
+               zlim = c(-0.6,0.6),
+               main = paste("Module-trait relationships - p2 recovery"))
+dev.off()
+```
+
+
+phase 2- naive
+```{r}
+sizeGrWindow(10,10)
+# Will display correlations and their p-values
+p2.matrix <-  paste(signif(moduleTraitCor_nai, 2), "\n(",
+                                      signif(moduleTraitPvalue_nai, 1), ")", sep = "")
+
+par(mar = c(8, 9.5, 5, 3));
+# Display the correlation values within a heatmap plot
+png("outputs/phase2_naive_heatmap.png", 700, 800, pointsize=20)
+labeledHeatmap(Matrix = moduleTraitCor_nai,
+               xLabels = names(nai_traits),
+               yLabels = names(MEs),
+               ySymbols = names(MEs),
+               colorLabels = TRUE,
+               colors = blueWhiteRed(50),
+               textMatrix = p2.matrix,
+               setStdMargins = FALSE,
+               cex.text = 1,
+               zlim = c(-0.6,0.6),
+               main = paste("Module-trait relationships - p2 naive"))
+dev.off()
+```
+
+phase 2- stress
+```{r}
+sizeGrWindow(10,10)
+# Will display correlations and their p-values
+p2.matrix <-  paste(signif(moduleTraitCor_str, 2), "\n(",
                                       signif(moduleTraitPvalue_str, 1), ")", sep = "")
 
 par(mar = c(8, 9.5, 5, 3));
 # Display the correlation values within a heatmap plot
-png("outputs/phase1_heatmap.png", 700, 800, pointsize=20)
+png("outputs/phase2_stress_heatmap.png", 700, 800, pointsize=20)
 labeledHeatmap(Matrix = moduleTraitCor_str,
                xLabels = names(str_traits),
                yLabels = names(MEs),
                ySymbols = names(MEs),
                colorLabels = TRUE,
                colors = blueWhiteRed(50),
-               textMatrix = p1.matrix,
+               textMatrix = p2.matrix,
                setStdMargins = FALSE,
                cex.text = 1,
                zlim = c(-0.6,0.6),
-               main = paste("Module-trait relationships - phase 1"))
+               main = paste("Module-trait relationships - p2 stress"))
 dev.off()
 ```
-
 
 ```{r}
 # this heatmap looks better
