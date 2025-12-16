@@ -239,7 +239,7 @@ dim(Traits)
 ```
 
 
-## 6. Prepare trait data (split across 3 treatment groups: recovery, naive, stress)
+## 6. Prepare trait data (split across 3 treatment groups: recovery, naive, stress & one with all treatments**)
 ```{r}
 rec_traits     <-  Traits %>% dplyr::select('treatment') %>% #treatment as control vs recovery
                             dplyr::mutate(recovery = as.factor(as.numeric(treatment == "recovery")))  %>%  # call occurrence of 'recovery'  as 0s and 1s (factor)
@@ -260,6 +260,16 @@ str_traits     <-  Traits %>% dplyr::select('treatment') %>% #treatment as contr
                             dplyr::mutate(control = as.factor(as.numeric(treatment == "control")))  %>%  # call occurrence of 'control' as 0s and 1s (factor)
                             dplyr::select(-treatment)
 str_traits  # final dataset of 0,1 for treatment groups - stress only!
+
+
+# Combined treatments
+all_traits <-   Traits %>% dplyr::select('treatment') %>% #build matrix with all treatment groups
+  dplyr::mutate(stress = as.factor(as.numeric(treatment == "stress")))  %>%  # call occurrence of 'stress' as 0s and 1s (factor)
+  dplyr::mutate(naive = as.factor(as.numeric(treatment == "naive")))  %>%  # call occurrence of 'naive' as 0s and 1s (factor)
+  dplyr::mutate(recovery = as.factor(as.numeric(treatment == "recovery")))  %>%  # call occurrence of 'recovery' as 0s and 1s (factor)
+  dplyr::mutate(control = as.factor(as.numeric(treatment == "control")))  %>%  # call occurrence of 'control' as 0s and 1s (factor)
+  dplyr::select(-treatment)
+all_traits
 ```
 
 
@@ -288,6 +298,15 @@ png("outputs/phase2_stress_ClusterTree.png", 1000, 1000, pointsize=20)
 p2_traitColors = labels2colors(str_traits); # Convert traits to a color representation: white means low, red means high, grey means missing entry
 plotDendroAndColors(sampleTree2, p2_traitColors, # Plot the sample dendrogram and the colors underneath.
                     groupLabels = names(str_traits), 
+                    main = "PHASE 2 stress - Sample dendrogram and trait heatmap")
+dev.off()
+
+
+# phase 2 stress v control treatment
+png("outputs/phase2_all_treatments_ClusterTree.png", 1000, 1000, pointsize=20)
+p2_traitColors = labels2colors(all_traits); # Convert traits to a color representation: white means low, red means high, grey means missing entry
+plotDendroAndColors(sampleTree2, p2_traitColors, # Plot the sample dendrogram and the colors underneath.
+                    groupLabels = names(all_traits), 
                     main = "PHASE 2 stress - Sample dendrogram and trait heatmap")
 dev.off()
 
@@ -509,6 +528,15 @@ moduleTraitCor_str      = cor(MEs, str_traits_asnum, use = "p");
 moduleTraitPvalue_str   = corPvalueStudent(moduleTraitCor_str, nSamples);
 print("stress Module Correlation p-values")
 moduleTraitPvalue_str
+
+# ALL treatments
+all_traits_asnum    <- data.frame(lapply(all_traits, function(x) as.numeric(as.character(x))),
+                                check.names=F, row.names = row.names(all_traits))
+moduleTraitCor_all      = cor(MEs, all_traits_asnum, use = "p");
+moduleTraitPvalue_all   = corPvalueStudent(moduleTraitCor_all, nSamples);
+print("all Module Correlation p-values")
+moduleTraitPvalue_all
+
 ```
 
 ```{r}
@@ -542,6 +570,31 @@ STILL NEED TO EXPLORE THIS!
 
 
 ## 13. Heatmaps!
+
+phase 2- ALL TREATMENTS
+```{r}
+sizeGrWindow(10,10)
+# Will display correlations and their p-values
+p2.matrix <-  paste(signif(moduleTraitCor_all, 2), "\n(",
+                                      signif(moduleTraitPvalue_all, 1), ")", sep = "")
+
+par(mar = c(8, 9.5, 5, 3));
+# Display the correlation values within a heatmap plot
+png("outputs/phase2_allTreatments_heatmap.png", 700, 800, pointsize=20)
+labeledHeatmap(Matrix = moduleTraitCor_all,
+               xLabels = names(all_traits),
+               yLabels = names(MEs),
+               ySymbols = names(MEs),
+               colorLabels = TRUE,
+               colors = blueWhiteRed(50),
+               textMatrix = p2.matrix,
+               setStdMargins = FALSE,
+               cex.text = 1,
+               zlim = c(-0.6,0.6),
+               main = paste("Module-trait relationships - p2 allTreatments"))
+dev.off()
+```
+
 
 phase 2- recovery
 ```{r}
