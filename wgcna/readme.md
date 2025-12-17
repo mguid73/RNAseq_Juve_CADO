@@ -1,7 +1,8 @@
 ## Weighted Gene Co-Network Analysis 
 
-1. Run WGCNA script on each phase (1 & 2) of filtered gene count matrices (the same generated for DESeq2 analysis)
+[x] Run WGCNA script on each phase (1 & 2) of filtered gene count matrices (the same generated for DESeq2 analysis)
 
-2. Run TopGO on identified color modules (to see what kinds of genes make up that module)
+[ ] Run TopGO on identified significant color modules
 
-3. Maybe run WGCNA on the full dataset with both phases (**need to reconfigure the deseq matrix to do this)
+[ ] Update heatmaps (and other visualizations w/ topGO) for chapter 3 figures!
+

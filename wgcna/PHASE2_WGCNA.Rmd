@@ -43,7 +43,7 @@ library(ComplexHeatmap)
 library(circlize)
 library(reshape)
 library(ggplot2)
-library(genefilter)
+#library(genefilter)
 #library(hrbrthemes)
 ```
 
@@ -148,7 +148,7 @@ p2_treatment_data$batch <- factor(p2_treatment_data$batch, levels = c("2", "3", 
 dm2 <- DESeqDataSetFromMatrix(countData = p2_count_data,
                              colData = p2_treatment_data,
                              design = ~ batch + treatment)
-dm2$treatment <- factor(dm2$treatment, levels = c("control", "stress"))
+dm2$treatment <- factor(dm2$treatment, levels = c("control", "naive", "recovery", "stress"))
 levels(dm2$treatment)
 dm2
 
@@ -190,7 +190,7 @@ sizeGrWindow(12,9) # The user should change the dimensions if the window is too 
 par(cex = 0.6);
 par(mar = c(0,4,2,0))
 # output the tree as .png file..
-png("outputs/sampleClusterTree_Precut.png", 1000, 1000, pointsize=20)
+png("phase2_outputs/sampleClusterTree_Precut.png", 1000, 1000, pointsize=20)
 plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5, 
      cex.axis = 1.5, cex.main = 2) 
 abline(h = 105 , col = "red") # add line to plot to show the cut-off outlier samples 
@@ -217,7 +217,7 @@ nSamples = nrow(dm2_mvg) # number of samples == 47  - the cut tree removed 1 sam
 
 # plot the tree with the 'keep samples'  =========================================== #
 sampleTree2 = hclust(dist(dm2_mvg), method = "average") # Next we cluster the samples (in contrast to clustering genes that will come later)  to see if there are any obvious outliers.
-png("outputs/ClusterTree_Postcut.png", 1000, 1000, pointsize=20)
+png("phase2_outputs/ClusterTree_Postcut.png", 1000, 1000, pointsize=20)
 plot(sampleTree2, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,
      cex.axis = 1.5, cex.main = 2)
 dev.off()
@@ -277,7 +277,7 @@ all_traits
 *make sure you are using the right sample tree!!*
 ```{r}
 # phase 2 recovery v control treatment
-png("outputs/phase2_recovery_ClusterTree.png", 1000, 1000, pointsize=20)
+png("phase2_outputs/phase2_recovery_ClusterTree.png", 1000, 1000, pointsize=20)
 p2_traitColors = labels2colors(rec_traits); # Convert traits to a color representation: white means low, red means high, grey means missing entry
 plotDendroAndColors(sampleTree2, p2_traitColors, # Plot the sample dendrogram and the colors underneath.
                     groupLabels = names(rec_traits), 
@@ -285,7 +285,7 @@ plotDendroAndColors(sampleTree2, p2_traitColors, # Plot the sample dendrogram an
 dev.off()
 
 # phase 2 naive v control treatment
-png("outputs/phase2_naive_ClusterTree.png", 1000, 1000, pointsize=20)
+png("phase2_outputs/phase2_naive_ClusterTree.png", 1000, 1000, pointsize=20)
 p2_traitColors = labels2colors(nai_traits); # Convert traits to a color representation: white means low, red means high, grey means missing entry
 plotDendroAndColors(sampleTree2, p2_traitColors, # Plot the sample dendrogram and the colors underneath.
                     groupLabels = names(nai_traits), 
@@ -294,7 +294,7 @@ dev.off()
 
 
 # phase 2 stress v control treatment
-png("outputs/phase2_stress_ClusterTree.png", 1000, 1000, pointsize=20)
+png("phase2_outputs/phase2_stress_ClusterTree.png", 1000, 1000, pointsize=20)
 p2_traitColors = labels2colors(str_traits); # Convert traits to a color representation: white means low, red means high, grey means missing entry
 plotDendroAndColors(sampleTree2, p2_traitColors, # Plot the sample dendrogram and the colors underneath.
                     groupLabels = names(str_traits), 
@@ -302,8 +302,8 @@ plotDendroAndColors(sampleTree2, p2_traitColors, # Plot the sample dendrogram an
 dev.off()
 
 
-# phase 2 stress v control treatment
-png("outputs/phase2_all_treatments_ClusterTree.png", 1000, 1000, pointsize=20)
+# phase 2 all treatment
+png("phase2_outputs/phase2_all_treatments_ClusterTree.png", 1000, 1000, pointsize=20)
 p2_traitColors = labels2colors(all_traits); # Convert traits to a color representation: white means low, red means high, grey means missing entry
 plotDendroAndColors(sampleTree2, p2_traitColors, # Plot the sample dendrogram and the colors underneath.
                     groupLabels = names(all_traits), 
@@ -311,8 +311,8 @@ plotDendroAndColors(sampleTree2, p2_traitColors, # Plot the sample dendrogram an
 dev.off()
 
 # write some of the data thus far.... 
-#save(dm2_mvg, Traits, file = "data/phase2_dataInput.RData")
-#write.csv(dm2_mvg, "data/phase2_vstTransformed_WGCNAdata.csv") # # write the vst transformed data 
+#save(dm2_mvg, Traits, file = "phase2_data/phase2_dataInput.RData")
+#write.csv(dm2_mvg, "phase2_data/phase2_vstTransformed_WGCNAdata.csv") # # write the vst transformed data 
 ```
 
 ## 8. Set softpower threshold
@@ -339,7 +339,7 @@ sft = pickSoftThreshold(dm2_mvg, powerVector = powers, verbose = 5) #...wait for
 
 # png to output 
 sizeGrWindow(9, 5) # set window size 
-png("outputs/phase2_ScaleTopology_SoftThresh.png", 1000, 1000, pointsize=20)
+png("phase2_outputs/phase2_ScaleTopology_SoftThresh.png", 1000, 1000, pointsize=20)
         par(mfrow = c(1,2));
         cex1 = 0.9;
         
@@ -444,7 +444,7 @@ METree = hclust(as.dist(MEDiss), method = "average") # Cluster module eigengenes
 
 # Plot the result ================================================================ #
 sizeGrWindow(7, 6)
-png("outputs/phase2_ClusterEigengenes.png", 1000, 1000, pointsize=20)
+png("phase2_outputs/phase2_ClusterEigengenes.png", 1000, 1000, pointsize=20)
 plot(METree, main = "PHASE 2 Clustering of module eigengenes - SIGNED (dissimilarity calc = MEDiss = 1-cor(MEs))",
      xlab = "", sub = "")
 dev.off()
@@ -471,14 +471,14 @@ use 'mergedColors' we needed to merge related eigengene modules together
 # Rename to moduleColors
 moduleColors = dynamicColors_sign
 # Construct numerical labels corresponding to the colors
-#colorOrder = c("grey", standardColors(50));
-colorOrder = c(standardColors(50))
+colorOrder = c("grey", standardColors(50));
+#colorOrder = c(standardColors(50))
 moduleLabels = match(moduleColors, colorOrder)-1;
 
 # Save module colors and labels for use in subsequent parts
-#save(MEs, moduleLabels, moduleColors, file = "data/phase2_networkConstruction-stepByStep.RData")
+save(MEs, moduleLabels, moduleColors, file = "phase2_data/phase2_networkConstruction-stepByStep.RData")
 # write csv - save the module eigengenes
-#write.csv(MEs, file = "data/phase2_WGCNA_ModuleEigengenes.csv")
+write.csv(MEs, file = "phase2_data/phase2_WGCNA_ModuleEigengenes.csv")
 ```
 
 
@@ -556,10 +556,10 @@ module_yellow_genes <- names(dds5)[moduleColors=="yellow"]
 length(module_yellow_genes)
 
 #save list of module blue genes
-#write.csv(module_brown_genes, "outputs/phase2_module_brown_genes.csv", quote=F, row.names = FALSE)
-#write.csv(module_turquoise_genes, "outputs/module_turquoise_genes.csv", quote=F, row.names = FALSE)
-#write.csv(module_blue_genes, "outputs/phase2_module_blue_genes.csv", quote=F, row.names = FALSE)
-#write.csv(module_yellow_genes, "outputs/phase2_module_yellow_genes.csv", quote=F, row.names = FALSE)
+#write.csv(module_brown_genes, "phase2_outputs/phase2_module_brown_genes.csv", quote=F, row.names = FALSE)
+#write.csv(module_turquoise_genes, "phase2_outputs/module_turquoise_genes.csv", quote=F, row.names = FALSE)
+#write.csv(module_blue_genes, "phase2_outputs/phase2_module_blue_genes.csv", quote=F, row.names = FALSE)
+#write.csv(module_yellow_genes, "phase2_outputs/phase2_module_yellow_genes.csv", quote=F, row.names = FALSE)
 
 ```
 
@@ -580,7 +580,7 @@ p2.matrix <-  paste(signif(moduleTraitCor_all, 2), "\n(",
 
 par(mar = c(8, 9.5, 5, 3));
 # Display the correlation values within a heatmap plot
-png("outputs/phase2_allTreatments_heatmap.png", 700, 800, pointsize=20)
+png("phase2_outputs/phase2_allTreatments_heatmap.png", 700, 800, pointsize=20)
 labeledHeatmap(Matrix = moduleTraitCor_all,
                xLabels = names(all_traits),
                yLabels = names(MEs),
