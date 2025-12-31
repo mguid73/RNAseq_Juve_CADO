@@ -5,4 +5,3 @@
 [ ] Run TopGO on identified significant color modules
 
 [ ] Update heatmaps (and other visualizations w/ topGO) for chapter 3 figures!
-
