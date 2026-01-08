@@ -1,0 +1,440 @@
+---
+title: "PHASE 1 - TopGO Directional (up/down) Regulation"
+author: "Megan Delatte-Guidry"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Gene Ontology Enrichment Analysis on DEG gene sets - UP and DOWN regulated genes as separate datasets for each phase!
+
+```{r}
+library(topGO)
+library(stringr)
+library(dplyr)
+library(tidyr)
+```
+
+### Steps
+
+1. Data preparation: List of genes identifiers, gene scores, list of differentially expressed genes or a criteria for selecting genes based on their scores, as well as gene-to-GO annotations are all collected and stored in a single R object.   
+(referenced [Amy Zyck's TopGO script](https://github.com/MarineEvoEcoLab/ROD_CADO/blob/main/Outlier_Exploration/Outlier_GO.Rmd) for the gene2go table)
+
+2. Running the enrichment tests: Using the object created in the first step the user can perform enrichment analysis using any feasible mixture of statistical tests and methods that deal with the GO topology.
+
+3. Analysis of the results: The results obtained in the second step are analysed using summary functions and visualization tools.
+_________________________________________________________________________________
+
+## Step 1: Data preparation 
+
+### gene2go table from annotation information
+
+PULLING gene2go_full.tab FROM THE WGCNA DIRECTORY (../wgcna/gene2go_full.tab)
+
+gaf from NCBI with the GO terms for genes in the eastern oyster genome. I'm going to take this file and extract the Gene IDs and associated GO terms.
+
+In terminal:
+```{bash}
+#wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/002/022/765/GCF_002022765.2_C_virginica-3.0/GCF_002022765.2_C_virginica-3.0_gene_ontology.gaf.gz
+#gunzip GCF_002022765.2_C_virginica-3.0_gene_ontology.gaf.gz
+#mv GCF_002022765.2_C_virginica-3.0_gene_ontology.gaf gene_ontology.gaf
+```
+
+Now I can make a new .tab file with just the gene ID and GO IDs (3rd and 5th columns) renamed "gene_id" and "GO_Annotation". The gene_name column will have one unique observation per row and all associated GO terms will be saved in the same row, with values separated by ;
+
+```{bash}
+#awk 'NR>9 {print $3 "\t" $5}' gene_ontology.gaf | 
+#sed '1i gene_id\tGO_Annotation' | 
+#sort | awk '
+#NR==1 {print; next}
+#$1!=prev {
+#if (NR>2) print prev "\t" goids;
+#prev=$1;
+#goids=$2;
+#next
+#}
+#{
+#goids=goids "; " $2
+#}
+#END {print prev "\t" goids}
+#' > gene2go_full.tab
+```
+
+Gene IDs for down and upregulated genes are in the following files:
+outputs/phase1_directional_expression.csv
+outputs/phase2_naive_directional_expression.csv
+outputs/phase2_recovery_directional_expression.csv
+outputs/phase2_stress_directional_expression.csv
+
+Make separate files with gene IDs and GO IDs for UP & DOWN regulated genes
+```{r}
+# # load data
+# p1 <- read.csv("outputs/phase1_directional_expression.csv", header = TRUE, sep = ",")
+# p1
+# # separate UP and DOWN reg genes into two data sets
+# p1_up <- subset(p1, diffexpressed=="UP")
+# p1_down <- subset(p1, diffexpressed=="DOWN")
+#   
+# # load go annotation file to assign go terms to color module
+# go_terms <- read.table("../wgcna/gene2go_full.tab", header = TRUE, sep="\t")
+# head(go_terms)
+# 
+# # PHASE 1 UP - reformat gene_id column to be just LOC#, add in go annotation, remove 'MSTRG' rows and NA rows
+# p1_up$gene_id <- str_extract(p1_up$GeneID, "[^|]+$")
+# dim(p1_up)
+# p1_up_wGO <- merge(p1_up, go_terms, by = "gene_id", all.x = TRUE)
+# dim(p1_up_wGO)
+# #clean up 
+# p1_up_wGO <- na.omit(p1_up_wGO)
+# p1_up_wGO <- p1_up_wGO[, c("gene_id", "GO_Annotation")]
+# dim(p1_up_wGO)
+# 
+# # PHASE 1 DOWN - reformat gene_id column to be just LOC#, add in go annotation, remove 'MSTRG' rows and NA rows
+# p1_down$gene_id <- str_extract(p1_down$GeneID, "[^|]+$")
+# dim(p1_down)
+# p1_down_wGO <- merge(p1_down, go_terms, by = "gene_id", all.x = TRUE)
+# dim(p1_down_wGO)
+# #clean up 
+# p1_down_wGO <- na.omit(p1_down_wGO)
+# p1_down_wGO <- p1_down_wGO[, c("gene_id", "GO_Annotation")]
+# dim(p1_down_wGO)
+
+# write out tables
+#write.table(p1_up_wGO, "p1_UP_genes_GO_header.tab", sep = "\t", row.names=FALSE)
+#write.table(p1_down_wGO, "p1_DOWN_genes_GO_header.tab", sep = "\t", row.names=FALSE)
+```
+
+Read in expressed genes file - maybe I'll use this??
+```{r}
+p1_filt_counts <- read.csv("../de_analysis/outputs/p1_filtered_gene_count_matrix.csv")
+head(p1_filt_counts)
+```
+
+
+Read in gene2go information 
+
+```{r}
+all_gene2go<-read.delim("../wgcna/gene2go_full.tab", sep="\t")
+UP_gene2go<-read.delim("p1_UP_genes_GO_header.tab", sep="\t")
+DOWN_gene2go<-read.delim("p1_DOWN_genes_GO_header.tab", sep="\t")
+View(UP_gene2go)
+View(DOWN_gene2go)
+```
+
+Make list of genes for input to TopGO
+```{r}
+UP_genes <- as.character(unique(UP_gene2go$gene_id))
+DOWN_genes <- as.character(unique(DOWN_gene2go$gene_id))
+
+all_genes <- as.character(unique(all_gene2go$gene_id))
+
+UP_GeneList <- factor(as.integer(all_genes %in% UP_genes))
+names(UP_GeneList) <- all_genes
+
+DOWN_GeneList <- factor(as.integer(all_genes %in% DOWN_genes))
+names(DOWN_GeneList) <- all_genes
+```
+
+The following code will perform GO enrichment using the weighted Fisher's exact test  
+
+Read in gene-to-go-mappings
+```{r}
+gene2go_topgo <-readMappings("../wgcna/gene2go_full.tab", IDsep=";", sep="\t")
+```
+
+Set function to select genes of interest (ie those that have pvalue < 0.05)
+```{r}
+topDiffGenes <- function(allScore) {
+return(allScore < 0.05)}
+```
+
+### Biological Processes
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_UP_BP <-new("topGOdata", ontology="BP", gene2GO=gene2go_topgo, allGenes=UP_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+
+GO_DOWN_BP <-new("topGOdata", ontology="BP", gene2GO=gene2go_topgo, allGenes=DOWN_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_UP_BP_FE <- runTest(GO_UP_BP, algorithm="weight01", statistic="fisher")
+
+GO_DOWN_BP_FE <- runTest(GO_DOWN_BP, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_UP_BP_RT <- GenTable(GO_UP_BP, Fisher = GO_UP_BP_FE, orderBy = "Fisher",  topNodes = 50, numChar = 100)
+
+GO_DOWN_BP_RT <- GenTable(GO_DOWN_BP, Fisher = GO_DOWN_BP_FE, orderBy = "Fisher",  topNodes = 50, numChar = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_UP_BP_RT$Fisher<-as.numeric(GO_UP_BP_RT$Fisher)
+GO_UP_BP_RT_sig<-GO_UP_BP_RT[GO_UP_BP_RT$Fisher<0.05,]
+
+GO_DOWN_BP_RT$Fisher<-as.numeric(GO_DOWN_BP_RT$Fisher)
+GO_DOWN_BP_RT_sig<-GO_DOWN_BP_RT[GO_DOWN_BP_RT$Fisher<0.05,]
+```
+
+Merge `GO_UP_BP_RT_sig` with GO and gene info. 
+```{r}
+# Separate GO terms 
+UP_gene2go <- UP_gene2go %>%
+  separate_rows(GO_Annotation, sep = ";")
+
+# Ensure GO terms in both datasets are formatted similarly (trim whitespaces)
+UP_gene2go$GO_Annotation <- trimws(UP_gene2go$GO_Annotation)
+GO_UP_BP_RT_sig$GO.ID <- trimws(GO_UP_BP_RT_sig$GO.ID)
+
+# Join the datasets based on GO term
+GO_UP_BP_RT_sig_gene <- UP_gene2go %>%
+  left_join(GO_UP_BP_RT_sig, by = c("GO_Annotation" = "GO.ID")) %>%
+  na.omit()
+
+# Add ontology column 
+GO_UP_BP_RT_sig_gene$ontology <- "Biological Processes"
+```
+
+Merge `GO_DOWN_BP_RT_sig` with GO and gene info. 
+```{r}
+# Separate GO terms 
+DOWN_gene2go <- DOWN_gene2go %>%
+  separate_rows(GO_Annotation, sep = ";")
+
+# Ensure GO terms in both datasets are formatted similarly (trim whitespaces)
+DOWN_gene2go$GO_Annotation <- trimws(DOWN_gene2go$GO_Annotation)
+GO_DOWN_BP_RT_sig$GO.ID <- trimws(GO_DOWN_BP_RT_sig$GO.ID)
+
+# Join the datasets based on GO term
+GO_DOWN_BP_RT_sig_gene <- DOWN_gene2go %>%
+  left_join(GO_DOWN_BP_RT_sig, by = c("GO_Annotation" = "GO.ID")) %>%
+  na.omit()
+
+# Add ontology column 
+GO_DOWN_BP_RT_sig_gene$ontology <- "Biological Processes"
+```
+
+### Cellular Components
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_UP_CC <-new("topGOdata", ontology="CC", gene2GO=gene2go_topgo, allGenes=UP_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+
+GO_DOWN_CC <-new("topGOdata", ontology="CC", gene2GO=gene2go_topgo, allGenes=DOWN_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_UP_CC_FE <- runTest(GO_UP_CC, algorithm="weight01", statistic="fisher")
+
+GO_DOWN_CC_FE <- runTest(GO_DOWN_CC, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_UP_CC_RT <- GenTable(GO_UP_CC, Fisher = GO_UP_CC_FE, orderBy = "Fisher",  topNodes = 50, numChar = 100)
+
+GO_DOWN_CC_RT <- GenTable(GO_DOWN_CC, Fisher = GO_DOWN_CC_FE, orderBy = "Fisher",  topNodes = 50, numChar = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_UP_CC_RT$Fisher<-as.numeric(GO_UP_CC_RT$Fisher)
+GO_UP_CC_RT_sig<-GO_UP_CC_RT[GO_UP_CC_RT$Fisher<0.05,]
+
+GO_DOWN_CC_RT$Fisher<-as.numeric(GO_DOWN_CC_RT$Fisher)
+GO_DOWN_CC_RT_sig<-GO_DOWN_CC_RT[GO_DOWN_CC_RT$Fisher<0.05,]
+```
+
+Merge `GO_UP_CC_RT_sig` with GO and gene info. 
+```{r}
+# Separate GO terms 
+UP_gene2go <- UP_gene2go %>%
+  separate_rows(GO_Annotation, sep = ";")
+
+# Ensure GO terms in both datasets are formatted similarly (trim whitespaces)
+UP_gene2go$GO_Annotation <- trimws(UP_gene2go$GO_Annotation)
+GO_UP_CC_RT_sig$GO.ID <- trimws(GO_UP_CC_RT_sig$GO.ID)
+
+# Join the datasets based on GO term
+GO_UP_CC_RT_sig_gene <- UP_gene2go %>%
+  left_join(GO_UP_CC_RT_sig, by = c("GO_Annotation" = "GO.ID")) %>%
+  na.omit()
+
+# Add ontology column 
+GO_UP_CC_RT_sig_gene$ontology <- "Cellular Components"
+```
+
+Merge `GO_DOWN_CC_RT_sig` with GO and gene info. 
+```{r}
+# Separate GO terms 
+DOWN_gene2go <- DOWN_gene2go %>%
+  separate_rows(GO_Annotation, sep = ";")
+
+# Ensure GO terms in both datasets are formatted similarly (trim whitespaces)
+DOWN_gene2go$GO_Annotation <- trimws(DOWN_gene2go$GO_Annotation)
+GO_DOWN_CC_RT_sig$GO.ID <- trimws(GO_DOWN_CC_RT_sig$GO.ID)
+
+# Join the datasets based on GO term
+GO_DOWN_CC_RT_sig_gene <- DOWN_gene2go %>%
+  left_join(GO_DOWN_CC_RT_sig, by = c("GO_Annotation" = "GO.ID")) %>%
+  na.omit()
+
+# Add ontology column 
+GO_DOWN_CC_RT_sig_gene$ontology <- "Cellular Components"
+```
+
+
+### Molecular Functions
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_UP_MF <-new("topGOdata", ontology="MF", gene2GO=gene2go_topgo, allGenes=UP_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+
+GO_DOWN_MF <-new("topGOdata", ontology="MF", gene2GO=gene2go_topgo, allGenes=DOWN_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_UP_MF_FE <- runTest(GO_UP_MF, algorithm="weight01", statistic="fisher")
+
+GO_DOWN_MF_FE <- runTest(GO_DOWN_MF, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_UP_MF_RT <- GenTable(GO_UP_MF, Fisher = GO_UP_MF_FE, orderBy = "Fisher",  topNodes = 50, numChar = 100)
+
+GO_DOWN_MF_RT <- GenTable(GO_DOWN_MF, Fisher = GO_DOWN_MF_FE, orderBy = "Fisher",  topNodes = 50, numChar = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_UP_MF_RT$Fisher<-as.numeric(GO_UP_MF_RT$Fisher)
+GO_UP_MF_RT_sig<-GO_UP_MF_RT[GO_UP_MF_RT$Fisher<0.05,]
+
+GO_DOWN_MF_RT$Fisher<-as.numeric(GO_DOWN_MF_RT$Fisher)
+GO_DOWN_MF_RT_sig<-GO_DOWN_MF_RT[GO_DOWN_MF_RT$Fisher<0.05,]
+```
+
+Merge `GO_UP_MF_RT_sig` with GO and gene info. 
+```{r}
+# Separate GO terms 
+UP_gene2go <- UP_gene2go %>%
+  separate_rows(GO_Annotation, sep = ";")
+
+# Ensure GO terms in both datasets are formatted similarly (trim whitespaces)
+UP_gene2go$GO_Annotation <- trimws(UP_gene2go$GO_Annotation)
+GO_UP_MF_RT_sig$GO.ID <- trimws(GO_UP_MF_RT_sig$GO.ID)
+
+# Join the datasets based on GO term
+GO_UP_MF_RT_sig_gene <- UP_gene2go %>%
+  left_join(GO_UP_MF_RT_sig, by = c("GO_Annotation" = "GO.ID")) %>%
+  na.omit()
+
+# Add ontology column 
+GO_UP_MF_RT_sig_gene$ontology <- "Molecular Functions"
+```
+
+Merge `GO_DOWN_MF_RT_sig` with GO and gene info. 
+```{r}
+# Separate GO terms 
+DOWN_gene2go <- DOWN_gene2go %>%
+  separate_rows(GO_Annotation, sep = ";")
+
+# Ensure GO terms in both datasets are formatted similarly (trim whitespaces)
+DOWN_gene2go$GO_Annotation <- trimws(DOWN_gene2go$GO_Annotation)
+GO_DOWN_MF_RT_sig$GO.ID <- trimws(GO_DOWN_MF_RT_sig$GO.ID)
+
+# Join the datasets based on GO term
+GO_DOWN_MF_RT_sig_gene <- DOWN_gene2go %>%
+  left_join(GO_DOWN_MF_RT_sig, by = c("GO_Annotation" = "GO.ID")) %>%
+  na.omit()
+
+# Add ontology column 
+GO_DOWN_MF_RT_sig_gene$ontology <- "Molecular Functions"
+```
+
+### Join ontologies
+
+Bind `GO_UP_BP_RT_sig_gene`, `GO_UP_CC_RT_sig_gene`, and `GO_UP_MF_RT_sig_gene` to make a df that has significantly enriched GO terms for all ontologies 
+```{r}
+GO_UP_sig_genes <- rbind(GO_UP_BP_RT_sig_gene, GO_UP_CC_RT_sig_gene, GO_UP_MF_RT_sig_gene)
+GO_DOWN_sig_genes <- rbind(GO_DOWN_BP_RT_sig_gene, GO_DOWN_CC_RT_sig_gene, GO_DOWN_MF_RT_sig_gene)
+```
+
+Merge `pi_bed_filt` with `GO_UP_sig_genes` and calculate proportion of significant genes
+```{r}
+merged_up_genes <- GO_UP_sig_genes %>%
+  mutate(prop.sig.genes = Significant/Annotated)
+
+# saving unique instances of gene/GO pairs
+merged_up_genes <- unique(merged_up_genes)
+
+merged_down_genes <- GO_DOWN_sig_genes %>%
+  mutate(prop.sig.genes = Significant/Annotated)
+
+# saving unique instances of gene/GO pairs
+merged_down_genes <- unique(merged_down_genes)
+```
+
+```{r}
+# Write to csv 
+#write.csv(merged_up_genes, "p1_UP_genes_GO_enrichment.csv")
+#write.csv(merged_down_genes, "p1_DOWN_genes_GO_enrichment.csv")
+```
+
+
+
+Plot - need to work out 
+```{r}
+GO_plot_pi <- ggplot(merged_out_genes, aes(x = Term, y = -log(Fisher), size = prop.sig.genes, fill = -log(Fisher))) +
+  expand_limits(y = 1.5) +
+  ylim(1, 7.25) +
+  #Add horizontal lines with a single aesthetic value
+  geom_hline(yintercept = -log10(0.01), linetype = "longdash", colour = "black", linewidth = .6) +
+  geom_hline(yintercept = -log10(0.001), linetype = "solid", colour = "black", linewidth = .6) +
+  geom_point(shape = 21) + 
+  scale_size(range = c(2, 12)) + 
+  scale_fill_continuous(low = "#1AD3D1FF", high = "#4686FBFF") +
+  xlab('') + 
+  ylab('Enrichment score') +
+  #labs(caption = 'Cut-off lines at p=0.01 and p=0.001') +
+  theme_bw() +
+  facet_grid(vars(ontology), scales = "free", space = "free_y") +
+  coord_flip(); GO_plot_pi
+
+ggsave(
+  "GO_plot_pi.png",
+  plot = GO_plot_pi,
+  width = 8,
+  height = 10,
+  dpi = 300
+)
+
+```
+
+Lastly, I'm just going to save the figure as a .png
+```{r}
+# Open PNG device with high resolution and transparent background
+png(filename = "GO_plot_pi.png",
+    width = 2000,   # width in pixels (adjust for desired size)
+    height = 2000,  # height in pixels
+    res = 200,      # resolution in dpi for high quality
+    bg = "transparent")  # transparent background
+
+# Print the plot object
+print(GO_plot_pi)
+
+# Close the device to finalize the file
+dev.off()
+```

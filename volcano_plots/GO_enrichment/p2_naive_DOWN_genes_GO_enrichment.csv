@@ -1,0 +1,6 @@
+"","gene_id","GO_Annotation","Term","Annotated","Significant","Expected","Fisher","ontology","prop.sig.genes"
+"1","LOC111105842","GO:0010951","negative regulation of endopeptidase activity",41,1,0.01,0.0138,"Biological Processes",0.024390243902439
+"2","LOC111109956","GO:0006954","inflammatory response",118,1,0.04,0.0393,"Biological Processes",0.00847457627118644
+"3","LOC111125988","GO:0035434","copper ion transmembrane transport",5,1,0,0.0017,"Biological Processes",0.2
+"4","LOC111135433","GO:0005844","polysome",12,1,0,0.0044,"Cellular Components",0.0833333333333333
+"5","LOC111125988","GO:0005375","copper ion transmembrane transporter activity",6,1,0,0.0028,"Molecular Functions",0.166666666666667

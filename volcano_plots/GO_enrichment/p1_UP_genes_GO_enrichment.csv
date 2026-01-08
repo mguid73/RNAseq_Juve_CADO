@@ -1,0 +1,22 @@
+"","gene_id","GO_Annotation","Term","Annotated","Significant","Expected","Fisher","ontology","prop.sig.genes"
+"1","LOC111103611","GO:0000079","regulation of cyclin-dependent protein serine/threonine kinase activity",31,1,0.01,0.01458,"Biological Processes",0.032258064516129
+"2","LOC111103611","GO:1900087","positive regulation of G1/S transition of mitotic cell cycle",2,1,0,0.00095,"Biological Processes",0.5
+"3","LOC111105688","GO:0000245","spliceosomal complex assembly",21,1,0.01,0.0099,"Biological Processes",0.0476190476190476
+"4","LOC111105688","GO:0050684","regulation of mRNA processing",32,1,0.02,0.01505,"Biological Processes",0.03125
+"5","LOC111119460","GO:0043484","regulation of RNA splicing",36,1,0.02,0.01692,"Biological Processes",0.0277777777777778
+"6","LOC111126062","GO:0032468","Golgi calcium ion homeostasis",2,1,0,0.00095,"Biological Processes",0.5
+"7","LOC111126062","GO:0032472","Golgi calcium ion transport",2,1,0,0.00095,"Biological Processes",0.5
+"8","LOC111126062","GO:0070588","calcium ion transmembrane transport",90,1,0.04,0.04184,"Biological Processes",0.0111111111111111
+"9","LOC111126062","GO:0071421","manganese ion transmembrane transport",2,1,0,0.00095,"Biological Processes",0.5
+"10","LOC111131917","GO:0018105","peptidyl-serine phosphorylation",50,1,0.02,0.02343,"Biological Processes",0.02
+"11","LOC111135642","GO:0007417","central nervous system development",33,1,0.02,0.01552,"Biological Processes",0.0303030303030303
+"12","LOC111103611","GO:0000307","cyclin-dependent protein kinase holoenzyme complex",25,1,0.01,0.011,"Cellular Components",0.04
+"13","LOC111103611","GO:0005634","nucleus",3481,4,1.54,0.0409,"Cellular Components",0.0011490950876185
+"14","LOC111119460","GO:0005634","nucleus",3481,4,1.54,0.0409,"Cellular Components",0.0011490950876185
+"15","LOC111127981","GO:0000159","protein phosphatase type 2A complex",7,1,0,0.0031,"Cellular Components",0.142857142857143
+"16","LOC111127981","GO:0005634","nucleus",3481,4,1.54,0.0409,"Cellular Components",0.0011490950876185
+"17","LOC111135642","GO:0005634","nucleus",3481,4,1.54,0.0409,"Cellular Components",0.0011490950876185
+"18","LOC111103611","GO:0016538","cyclin-dependent protein serine/threonine kinase regulator activity",36,1,0.01,0.0146,"Molecular Functions",0.0277777777777778
+"19","LOC111126062","GO:0005384","manganese ion transmembrane transporter activity",5,1,0,0.002,"Molecular Functions",0.2
+"20","LOC111127981","GO:0072542","protein phosphatase activator activity",6,1,0,0.0024,"Molecular Functions",0.166666666666667
+"21","LOC111135642","GO:0001228","DNA-binding transcription activator activity, RNA polymerase II-specific",31,1,0.01,0.0126,"Molecular Functions",0.032258064516129

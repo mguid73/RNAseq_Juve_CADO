@@ -1,0 +1,15 @@
+"","gene_id","GO_Annotation","Term","Annotated","Significant","Expected","Fisher","ontology","prop.sig.genes"
+"1","LOC111105102","GO:0006446","regulation of translational initiation",61,1,0.04,0.0365,"Biological Processes",0.0163934426229508
+"2","LOC111105298","GO:0042744","hydrogen peroxide catabolic process",8,1,0,0.0049,"Biological Processes",0.125
+"3","LOC111105298","GO:0045454","cell redox homeostasis",13,1,0.01,0.0079,"Biological Processes",0.0769230769230769
+"4","LOC111125988","GO:0035434","copper ion transmembrane transport",5,1,0,0.003,"Biological Processes",0.2
+"5","LOC111136991","GO:0005665","RNA polymerase II, core complex",15,1,0.01,0.012,"Cellular Components",0.0666666666666667
+"6","LOC111105298","GO:0008379","thioredoxin peroxidase activity",6,1,0,0.004,"Molecular Functions",0.166666666666667
+"7","LOC111106442","GO:0008270","zinc ion binding",2113,4,1.4,0.043,"Molecular Functions",0.00189304306672977
+"8","LOC111107407","GO:0008270","zinc ion binding",2113,4,1.4,0.043,"Molecular Functions",0.00189304306672977
+"9","LOC111111685","GO:0008270","zinc ion binding",2113,4,1.4,0.043,"Molecular Functions",0.00189304306672977
+"10","LOC111112602","GO:0046592","polyamine oxidase activity",6,1,0,0.004,"Molecular Functions",0.166666666666667
+"11","LOC111117921","GO:0008270","zinc ion binding",2113,4,1.4,0.043,"Molecular Functions",0.00189304306672977
+"12","LOC111125896","GO:0015421","oligopeptide-transporting ATPase activity",3,1,0,0.002,"Molecular Functions",0.333333333333333
+"13","LOC111125988","GO:0005375","copper ion transmembrane transporter activity",6,1,0,0.004,"Molecular Functions",0.166666666666667
+"14","LOC111136991","GO:0003899","DNA-directed 5'-3' RNA polymerase activity",25,1,0.02,0.016,"Molecular Functions",0.04
