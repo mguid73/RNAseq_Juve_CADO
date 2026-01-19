@@ -115,11 +115,11 @@ p2_gn.keep <- rownames(p2_keep)
 
 #data filtered in PoverA, P percent of the samples have counts over A
 p1_filt_gene_counts <- as.data.frame(p1_gene_counts[which(rownames(p1_gene_counts) %in% p1_gn.keep),])
-write.csv(p1_filt_gene_counts, file="p1_filtered_gene_count_matrix.csv")
+#write.csv(p1_filt_gene_counts, file="p1_filtered_gene_count_matrix.csv")
 head(p1_filt_gene_counts,10)
 
 p2_filt_gene_counts <- as.data.frame(p2_gene_counts[which(rownames(p2_gene_counts) %in% p2_gn.keep),])
-write.csv(p2_filt_gene_counts, file="p2_filtered_gene_count_matrix.csv")
+#write.csv(p2_filt_gene_counts, file="p2_filtered_gene_count_matrix.csv")
 head(p2_filt_gene_counts,10)
 ```
 #> nrow(gene_counts)
@@ -184,6 +184,7 @@ summary(res1)
 sum(res1$padj!=0, na.rm=TRUE) #35715 DEGs total
 sum(res1$padj<0.1, na.rm=TRUE) #532 pass the filter with 0.1 cutoff
 sum(res1$padj<0.05, na.rm=TRUE) #304 pass the filter with 0.05 cutoff
+sum(res1$padj<0.001, na.rm=TRUE) #79 pass the filter with 0.05 cutoff
 ```
 
 ```{r}
@@ -195,14 +196,14 @@ summary(res1_comp)
 
 Next, I'll subset each results set to only be significantly DEGs and order then by the adjusted p value (small to large)
 ```{r}
-sig_res1_comp <- subset(res1_comp, padj<0.05) #identify signficant pvalues with 5%FDR
+sig_res1_comp <- subset(res1_comp, padj<0.05) #identify significant pvalues with 5%FDR
 summary(sig_res1_comp)
 #order by padj
 ordered_sig_res1_comp <-sig_res1_comp[ order(sig_res1_comp$padj ), ] 
 
 head(sig_res1_comp)
 #these ordered lists were written to files for potential later use - GO analysis
-write.csv(ordered_sig_res1_comp,"outputs/sig_phase1_res_stress.csv")
+#write.csv(ordered_sig_res1_comp,"outputs/sig_phase1_res_stress.csv")
 ```
 
 #### Visualization
@@ -212,6 +213,7 @@ For most of the analysis/visualization I wanted to compare the treatments accros
 #combine significant DEGs for all treatment contrasts
 combine1 <- rbind(sig_res1_comp)
 combine_list1 <- dm1[which(rownames(dm1) %in% rownames(combine1)),] #combined list from the original matrix so dupicates are removed 
+summary(combine_list1)
 vsd1 <- varianceStabilizingTransformation(combine_list1, blind=FALSE)
 ```
 
@@ -227,16 +229,20 @@ Principle Components Analysis
 ```{r}
 # Quick PCA plot to start
 plotPCA(vsd1, intgroup=c("treatment")) # same PCA as below but less pretty, use this for knowing the PC loadings for the labels in the below PCA
+```
 
+```{r}
 # prettier pca
 pcaData <- plotPCA(vsd1, intgroup=c("treatment"), returnData=TRUE)
 percentVar <- round(100 * attr(pcaData, "percentVar"))
 percentVar
 ggplot(pcaData, aes(PC1, PC2, color=treatment, label=name)) +
-  geom_point(aes(fill=treatment), pch = 21, size = 7, color= "white") +
+  geom_point(aes(fill=treatment), pch = 21, size = 7, color= "black") +
   #geom_text() +
-  coord_fixed() + ylab("PC2: 10% Variance Explained") +
-  xlab("PC1:37% Variance Explained") +
+  coord_fixed() + ylab("PC2: 15% Variance Explained") +
+  xlab("PC1:35% Variance Explained") +
+  annotate("text", x = -3, y = 1, label = "control", color = "#A29BAD", fontface="bold", size = 6) +
+  annotate("text", x = 3, y = 2.5, label = "stress", color = "#D29F13", fontface="bold", size = 6) +
   #theme_linedraw() +
   scale_fill_manual(values = c(control="#A29BAD", stress ="#D29F13")) +
   theme_minimal(base_size = 20) +
@@ -245,15 +251,15 @@ ggplot(pcaData, aes(PC1, PC2, color=treatment, label=name)) +
     panel.grid.minor = element_blank(),
     panel.grid.major.x = element_blank(),
     panel.grid.major.y = element_blank(),
-    axis.title=element_text(face="bold", size=24, color="white"),
-    axis.text=element_text(size=24, color="white"), 
+    axis.title=element_text(face="bold", size=20, color="black"),
+    axis.text=element_text(size=20, color="black"), 
     axis.text.x = element_text(size = 20),
-    panel.border = element_rect(color = "white", fill = NA, linewidth = 1),
-    panel.background = element_rect(fill = alpha("white", 0.1))
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+    #panel.background = element_rect(fill = alpha("white", 0.1))
     )
 
 
-ggsave("pca_plots/phase1_pca_5batch_colorbytreatment_blk_ann.png", last_plot(), width=7, height=7)
+ggsave("pca_plots/phase1_pca.png", last_plot(), width=7, height=7)
 ```
 
 Heatmap of rlog transformed difference in expression compared to the average across all samples, using adjusted p value of 0.00001 or less. Many thanks to Hollie Putnam for the code of how to make this heatmap.
@@ -315,9 +321,9 @@ res_naive_all <- results(dds2, contrast=c("treatment","control", "naive"))
 res_recovery_all <- results(dds2, contrast=c("treatment","control", "recovery"))
 
 #then lets save these results set for later use (pretty sure this is what I'll use for the GO term analysis)
-write.csv(res_stress_all,"outputs/phase2_res_stress.csv")
-write.csv(res_naive_all,"outputs/phase2_res_naive.csv")
-write.csv(res_recovery_all,"outputs/phase2_res_recovery.csv")
+#write.csv(res_stress_all,"outputs/phase2_res_stress.csv")
+#write.csv(res_naive_all,"outputs/phase2_res_naive.csv")
+#write.csv(res_recovery_all,"outputs/phase2_res_recovery.csv")
 ```
 
 Investigating the models 
@@ -392,6 +398,7 @@ For most of the analysis/visualization I wanted to compare the treatments accros
 #combine significant DEGs for all treatment contrasts
 combine2 <- rbind(sig_res_stress, sig_res_naive, sig_res_recovery)
 combine_list2 <- dm2[which(rownames(dm2) %in% rownames(combine2)),] #combined list from the original matrix so dupicates are removed 
+summary(combine_list2)
 #combine_rlog <- rlog(combine_list, blind=FALSE) #setting blind to FALSE takes into account levels and contrasts
 vsd2 <- varianceStabilizingTransformation(combine_list2, blind=FALSE)
 
@@ -409,17 +416,23 @@ assay(vsd2) <- mat
 ```{r}
 # Quick PCA plot to start
 plotPCA(vsd2, intgroup=c("treatment")) # same PCA as below but less pretty, use this for knowing the PC loadings for the labels in the below PCA
+```
 
+```{r}
 # prettier pca
 pcaData <- plotPCA(vsd2, intgroup=c("treatment"), returnData=TRUE)
 percentVar <- round(100 * attr(pcaData, "percentVar"))
 percentVar
 ggplot(pcaData, aes(PC1, PC2, color=treatment, label=name)) +
-  geom_point(aes(fill=treatment), pch = 21, size = 7, color= "white") +
+  geom_point(aes(fill=treatment), pch = 21, size = 7, color= "black") +
   #geom_text() +
   coord_fixed() + ylab("PC2: 8% Variance Explained") +
-  xlab("PC1:34% Variance Explained") +
+  xlab("PC1:33% Variance Explained") +
   #theme_linedraw() +
+  annotate("text", x = -15, y = 20, label = "control", color = "#A29BAD", fontface="bold", size = 6) +
+  annotate("text", x = 50, y = 10, label = "stress", color = "#D29F13", fontface="bold", size = 6) +
+  annotate("text", x = -30, y = -10, label = "naive", color = "#6BA84C", fontface="bold", size = 6) +
+  annotate("text", x = 5, y = -38, label = "recovery", color = "#65A6E2", fontface="bold", size = 6) +
   scale_fill_manual(values = c(control="#A29BAD", stress ="#D29F13", naive= "#6BA84C", recovery= "#65A6E2")) +
   theme_minimal(base_size = 20) +
   theme(
@@ -427,14 +440,14 @@ ggplot(pcaData, aes(PC1, PC2, color=treatment, label=name)) +
     panel.grid.minor = element_blank(),
     panel.grid.major.x = element_blank(),
     panel.grid.major.y = element_blank(),
-    axis.title=element_text(face="bold", size=24, color="white"),
-    axis.text=element_text(size=24, color="white"), 
+    axis.title=element_text(face="bold", size=20, color="black"),
+    axis.text=element_text(size=20, color="black"), 
     axis.text.x = element_text(size = 20),
-    panel.border = element_rect(color = "white", fill = NA, linewidth = 1),
-    panel.background = element_rect(fill = alpha("white", 0.1))
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+    #panel.background = element_rect(fill = alpha("white", 0.1))
     )
 
-ggsave("phase2_pca_5batch_colorbytreatment_blk_ann.png", last_plot(), width=7, height=7)
+ggsave("pca_plots/phase2_pca.png", last_plot(), width=7, height=7)
 ```
 
 plotting other PCs

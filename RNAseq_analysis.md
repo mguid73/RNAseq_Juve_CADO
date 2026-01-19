@@ -292,10 +292,45 @@ for i in *.fq.gz.bam; do
 
 Find the min, max, and average of the mapping percentages
 ```
+#!/bin/bash
 
+# Extract all percentages from the file
+percentages=$(grep -oP '\d+\.\d+(?=%)' mapping_stats.txt)
+
+# Convert to array and calculate stats using awk
+echo "$percentages" | awk '
+BEGIN {
+    min = 999999
+    max = 0
+    sum = 0
+    count = 0
+}
+{
+    sum += $1
+    count++
+    if ($1 < min) min = $1
+    if ($1 > max) max = $1
+}
+END {
+    if (count > 0) {
+        avg = sum / count
+        printf "Mapping Percentage Statistics:\n"
+        printf "Minimum: %.2f%%\n", min
+        printf "Maximum: %.2f%%\n", max
+        printf "Average: %.2f%%\n", avg
+        printf "\nTotal percentages found: %d\n", count
+    } else {
+        print "No percentages found in the file"
+    }
+}'
 ```
 
-Range of ________% alignment rate across samples. Alignment summaries stored in /mapping/summaries.
+Mapping Percentage Statistics:
+Minimum: 66.07%
+Maximum: 89.05%
+Average: 81.68%
+
+Alignment summaries stored in /mapping/summaries.
 
 
 
@@ -466,6 +501,7 @@ See R markdown (`DESeq2_analysis.Rmd`) for futher analysis steps.
 * volcano plots
 * GO term enrichment analysis
     * GO MWU 
-* KEGG function pathways?
+    * TopGO
+    * gprofiler
 * WGCNA
 

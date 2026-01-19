@@ -60,6 +60,12 @@ deg1_clean_direction <- subset(deg1_clean, diffexpressed != 'NO')
 #check we got all of the data - should return "TRUE"
 all(nrow(deg1_clean_direction) == sum(nrow(deg1_clean[deg1_clean$diffexpressed == 'DOWN', ]) + nrow(deg1_clean[deg1_clean$diffexpressed == 'UP', ])))
 
+dim(deg1_clean_direction)
+head(deg1_clean_direction)
+sum(deg1_clean_direction$diffexpressed == 'DOWN')
+sum(deg1_clean_direction$diffexpressed == 'UP')
+
+
 # write out dataset for topGO
 #write.csv(deg1_clean_direction, "outputs/phase1_directional_expression.csv")
 ```
@@ -152,6 +158,21 @@ deg2_nai_clean_direction <- subset(deg2_nai_clean, diffexpressed != 'NO')
 all(nrow(deg2_str_clean_direction) == sum(nrow(deg2_str_clean[deg2_str_clean$diffexpressed == 'DOWN', ]) + nrow(deg2_str_clean[deg2_str_clean$diffexpressed == 'UP', ])))
 all(nrow(deg2_rec_clean_direction) == sum(nrow(deg2_rec_clean[deg2_rec_clean$diffexpressed == 'DOWN', ]) + nrow(deg2_rec_clean[deg2_rec_clean$diffexpressed == 'UP', ])))
 all(nrow(deg2_nai_clean_direction) == sum(nrow(deg2_nai_clean[deg2_nai_clean$diffexpressed == 'DOWN', ]) + nrow(deg2_nai_clean[deg2_nai_clean$diffexpressed == 'UP', ])))
+
+#stress
+dim(deg2_str_clean_direction)
+sum(deg2_str_clean$diffexpressed == 'DOWN')
+sum(deg2_str_clean$diffexpressed == 'UP')
+
+#recovery
+dim(deg2_rec_clean_direction)
+sum(deg2_rec_clean$diffexpressed == 'DOWN')
+sum(deg2_rec_clean$diffexpressed == 'UP')
+
+#naive
+dim(deg2_nai_clean_direction)
+sum(deg2_nai_clean$diffexpressed == 'DOWN')
+sum(deg2_nai_clean$diffexpressed == 'UP')
 
 # write out dataset for topGO
 #write.csv(deg2_str_clean_direction, "outputs/phase2_stress_directional_expression.csv")

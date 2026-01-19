@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Notes****
 
-```{r}
+```{r, warning=FALSE, echo=FALSE}
 library(topGO)
 library(stringr)
 library(dplyr)
@@ -38,31 +38,31 @@ gaf from NCBI with the GO terms for genes in the eastern oyster genome. I'm goin
 
 In terminal:
 ```{bash}
-wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/002/022/765/GCF_002022765.2_C_virginica-3.0/GCF_002022765.2_C_virginica-3.0_gene_ontology.gaf.gz
+#wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/002/022/765/GCF_002022765.2_C_virginica-3.0/GCF_002022765.2_C_virginica-3.0_gene_ontology.gaf.gz
 
-gunzip GCF_002022765.2_C_virginica-3.0_gene_ontology.gaf.gz
+#gunzip GCF_002022765.2_C_virginica-3.0_gene_ontology.gaf.gz
 
-mv GCF_002022765.2_C_virginica-3.0_gene_ontology.gaf gene_ontology.gaf
+#mv GCF_002022765.2_C_virginica-3.0_gene_ontology.gaf gene_ontology.gaf
 ```
 
 Now I can make a new .tab file with just the gene ID and GO IDs (3rd and 5th columns) renamed "gene_id" and "GO_Annotation". The gene_name column will have one unique observation per row and all associated GO terms will be saved in the same row, with values separated by ;
 
 ```{bash}
-awk 'NR>9 {print $3 "\t" $5}' gene_ontology.gaf | 
-sed '1i gene_id\tGO_Annotation' | 
-sort | awk '
-NR==1 {print; next}
-$1!=prev {
-if (NR>2) print prev "\t" goids;
-prev=$1;
-goids=$2;
-next
-}
-{
-goids=goids "; " $2
-}
-END {print prev "\t" goids}
-' > gene2go_full.tab
+#awk 'NR>9 {print $3 "\t" $5}' gene_ontology.gaf | 
+#sed '1i gene_id\tGO_Annotation' | 
+#sort | awk '
+#NR==1 {print; next}
+#$1!=prev {
+#if (NR>2) print prev "\t" goids;
+#prev=$1;
+#goids=$2;
+#next
+#}
+#{
+#goids=goids "; " $2
+#}
+#END {print prev "\t" goids}
+#' > gene2go_full.tab
 ```
 
 Gene IDs for the different modules are in the following files:
@@ -70,6 +70,8 @@ phase1_outputs/phase1_module_<color>_genes.csv
 phase2_outputs/phase2_module_<color>_genes.csv
 
 Make a file with gene IDs and GO IDs for the color
+
+### Phase I BLUE
 ```{r}
 # load data
 p1_blue <- read.csv("phase1_outputs/phase1_module_blue_genes.csv", header = TRUE, sep = ",")
@@ -91,6 +93,72 @@ dim(p1_blue_wGO)
 #write.table(p1_blue_wGO, "p1_blue_genes_GO_header.tab", sep = "\t", row.names=FALSE)
 ```
 
+### Phase II SEASHELL
+```{r}
+# load data
+p2_seashell <- read.csv("phase2_outputs/phase2_module_seashell_genes.csv", header = TRUE, sep = ",")
+p2_seashell
+# load go annotation file to assign go terms to color module
+go_terms <- read.table("gene2go_full.tab", header = TRUE, sep="\t")
+head(go_terms)
+
+# reformat gene_id column to be just LOC#, add in go annotation, remove 'MSTRG' rows and NA rows
+p2_seashell$gene_id <- str_extract(p2_seashell$x, "[^|]+$")
+dim(p2_seashell)
+p2_seashell_wGO <- merge(p2_seashell, go_terms, by = "gene_id", all.x = TRUE)
+dim(p2_seashell_wGO)
+#clean up 
+p2_seashell_wGO <- na.omit(p2_seashell_wGO)
+p2_seashell_wGO <- p2_seashell_wGO[, c("gene_id", "GO_Annotation")]
+dim(p2_seashell_wGO)
+
+write.table(p2_seashell_wGO, "p2_seashell_genes_GO_header.tab", sep = "\t", row.names=FALSE)
+```
+
+### Phase II GOLD
+```{r}
+# load data
+p2_gold <- read.csv("phase2_outputs/phase2_module_gold_genes.csv", header = TRUE, sep = ",")
+p2_gold
+# load go annotation file to assign go terms to color module
+go_terms <- read.table("gene2go_full.tab", header = TRUE, sep="\t")
+head(go_terms)
+
+# reformat gene_id column to be just LOC#, add in go annotation, remove 'MSTRG' rows and NA rows
+p2_gold$gene_id <- str_extract(p2_gold$x, "[^|]+$")
+dim(p2_gold)
+p2_gold_wGO <- merge(p2_gold, go_terms, by = "gene_id", all.x = TRUE)
+dim(p2_gold_wGO)
+#clean up 
+p2_gold_wGO <- na.omit(p2_gold_wGO)
+p2_gold_wGO <- p2_gold_wGO[, c("gene_id", "GO_Annotation")]
+dim(p2_gold_wGO)
+
+#write.table(p2_gold_wGO, "p2_gold_genes_GO_header.tab", sep = "\t", row.names=FALSE)
+```
+
+### Phase II PURPLE
+```{r}
+# load data
+p2_purple <- read.csv("phase2_outputs/phase2_module_purple_genes.csv", header = TRUE, sep = ",")
+p2_purple
+# load go annotation file to assign go terms to color module
+go_terms <- read.table("gene2go_full.tab", header = TRUE, sep="\t")
+head(go_terms)
+
+# reformat gene_id column to be just LOC#, add in go annotation, remove 'MSTRG' rows and NA rows
+p2_purple$gene_id <- str_extract(p2_purple$x, "[^|]+$")
+dim(p2_purple)
+p2_purple_wGO <- merge(p2_purple, go_terms, by = "gene_id", all.x = TRUE)
+dim(p2_purple_wGO)
+#clean up 
+p2_purple_wGO <- na.omit(p2_purple_wGO)
+p2_purple_wGO <- p2_purple_wGO[, c("gene_id", "GO_Annotation")]
+dim(p2_purple_wGO)
+
+#write.table(p2_purple_wGO, "p2_purple_genes_GO_header.tab", sep = "\t", row.names=FALSE)
+```
+
 Read in expressed genes file - maybe I'll use this??
 ```{r}
 p1_filt_counts <- read.csv("../de_analysis/outputs/p1_filtered_gene_count_matrix.csv")
@@ -102,7 +170,7 @@ Read in gene2go information
 
 ```{r}
 all_gene2go<-read.delim("gene2go_full.tab", sep="\t")
-module_gene2go<-read.delim("p1_blue_genes_GO_header.tab", sep="\t")
+module_gene2go<-read.delim("p2_purple_genes_GO_header.tab", sep="\t")
 View(module_gene2go)
 ```
 
@@ -275,8 +343,10 @@ merged_out_genes <- unique(merged_out_genes)
 
 ```{r}
 # Write to csv 
-write.csv(merged_out_genes, "p1_blue_genes_GO_enrichment.csv")
+#write.csv(merged_out_genes, "module_GO_enrichment/p2_purple_genes_GO_enrichment.csv")
 ```
+
+
 
 Plot - need to work out 
 ```{r}

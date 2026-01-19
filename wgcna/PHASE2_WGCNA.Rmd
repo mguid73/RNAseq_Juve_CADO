@@ -471,9 +471,11 @@ use 'mergedColors' we needed to merge related eigengene modules together
 # Rename to moduleColors
 moduleColors = dynamicColors_sign
 # Construct numerical labels corresponding to the colors
-colorOrder = c("grey", standardColors(50));
-#colorOrder = c(standardColors(50))
-moduleLabels = match(moduleColors, colorOrder)-1;
+ColorOrder = c("grey", standardColors(50));
+moduleLabels = match(moduleColors, ColorOrder)-1;
+
+customColorOrder = c("grey", "green", "gold", "seashell", "purple");
+moduleColors.custom = customColorOrder[moduleLabels + 1]
 
 # Save module colors and labels for use in subsequent parts
 save(MEs, moduleLabels, moduleColors, file = "phase2_data/phase2_networkConstruction-stepByStep.RData")
@@ -492,7 +494,7 @@ we simply correlate eigengenes with external traits and look for the  significan
 nGenes = ncol(dm2_mvg); 
 nSamples = nrow(dm2_mvg); 
 # Recalculate MEs with color labels
-MEs0 = moduleEigengenes(dm2_mvg, moduleColors)$eigengenes
+MEs0 = moduleEigengenes(dm2_mvg, moduleColors.custom)$eigengenes   
 MEs = orderMEs(MEs0) # reorders the columns (colors/modules)
 ```
 
@@ -543,23 +545,23 @@ moduleTraitPvalue_all
 dds5 = as.data.frame((dm2_mvg))
 dim(dds5) 
 
-module_brown_genes <- names(dds5)[moduleColors=="brown"]
-length(module_brown_genes)
+module_seashell_genes <- names(dds5)[moduleColors.custom=="seashell"]
+length(module_seashell_genes)
 
-module_turquoise_genes <- names(dds5)[moduleColors=="turquoise"]
-length(module_turquoise_genes)
+module_green_genes <- names(dds5)[moduleColors.custom=="green"]
+length(module_green_genes)
 
-module_blue_genes <- names(dds5)[moduleColors=="blue"]
-length(module_blue_genes)
+module_gold_genes <- names(dds5)[moduleColors.custom=="gold"]
+length(module_gold_genes)
 
-module_yellow_genes <- names(dds5)[moduleColors=="yellow"]
-length(module_yellow_genes)
+module_purple_genes <- names(dds5)[moduleColors.custom=="purple"]
+length(module_purple_genes)
 
 #save list of module blue genes
-#write.csv(module_brown_genes, "phase2_outputs/phase2_module_brown_genes.csv", quote=F, row.names = FALSE)
-#write.csv(module_turquoise_genes, "phase2_outputs/module_turquoise_genes.csv", quote=F, row.names = FALSE)
-#write.csv(module_blue_genes, "phase2_outputs/phase2_module_blue_genes.csv", quote=F, row.names = FALSE)
-#write.csv(module_yellow_genes, "phase2_outputs/phase2_module_yellow_genes.csv", quote=F, row.names = FALSE)
+write.csv(module_seashell_genes, "phase2_outputs/phase2_module_seashell_genes.csv", quote=F, row.names = FALSE)
+write.csv(module_green_genes, "phase2_outputs/module_green_genes.csv", quote=F, row.names = FALSE)
+write.csv(module_gold_genes, "phase2_outputs/phase2_module_gold_genes.csv", quote=F, row.names = FALSE)
+write.csv(module_purple_genes, "phase2_outputs/phase2_module_purple_genes.csv", quote=F, row.names = FALSE)
 
 ```
 
@@ -573,16 +575,17 @@ STILL NEED TO EXPLORE THIS!
 
 phase 2- ALL TREATMENTS
 ```{r}
-sizeGrWindow(10,10)
+#sizeGrWindow(10,10)
 # Will display correlations and their p-values
 p2.matrix <-  paste(signif(moduleTraitCor_all, 2), "\n(",
                                       signif(moduleTraitPvalue_all, 1), ")", sep = "")
 
-par(mar = c(8, 9.5, 5, 3));
+par(mar = c(10,10,10,10));
 # Display the correlation values within a heatmap plot
-png("phase2_outputs/phase2_allTreatments_heatmap.png", 700, 800, pointsize=20)
+png("phase2_outputs/phase2_allTreatments_heatmap.png", 800, 800, pointsize=20)
 labeledHeatmap(Matrix = moduleTraitCor_all,
                xLabels = names(all_traits),
+               #yLabels = str_sub(names(MEs),3),  
                yLabels = names(MEs),
                ySymbols = names(MEs),
                colorLabels = TRUE,
@@ -590,95 +593,23 @@ labeledHeatmap(Matrix = moduleTraitCor_all,
                textMatrix = p2.matrix,
                setStdMargins = FALSE,
                cex.text = 1,
+               cex.lab = 1,
                zlim = c(-0.6,0.6),
                main = paste("Module-trait relationships - p2 allTreatments"))
 dev.off()
-```
 
-
-phase 2- recovery
-```{r}
-sizeGrWindow(10,10)
-# Will display correlations and their p-values
-p2.matrix <-  paste(signif(moduleTraitCor_rec, 2), "\n(",
-                                      signif(moduleTraitPvalue_rec, 1), ")", sep = "")
-
-par(mar = c(8, 9.5, 5, 3));
-# Display the correlation values within a heatmap plot
-png("outputs/phase2_recovery_heatmap.png", 700, 800, pointsize=20)
-labeledHeatmap(Matrix = moduleTraitCor_rec,
-               xLabels = names(rec_traits),
-               yLabels = names(MEs),
-               ySymbols = names(MEs),
-               colorLabels = TRUE,
-               colors = blueWhiteRed(50),
-               textMatrix = p2.matrix,
-               setStdMargins = FALSE,
-               cex.text = 1,
-               zlim = c(-0.6,0.6),
-               main = paste("Module-trait relationships - p2 recovery"))
-dev.off()
-```
-
-
-phase 2- naive
-```{r}
-sizeGrWindow(10,10)
-# Will display correlations and their p-values
-p2.matrix <-  paste(signif(moduleTraitCor_nai, 2), "\n(",
-                                      signif(moduleTraitPvalue_nai, 1), ")", sep = "")
-
-par(mar = c(8, 9.5, 5, 3));
-# Display the correlation values within a heatmap plot
-png("outputs/phase2_naive_heatmap.png", 700, 800, pointsize=20)
-labeledHeatmap(Matrix = moduleTraitCor_nai,
-               xLabels = names(nai_traits),
-               yLabels = names(MEs),
-               ySymbols = names(MEs),
-               colorLabels = TRUE,
-               colors = blueWhiteRed(50),
-               textMatrix = p2.matrix,
-               setStdMargins = FALSE,
-               cex.text = 1,
-               zlim = c(-0.6,0.6),
-               main = paste("Module-trait relationships - p2 naive"))
-dev.off()
-```
-
-phase 2- stress
-```{r}
-sizeGrWindow(10,10)
-# Will display correlations and their p-values
-p2.matrix <-  paste(signif(moduleTraitCor_str, 2), "\n(",
-                                      signif(moduleTraitPvalue_str, 1), ")", sep = "")
-
-par(mar = c(8, 9.5, 5, 3));
-# Display the correlation values within a heatmap plot
-png("outputs/phase2_stress_heatmap.png", 700, 800, pointsize=20)
-labeledHeatmap(Matrix = moduleTraitCor_str,
-               xLabels = names(str_traits),
-               yLabels = names(MEs),
-               ySymbols = names(MEs),
-               colorLabels = TRUE,
-               colors = blueWhiteRed(50),
-               textMatrix = p2.matrix,
-               setStdMargins = FALSE,
-               cex.text = 1,
-               zlim = c(-0.6,0.6),
-               main = paste("Module-trait relationships - p2 stress"))
-dev.off()
 ```
 
 ```{r}
-# this heatmap looks better
-p1.text <-  as.matrix(signif(moduleTraitPvalue_str, 3))
-pa = cluster::pam(p1.text, k = 1)
+# fancy heatmap
+p2.text <-  as.matrix(signif(moduleTraitPvalue_all, 3))
+pa = cluster::pam(p2.text, k = 1)
 col_fun = colorRamp2(c(-0.5, 0, 0.5), c("blue", "white", "red"))
-pdf("outputs/phase1_heatmap_fancy.pdf", width=5, height=6)
-Heatmap(moduleTraitCor_CA, 
+pdf("phase2_outputs/phase2_heatmap_fancy.pdf", width=6, height=6)
+Heatmap(moduleTraitCor_all, 
         name = "gene_cor", 
         rect_gp = gpar(col = "grey", lwd = 1),
-        column_title = "phase 1 WGCNA treatment", 
+        column_title = "phase 2 treatments", 
         column_title_gp = gpar(fontsize = 12, fontface = "bold"),
         # row_title = "WGCNA modules",
         #row_km = 4, 
@@ -691,7 +622,7 @@ Heatmap(moduleTraitCor_CA,
         border = TRUE,
         col = col_fun,
         cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sprintf("%.1f", CA.text[i, j]), x, y, gp = gpar(fontsize = 10))
+          grid.text(sprintf("%.1f", p2.text[i, j]), x, y, gp = gpar(fontsize = 10))
         })
 dev.off()
 ```

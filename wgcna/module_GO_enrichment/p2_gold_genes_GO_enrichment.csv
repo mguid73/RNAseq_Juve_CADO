@@ -1,0 +1,210 @@
+"","gene_id","GO_Annotation","Term","Annotated","Significant","Expected","Fisher","ontology","prop.sig.genes"
+"1","LOC111099585","GO:0070537","histone H2A K63-linked deubiquitination",2,1,0.01,0.01213,"Biological Processes",0.5
+"2","LOC111103611","GO:1900087","positive regulation of G1/S transition of mitotic cell cycle",2,1,0.01,0.01213,"Biological Processes",0.5
+"3","LOC111104407","GO:0006880","intracellular sequestering of iron ion",4,1,0.02,0.02412,"Biological Processes",0.25
+"4","LOC111105448","GO:0009408","response to heat",28,4,0.17,2.3e-05,"Biological Processes",0.142857142857143
+"5","LOC111105448","GO:0042026","protein refolding",37,5,0.23,2.8e-06,"Biological Processes",0.135135135135135
+"6","LOC111106468","GO:0006412","translation",662,22,4.03,2.4e-13,"Biological Processes",0.0332326283987915
+"7","LOC111106992","GO:0019878","lysine biosynthetic process via aminoadipic acid",3,1,0.02,0.01815,"Biological Processes",0.333333333333333
+"8","LOC111108251","GO:0042026","protein refolding",37,5,0.23,2.8e-06,"Biological Processes",0.135135135135135
+"9","LOC111111599","GO:0000381","regulation of alternative mRNA splicing, via spliceosome",16,2,0.1,0.00416,"Biological Processes",0.125
+"10","LOC111112917","GO:0019448","L-cysteine catabolic process",8,1,0.05,0.04767,"Biological Processes",0.125
+"11","LOC111114067","GO:0006412","translation",662,22,4.03,2.4e-13,"Biological Processes",0.0332326283987915
+"12","LOC111114718","GO:0002181","cytoplasmic translation",47,5,0.29,9.4e-06,"Biological Processes",0.106382978723404
+"13","LOC111115675","GO:0019432","triglyceride biosynthetic process",7,2,0.04,0.02974,"Biological Processes",0.285714285714286
+"14","LOC111115675","GO:0032869","cellular response to insulin stimulus",8,2,0.05,0.001,"Biological Processes",0.25
+"15","LOC111115898","GO:0006107","oxaloacetate metabolic process",4,1,0.02,0.02412,"Biological Processes",0.25
+"16","LOC111115898","GO:0006528","asparagine metabolic process",4,1,0.02,0.02412,"Biological Processes",0.25
+"17","LOC111115985","GO:0000028","ribosomal small subunit assembly",13,3,0.08,6e-05,"Biological Processes",0.230769230769231
+"18","LOC111115985","GO:0006412","translation",662,22,4.03,2.4e-13,"Biological Processes",0.0332326283987915
+"19","LOC111118304","GO:0000381","regulation of alternative mRNA splicing, via spliceosome",16,2,0.1,0.00416,"Biological Processes",0.125
+"20","LOC111119044","GO:0009408","response to heat",28,4,0.17,2.3e-05,"Biological Processes",0.142857142857143
+"21","LOC111119044","GO:0042026","protein refolding",37,5,0.23,2.8e-06,"Biological Processes",0.135135135135135
+"22","LOC111119071","GO:0006412","translation",662,22,4.03,2.4e-13,"Biological Processes",0.0332326283987915
+"23","LOC111119359","GO:0006412","translation",662,22,4.03,2.4e-13,"Biological Processes",0.0332326283987915
+"24","LOC111119666","GO:0090161","Golgi ribbon formation",2,1,0.01,0.01213,"Biological Processes",0.5
+"25","LOC111120087","GO:0042273","ribosomal large subunit biogenesis",58,3,0.35,0.02302,"Biological Processes",0.0517241379310345
+"26","LOC111120557","GO:0000028","ribosomal small subunit assembly",13,3,0.08,6e-05,"Biological Processes",0.230769230769231
+"27","LOC111120557","GO:0006412","translation",662,22,4.03,2.4e-13,"Biological Processes",0.0332326283987915
+"28","LOC111121848","GO:0006412","translation",662,22,4.03,2.4e-13,"Biological Processes",0.0332326283987915
+"29","LOC111121848","GO:0042274","ribosomal small subunit biogenesis",71,4,0.43,0.03494,"Biological Processes",0.0563380281690141
+"30","LOC111122600","GO:0006412","translation",662,22,4.03,2.4e-13,"Biological Processes",0.0332326283987915
+"31","LOC111122600","GO:0019941","modification-dependent protein catabolic process",757,3,4.61,0.00082,"Biological Processes",0.00396301188903567
+"32","LOC111123211","GO:0016573","histone acetylation",45,2,0.27,0.03061,"Biological Processes",0.0444444444444444
+"33","LOC111123835","GO:0015701","bicarbonate transport",6,1,0.04,0.03597,"Biological Processes",0.166666666666667
+"34","LOC111124544","GO:0007141","male meiosis I",1,1,0.01,0.00609,"Biological Processes",1
+"35","LOC111124544","GO:0007144","female meiosis I",1,1,0.01,0.00609,"Biological Processes",1
+"36","LOC111124544","GO:0048255","mRNA stabilization",4,1,0.02,0.02412,"Biological Processes",0.25
+"37","LOC111124874","GO:0006412","translation",662,22,4.03,2.4e-13,"Biological Processes",0.0332326283987915
+"38","LOC111125385","GO:0006654","phosphatidic acid biosynthetic process",4,1,0.02,0.02412,"Biological Processes",0.25
+"39","LOC111125548","GO:0000028","ribosomal small subunit assembly",13,3,0.08,6e-05,"Biological Processes",0.230769230769231
+"40","LOC111125548","GO:0006412","translation",662,22,4.03,2.4e-13,"Biological Processes",0.0332326283987915
+"41","LOC111126040","GO:0006412","translation",662,22,4.03,2.4e-13,"Biological Processes",0.0332326283987915
+"42","LOC111126482","GO:0006412","translation",662,22,4.03,2.4e-13,"Biological Processes",0.0332326283987915
+"43","LOC111126482","GO:2001235","positive regulation of apoptotic signaling pathway",7,1,0.04,0.04183,"Biological Processes",0.142857142857143
+"44","LOC111128168","GO:0035025","positive regulation of Rho protein signal transduction",3,1,0.02,0.01815,"Biological Processes",0.333333333333333
+"45","LOC111130039","GO:0002181","cytoplasmic translation",47,5,0.29,9.4e-06,"Biological Processes",0.106382978723404
+"46","LOC111130239","GO:0032957","inositol trisphosphate metabolic process",1,1,0.01,0.00609,"Biological Processes",1
+"47","LOC111130625","GO:0006412","translation",662,22,4.03,2.4e-13,"Biological Processes",0.0332326283987915
+"48","LOC111130771","GO:0006412","translation",662,22,4.03,2.4e-13,"Biological Processes",0.0332326283987915
+"49","LOC111130979","GO:0019547","arginine catabolic process to ornithine",2,1,0.01,0.01213,"Biological Processes",0.5
+"50","LOC111131049","GO:0002181","cytoplasmic translation",47,5,0.29,9.4e-06,"Biological Processes",0.106382978723404
+"51","LOC111131216","GO:0006412","translation",662,22,4.03,2.4e-13,"Biological Processes",0.0332326283987915
+"52","LOC111131216","GO:0019941","modification-dependent protein catabolic process",757,3,4.61,0.00082,"Biological Processes",0.00396301188903567
+"53","LOC111131671","GO:0075523","viral translational frameshifting",2,1,0.01,0.01213,"Biological Processes",0.5
+"54","LOC111133364","GO:0016573","histone acetylation",45,2,0.27,0.03061,"Biological Processes",0.0444444444444444
+"55","LOC111134536","GO:0006986","response to unfolded protein",38,2,0.23,0.01203,"Biological Processes",0.0526315789473684
+"56","LOC111134713","GO:0019543","propionate catabolic process",2,1,0.01,0.01213,"Biological Processes",0.5
+"57","LOC111134713","GO:0032869","cellular response to insulin stimulus",8,2,0.05,0.001,"Biological Processes",0.25
+"58","LOC111134713","GO:0046327","glycerol biosynthetic process from pyruvate",2,1,0.01,0.01213,"Biological Processes",0.5
+"59","LOC111134713","GO:0070365","hepatocyte differentiation",2,1,0.01,0.01213,"Biological Processes",0.5
+"60","LOC111134713","GO:0071333","cellular response to glucose stimulus",2,1,0.01,0.01213,"Biological Processes",0.5
+"61","LOC111134713","GO:0071549","cellular response to dexamethasone stimulus",2,1,0.01,0.01213,"Biological Processes",0.5
+"62","LOC111135749","GO:0009408","response to heat",28,4,0.17,2.3e-05,"Biological Processes",0.142857142857143
+"63","LOC111135749","GO:0042026","protein refolding",37,5,0.23,2.8e-06,"Biological Processes",0.135135135135135
+"64","LOC111136200","GO:0006741","NADP biosynthetic process",2,1,0.01,0.01213,"Biological Processes",0.5
+"65","LOC111136230","GO:0006412","translation",662,22,4.03,2.4e-13,"Biological Processes",0.0332326283987915
+"66","LOC111136230","GO:0042273","ribosomal large subunit biogenesis",58,3,0.35,0.02302,"Biological Processes",0.0517241379310345
+"67","LOC111136624","GO:0002181","cytoplasmic translation",47,5,0.29,9.4e-06,"Biological Processes",0.106382978723404
+"68","LOC111137089","GO:0002181","cytoplasmic translation",47,5,0.29,9.4e-06,"Biological Processes",0.106382978723404
+"69","LOC111137387","GO:0009408","response to heat",28,4,0.17,2.3e-05,"Biological Processes",0.142857142857143
+"70","LOC111137387","GO:0042026","protein refolding",37,5,0.23,2.8e-06,"Biological Processes",0.135135135135135
+"71","LOC111099585","GO:0070531","BRCA1-A complex",6,1,0.04,0.0382,"Cellular Components",0.166666666666667
+"72","LOC111099585","GO:0070552","BRISC complex",5,1,0.03,0.032,"Cellular Components",0.2
+"73","LOC111101020","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"74","LOC111103611","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"75","LOC111104280","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"76","LOC111106468","GO:0005840","ribosome",188,21,1.22,9.4e-08,"Cellular Components",0.111702127659574
+"77","LOC111106468","GO:0022627","cytosolic small ribosomal subunit",35,7,0.23,2.2e-09,"Cellular Components",0.2
+"78","LOC111107548","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"79","LOC111111599","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"80","LOC111111599","GO:1990904","ribonucleoprotein complex",504,20,3.26,0.0167,"Cellular Components",0.0396825396825397
+"81","LOC111114067","GO:0005840","ribosome",188,21,1.22,9.4e-08,"Cellular Components",0.111702127659574
+"82","LOC111114067","GO:0022627","cytosolic small ribosomal subunit",35,7,0.23,2.2e-09,"Cellular Components",0.2
+"83","LOC111114718","GO:0005840","ribosome",188,21,1.22,9.4e-08,"Cellular Components",0.111702127659574
+"84","LOC111114718","GO:0022625","cytosolic large ribosomal subunit",49,8,0.32,8.1e-10,"Cellular Components",0.163265306122449
+"85","LOC111115675","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"86","LOC111115985","GO:0005840","ribosome",188,21,1.22,9.4e-08,"Cellular Components",0.111702127659574
+"87","LOC111115985","GO:0022627","cytosolic small ribosomal subunit",35,7,0.23,2.2e-09,"Cellular Components",0.2
+"88","LOC111117989","GO:1990904","ribonucleoprotein complex",504,20,3.26,0.0167,"Cellular Components",0.0396825396825397
+"89","LOC111118304","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"90","LOC111118959","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"91","LOC111119071","GO:0005840","ribosome",188,21,1.22,9.4e-08,"Cellular Components",0.111702127659574
+"92","LOC111119071","GO:0022625","cytosolic large ribosomal subunit",49,8,0.32,8.1e-10,"Cellular Components",0.163265306122449
+"93","LOC111119359","GO:0005840","ribosome",188,21,1.22,9.4e-08,"Cellular Components",0.111702127659574
+"94","LOC111119574","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"95","LOC111120087","GO:0034399","nuclear periphery",4,1,0.03,0.0257,"Cellular Components",0.25
+"96","LOC111120557","GO:0005840","ribosome",188,21,1.22,9.4e-08,"Cellular Components",0.111702127659574
+"97","LOC111120557","GO:0022627","cytosolic small ribosomal subunit",35,7,0.23,2.2e-09,"Cellular Components",0.2
+"98","LOC111121848","GO:0005840","ribosome",188,21,1.22,9.4e-08,"Cellular Components",0.111702127659574
+"99","LOC111121848","GO:0022627","cytosolic small ribosomal subunit",35,7,0.23,2.2e-09,"Cellular Components",0.2
+"100","LOC111122600","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"101","LOC111122600","GO:0005840","ribosome",188,21,1.22,9.4e-08,"Cellular Components",0.111702127659574
+"102","LOC111123211","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"103","LOC111124544","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"104","LOC111124874","GO:0005840","ribosome",188,21,1.22,9.4e-08,"Cellular Components",0.111702127659574
+"105","LOC111124874","GO:0022625","cytosolic large ribosomal subunit",49,8,0.32,8.1e-10,"Cellular Components",0.163265306122449
+"106","LOC111125548","GO:0005840","ribosome",188,21,1.22,9.4e-08,"Cellular Components",0.111702127659574
+"107","LOC111125548","GO:0022627","cytosolic small ribosomal subunit",35,7,0.23,2.2e-09,"Cellular Components",0.2
+"108","LOC111126040","GO:0005840","ribosome",188,21,1.22,9.4e-08,"Cellular Components",0.111702127659574
+"109","LOC111126040","GO:0022625","cytosolic large ribosomal subunit",49,8,0.32,8.1e-10,"Cellular Components",0.163265306122449
+"110","LOC111126482","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"111","LOC111126482","GO:0022627","cytosolic small ribosomal subunit",35,7,0.23,2.2e-09,"Cellular Components",0.2
+"112","LOC111129405","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"113","LOC111130039","GO:0022625","cytosolic large ribosomal subunit",49,8,0.32,8.1e-10,"Cellular Components",0.163265306122449
+"114","LOC111130344","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"115","LOC111130625","GO:0005840","ribosome",188,21,1.22,9.4e-08,"Cellular Components",0.111702127659574
+"116","LOC111130771","GO:0005840","ribosome",188,21,1.22,9.4e-08,"Cellular Components",0.111702127659574
+"117","LOC111130979","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"118","LOC111131049","GO:0005840","ribosome",188,21,1.22,9.4e-08,"Cellular Components",0.111702127659574
+"119","LOC111131049","GO:0022625","cytosolic large ribosomal subunit",49,8,0.32,8.1e-10,"Cellular Components",0.163265306122449
+"120","LOC111131216","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"121","LOC111131216","GO:0005840","ribosome",188,21,1.22,9.4e-08,"Cellular Components",0.111702127659574
+"122","LOC111134449","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"123","LOC111134536","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"124","LOC111135307","GO:0005952","cAMP-dependent protein kinase complex",5,1,0.03,0.032,"Cellular Components",0.2
+"125","LOC111135790","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"126","LOC111136230","GO:0005840","ribosome",188,21,1.22,9.4e-08,"Cellular Components",0.111702127659574
+"127","LOC111136230","GO:0022625","cytosolic large ribosomal subunit",49,8,0.32,8.1e-10,"Cellular Components",0.163265306122449
+"128","LOC111136624","GO:0005840","ribosome",188,21,1.22,9.4e-08,"Cellular Components",0.111702127659574
+"129","LOC111137089","GO:0005840","ribosome",188,21,1.22,9.4e-08,"Cellular Components",0.111702127659574
+"130","LOC111137089","GO:0022625","cytosolic large ribosomal subunit",49,8,0.32,8.1e-10,"Cellular Components",0.163265306122449
+"131","LOC111137105","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"132","LOC111138235","GO:0005634","nucleus",3442,30,22.29,0.0055,"Cellular Components",0.00871586287042417
+"133","LOC111138235","GO:1990904","ribonucleoprotein complex",504,20,3.26,0.0167,"Cellular Components",0.0396825396825397
+"134","LOC111101020","GO:0003729","mRNA binding",160,8,0.9,0.00084,"Molecular Functions",0.05
+"135","LOC111101387","GO:0042923","neuropeptide binding",6,1,0.03,0.03318,"Molecular Functions",0.166666666666667
+"136","LOC111103593","GO:0042813","Wnt receptor activity",6,1,0.03,0.03318,"Molecular Functions",0.166666666666667
+"137","LOC111103655","GO:0003723","RNA binding",786,21,4.41,2e-04,"Molecular Functions",0.0267175572519084
+"138","LOC111104407","GO:0008198","ferrous iron binding",20,2,0.11,0.00554,"Molecular Functions",0.1
+"139","LOC111104407","GO:0008199","ferric iron binding",8,1,0.04,0.04399,"Molecular Functions",0.125
+"140","LOC111105448","GO:0044183","protein folding chaperone",184,5,1.03,9.1e-06,"Molecular Functions",0.0271739130434783
+"141","LOC111106468","GO:0003735","structural constituent of ribosome",174,21,0.98,2.2e-22,"Molecular Functions",0.120689655172414
+"142","LOC111106992","GO:0004753","saccharopine dehydrogenase activity",1,1,0.01,0.00561,"Molecular Functions",1
+"143","LOC111111599","GO:0003729","mRNA binding",160,8,0.9,0.00084,"Molecular Functions",0.05
+"144","LOC111112917","GO:0008198","ferrous iron binding",20,2,0.11,0.00554,"Molecular Functions",0.1
+"145","LOC111112917","GO:0017172","cysteine dioxygenase activity",8,1,0.04,0.04399,"Molecular Functions",0.125
+"146","LOC111114067","GO:0003735","structural constituent of ribosome",174,21,0.98,2.2e-22,"Molecular Functions",0.120689655172414
+"147","LOC111114718","GO:0003735","structural constituent of ribosome",174,21,0.98,2.2e-22,"Molecular Functions",0.120689655172414
+"148","LOC111115675","GO:0008195","phosphatidate phosphatase activity",9,1,0.05,0.04935,"Molecular Functions",0.111111111111111
+"149","LOC111115898","GO:0050152","omega-amidase activity",2,1,0.01,0.01118,"Molecular Functions",0.5
+"150","LOC111115985","GO:0003723","RNA binding",786,21,4.41,2e-04,"Molecular Functions",0.0267175572519084
+"151","LOC111115985","GO:0003735","structural constituent of ribosome",174,21,0.98,2.2e-22,"Molecular Functions",0.120689655172414
+"152","LOC111117989","GO:0003723","RNA binding",786,21,4.41,2e-04,"Molecular Functions",0.0267175572519084
+"153","LOC111118304","GO:0003729","mRNA binding",160,8,0.9,0.00084,"Molecular Functions",0.05
+"154","LOC111119044","GO:0044183","protein folding chaperone",184,5,1.03,9.1e-06,"Molecular Functions",0.0271739130434783
+"155","LOC111119071","GO:0003735","structural constituent of ribosome",174,21,0.98,2.2e-22,"Molecular Functions",0.120689655172414
+"156","LOC111119071","GO:0070180","large ribosomal subunit rRNA binding",6,2,0.03,0.00046,"Molecular Functions",0.333333333333333
+"157","LOC111119195","GO:0003723","RNA binding",786,21,4.41,2e-04,"Molecular Functions",0.0267175572519084
+"158","LOC111119359","GO:0003735","structural constituent of ribosome",174,21,0.98,2.2e-22,"Molecular Functions",0.120689655172414
+"159","LOC111120557","GO:0003735","structural constituent of ribosome",174,21,0.98,2.2e-22,"Molecular Functions",0.120689655172414
+"160","LOC111120557","GO:0048027","mRNA 5'-UTR binding",5,1,0.03,0.02772,"Molecular Functions",0.2
+"161","LOC111120557","GO:0070181","small ribosomal subunit rRNA binding",5,1,0.03,0.02772,"Molecular Functions",0.2
+"162","LOC111121848","GO:0003735","structural constituent of ribosome",174,21,0.98,2.2e-22,"Molecular Functions",0.120689655172414
+"163","LOC111122600","GO:0003735","structural constituent of ribosome",174,21,0.98,2.2e-22,"Molecular Functions",0.120689655172414
+"164","LOC111122600","GO:0031386","protein tag activity",9,2,0.05,0.00109,"Molecular Functions",0.222222222222222
+"165","LOC111122600","GO:0031625","ubiquitin protein ligase binding",35,2,0.2,0.01643,"Molecular Functions",0.0571428571428571
+"166","LOC111123835","GO:0008510","sodium:bicarbonate symporter activity",4,1,0.02,0.02224,"Molecular Functions",0.25
+"167","LOC111124874","GO:0003723","RNA binding",786,21,4.41,2e-04,"Molecular Functions",0.0267175572519084
+"168","LOC111124874","GO:0003735","structural constituent of ribosome",174,21,0.98,2.2e-22,"Molecular Functions",0.120689655172414
+"169","LOC111125385","GO:0003841","1-acylglycerol-3-phosphate O-acyltransferase activity",4,1,0.02,0.02224,"Molecular Functions",0.25
+"170","LOC111125548","GO:0003729","mRNA binding",160,8,0.9,0.00084,"Molecular Functions",0.05
+"171","LOC111125548","GO:0003735","structural constituent of ribosome",174,21,0.98,2.2e-22,"Molecular Functions",0.120689655172414
+"172","LOC111126040","GO:0003735","structural constituent of ribosome",174,21,0.98,2.2e-22,"Molecular Functions",0.120689655172414
+"173","LOC111126482","GO:0003723","RNA binding",786,21,4.41,2e-04,"Molecular Functions",0.0267175572519084
+"174","LOC111126482","GO:0003735","structural constituent of ribosome",174,21,0.98,2.2e-22,"Molecular Functions",0.120689655172414
+"175","LOC111128315","GO:0016175","superoxide-generating NAD(P)H oxidase activity",8,1,0.04,0.04399,"Molecular Functions",0.125
+"176","LOC111128450","GO:0004499","N,N-dimethylaniline monooxygenase activity",9,1,0.05,0.04935,"Molecular Functions",0.111111111111111
+"177","LOC111130039","GO:0003735","structural constituent of ribosome",174,21,0.98,2.2e-22,"Molecular Functions",0.120689655172414
+"178","LOC111130039","GO:0070180","large ribosomal subunit rRNA binding",6,2,0.03,0.00046,"Molecular Functions",0.333333333333333
+"179","LOC111130239","GO:0047325","inositol tetrakisphosphate 1-kinase activity",1,1,0.01,0.00561,"Molecular Functions",1
+"180","LOC111130239","GO:0052725","inositol-1,3,4-trisphosphate 6-kinase activity",1,1,0.01,0.00561,"Molecular Functions",1
+"181","LOC111130239","GO:0052726","inositol-1,3,4-trisphosphate 5-kinase activity",1,1,0.01,0.00561,"Molecular Functions",1
+"182","LOC111130552","GO:0003723","RNA binding",786,21,4.41,2e-04,"Molecular Functions",0.0267175572519084
+"183","LOC111130625","GO:0003735","structural constituent of ribosome",174,21,0.98,2.2e-22,"Molecular Functions",0.120689655172414
+"184","LOC111130771","GO:0003735","structural constituent of ribosome",174,21,0.98,2.2e-22,"Molecular Functions",0.120689655172414
+"185","LOC111130979","GO:0004053","arginase activity",2,1,0.01,0.01118,"Molecular Functions",0.5
+"186","LOC111130979","GO:0030145","manganese ion binding",21,2,0.12,0.0061,"Molecular Functions",0.0952380952380952
+"187","LOC111131049","GO:0003735","structural constituent of ribosome",174,21,0.98,2.2e-22,"Molecular Functions",0.120689655172414
+"188","LOC111131216","GO:0003735","structural constituent of ribosome",174,21,0.98,2.2e-22,"Molecular Functions",0.120689655172414
+"189","LOC111131216","GO:0031386","protein tag activity",9,2,0.05,0.00109,"Molecular Functions",0.222222222222222
+"190","LOC111131216","GO:0031625","ubiquitin protein ligase binding",35,2,0.2,0.01643,"Molecular Functions",0.0571428571428571
+"191","LOC111131538","GO:0001784","phosphotyrosine residue binding",2,1,0.01,0.01118,"Molecular Functions",0.5
+"192","LOC111131671","GO:1990825","sequence-specific mRNA binding",3,1,0.02,0.01673,"Molecular Functions",0.333333333333333
+"193","LOC111131784","GO:0003723","RNA binding",786,21,4.41,2e-04,"Molecular Functions",0.0267175572519084
+"194","LOC111134449","GO:0003729","mRNA binding",160,8,0.9,0.00084,"Molecular Functions",0.05
+"195","LOC111134713","GO:0004613","phosphoenolpyruvate carboxykinase (GTP) activity",2,1,0.01,0.01118,"Molecular Functions",0.5
+"196","LOC111134713","GO:0030145","manganese ion binding",21,2,0.12,0.0061,"Molecular Functions",0.0952380952380952
+"197","LOC111135307","GO:0008603","cAMP-dependent protein kinase regulator activity",3,1,0.02,0.01673,"Molecular Functions",0.333333333333333
+"198","LOC111135749","GO:0044183","protein folding chaperone",184,5,1.03,9.1e-06,"Molecular Functions",0.0271739130434783
+"199","LOC111136200","GO:0003940","L-iduronidase activity",1,1,0.01,0.00561,"Molecular Functions",1
+"200","LOC111136200","GO:0003951","NAD+ kinase activity",2,1,0.01,0.01118,"Molecular Functions",0.5
+"201","LOC111136230","GO:0003723","RNA binding",786,21,4.41,2e-04,"Molecular Functions",0.0267175572519084
+"202","LOC111136230","GO:0003735","structural constituent of ribosome",174,21,0.98,2.2e-22,"Molecular Functions",0.120689655172414
+"203","LOC111136624","GO:0003723","RNA binding",786,21,4.41,2e-04,"Molecular Functions",0.0267175572519084
+"204","LOC111136624","GO:0003735","structural constituent of ribosome",174,21,0.98,2.2e-22,"Molecular Functions",0.120689655172414
+"205","LOC111137089","GO:0003723","RNA binding",786,21,4.41,2e-04,"Molecular Functions",0.0267175572519084
+"206","LOC111137089","GO:0003735","structural constituent of ribosome",174,21,0.98,2.2e-22,"Molecular Functions",0.120689655172414
+"207","LOC111137387","GO:0044183","protein folding chaperone",184,5,1.03,9.1e-06,"Molecular Functions",0.0271739130434783
+"208","LOC111138235","GO:0008143","poly(A) binding",6,1,0.03,0.03318,"Molecular Functions",0.166666666666667
+"209","LOC111138235","GO:0008266","poly(U) RNA binding",3,1,0.02,0.01673,"Molecular Functions",0.333333333333333
