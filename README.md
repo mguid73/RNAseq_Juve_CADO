@@ -6,4 +6,14 @@ to be updated!
 
 RNAseq analysis steps: RNAseq_analysis.md
 
-DeSeq2 and GO assignments located in de_analysis 
+ANALYSIS FOLDERS:
+
+de_analysis
+
+volcano_plots
+
+wgcna
+
+ 
+
+
