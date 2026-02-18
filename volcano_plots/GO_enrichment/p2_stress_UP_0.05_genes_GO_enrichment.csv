@@ -1,0 +1,16 @@
+"","gene_id","GO_Annotation","Term","Annotated","Significant","Expected","Fisher","ontology","prop.sig.genes"
+"1","LOC111117570","GO:0006486","protein glycosylation",219,1,0.03,0.0294,"Biological Processes",0.0045662100456621
+"2","LOC111124666","GO:0010754","negative regulation of cGMP-mediated signaling",5,1,0,0.00068,"Biological Processes",0.2
+"3","LOC111124666","GO:0010821","regulation of mitochondrion organization",14,1,0,0.00189,"Biological Processes",0.0714285714285714
+"4","LOC111124666","GO:0043951","negative regulation of cAMP-mediated signaling",3,1,0,0.00041,"Biological Processes",0.333333333333333
+"5","LOC111124666","GO:0046069","cGMP catabolic process",5,1,0,0.00068,"Biological Processes",0.2
+"6","LOC111124666","GO:0005741","mitochondrial outer membrane",63,1,0.01,0.0093,"Cellular Components",0.0158730158730159
+"7","LOC111124666","GO:0005743","mitochondrial inner membrane",147,1,0.02,0.0215,"Cellular Components",0.00680272108843537
+"8","LOC111124666","GO:0005759","mitochondrial matrix",105,1,0.02,0.0154,"Cellular Components",0.00952380952380952
+"9","LOC111124666","GO:0048471","perinuclear region of cytoplasm",29,1,0,0.0043,"Cellular Components",0.0344827586206897
+"10","LOC111124666","GO:0097060","synaptic membrane",91,1,0.01,0.0134,"Cellular Components",0.010989010989011
+"11","LOC111117570","GO:0016758","transferase activity, transferring hexosyl groups",273,1,0.04,0.04121,"Molecular Functions",0.00366300366300366
+"12","LOC111124666","GO:0004115","3',5'-cyclic-AMP phosphodiesterase activity",6,1,0,0.00092,"Molecular Functions",0.166666666666667
+"13","LOC111124666","GO:0004118","cGMP-stimulated cyclic-nucleotide phosphodiesterase activity",5,1,0,0.00077,"Molecular Functions",0.2
+"14","LOC111124666","GO:0042803","protein homodimerization activity",18,1,0,0.00275,"Molecular Functions",0.0555555555555556
+"15","LOC111124666","GO:0047555","3',5'-cyclic-GMP phosphodiesterase activity",5,1,0,0.00077,"Molecular Functions",0.2

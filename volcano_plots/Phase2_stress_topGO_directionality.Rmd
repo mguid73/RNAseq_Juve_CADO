@@ -69,7 +69,7 @@ outputs/phase2_stress_directional_expression.csv
 Make separate files with gene IDs and GO IDs for UP & DOWN regulated genes
 ```{r}
 # load data
-p2_stress <- read.csv("outputs/phase2_stress_directional_expression.csv", header = TRUE, sep = ",")
+p2_stress <- read.csv("outputs/phase2_stress_directional_expression_p0.05.csv", header = TRUE, sep = ",")
 p2_stress
 # separate UP and DOWN reg genes into two data sets
 p2_stress_up <- subset(p2_stress, diffexpressed=="UP")
@@ -102,6 +102,8 @@ dim(p2_stress_down_wGO)
 # write out tables
 #write.table(p2_stress_up_wGO, "p2_stress_UP_genes_GO_header.tab", sep = "\t", row.names=FALSE)
 #write.table(p2_stress_down_wGO, "p2_stress_DOWN_genes_GO_header.tab", sep = "\t", row.names=FALSE)
+
+#write.table(p2_stress_up_wGO, "p2_stress_UP_genes_GO_header_p0.05.tab", sep = "\t", row.names=FALSE)
 ```
 
 Read in expressed genes file - maybe I'll use this??

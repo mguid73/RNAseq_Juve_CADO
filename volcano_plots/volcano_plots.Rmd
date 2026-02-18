@@ -133,31 +133,31 @@ Add a column to the data frame to specify if they are UP- or DOWN- regulated (lo
 ```{r}
 # create new column and fill values with "NO" as default
 deg2_str_clean$diffexpressed <- "NO" ; colnames(deg2_str_clean)
-deg2_rec_clean$diffexpressed <- "NO" ; colnames(deg2_rec_clean)
-deg2_nai_clean$diffexpressed <- "NO" ; colnames(deg2_nai_clean)
+#deg2_rec_clean$diffexpressed <- "NO" ; colnames(deg2_rec_clean)
+#deg2_nai_clean$diffexpressed <- "NO" ; colnames(deg2_nai_clean)
 
 # set "UP" based on previous threshold
-deg2_str_clean$diffexpressed[deg2_str_clean$log2FoldChange > 0.8 & deg2_str_clean$padj < 0.001] <- "UP"
-deg2_rec_clean$diffexpressed[deg2_rec_clean$log2FoldChange > 0.8 & deg2_rec_clean$padj < 0.001] <- "UP"
-deg2_nai_clean$diffexpressed[deg2_nai_clean$log2FoldChange > 0.8 & deg2_nai_clean$padj < 0.001] <- "UP"
+deg2_str_clean$diffexpressed[deg2_str_clean$log2FoldChange > 0.8 & deg2_str_clean$padj < 0.01] <- "UP"
+#deg2_rec_clean$diffexpressed[deg2_rec_clean$log2FoldChange > 0.8 & deg2_rec_clean$padj < 0.001] <- "UP"
+#deg2_nai_clean$diffexpressed[deg2_nai_clean$log2FoldChange > 0.8 & deg2_nai_clean$padj < 0.001] <- "UP"
 # set "DOWN" based on previous threshold
-deg2_str_clean$diffexpressed[deg2_str_clean$log2FoldChange < -0.8 & deg2_str_clean$padj < 0.001] <- "DOWN"
-deg2_rec_clean$diffexpressed[deg2_rec_clean$log2FoldChange < -0.8 & deg2_rec_clean$padj < 0.001] <- "DOWN"
-deg2_nai_clean$diffexpressed[deg2_nai_clean$log2FoldChange < -0.8 & deg2_nai_clean$padj < 0.001] <- "DOWN"
+deg2_str_clean$diffexpressed[deg2_str_clean$log2FoldChange < -0.8 & deg2_str_clean$padj < 0.01] <- "DOWN"
+#deg2_rec_clean$diffexpressed[deg2_rec_clean$log2FoldChange < -0.8 & deg2_rec_clean$padj < 0.001] <- "DOWN"
+#deg2_nai_clean$diffexpressed[deg2_nai_clean$log2FoldChange < -0.8 & deg2_nai_clean$padj < 0.001] <- "DOWN"
 # Explore a bit
-head(deg2_str_clean[order(deg2_str_clean$padj) & deg2_str_clean$diffexpressed == 'DOWN', ])
-head(deg2_rec_clean[order(deg2_rec_clean$padj) & deg2_rec_clean$diffexpressed == 'DOWN', ])
-head(deg2_nai_clean[order(deg2_nai_clean$padj) & deg2_nai_clean$diffexpressed == 'DOWN', ])
+head(deg2_str_clean[order(deg2_str_clean$padj) & deg2_str_clean$diffexpressed == 'UP', ])
+#head(deg2_rec_clean[order(deg2_rec_clean$padj) & deg2_rec_clean$diffexpressed == 'DOWN', ])
+#head(deg2_nai_clean[order(deg2_nai_clean$padj) & deg2_nai_clean$diffexpressed == 'DOWN', ])
 
 # variable with only up and down
 deg2_str_clean_direction <- subset(deg2_str_clean, diffexpressed != 'NO')
-deg2_rec_clean_direction <- subset(deg2_rec_clean, diffexpressed != 'NO')
-deg2_nai_clean_direction <- subset(deg2_nai_clean, diffexpressed != 'NO')
+#deg2_rec_clean_direction <- subset(deg2_rec_clean, diffexpressed != 'NO')
+#deg2_nai_clean_direction <- subset(deg2_nai_clean, diffexpressed != 'NO')
 
 #check we got all of the data - should return "TRUE"
 all(nrow(deg2_str_clean_direction) == sum(nrow(deg2_str_clean[deg2_str_clean$diffexpressed == 'DOWN', ]) + nrow(deg2_str_clean[deg2_str_clean$diffexpressed == 'UP', ])))
-all(nrow(deg2_rec_clean_direction) == sum(nrow(deg2_rec_clean[deg2_rec_clean$diffexpressed == 'DOWN', ]) + nrow(deg2_rec_clean[deg2_rec_clean$diffexpressed == 'UP', ])))
-all(nrow(deg2_nai_clean_direction) == sum(nrow(deg2_nai_clean[deg2_nai_clean$diffexpressed == 'DOWN', ]) + nrow(deg2_nai_clean[deg2_nai_clean$diffexpressed == 'UP', ])))
+#all(nrow(deg2_rec_clean_direction) == sum(nrow(deg2_rec_clean[deg2_rec_clean$diffexpressed == 'DOWN', ]) + nrow(deg2_rec_clean[deg2_rec_clean$diffexpressed == 'UP', ])))
+#all(nrow(deg2_nai_clean_direction) == sum(nrow(deg2_nai_clean[deg2_nai_clean$diffexpressed == 'DOWN', ]) + nrow(deg2_nai_clean[deg2_nai_clean$diffexpressed == 'UP', ])))
 
 #stress
 dim(deg2_str_clean_direction)
@@ -165,19 +165,22 @@ sum(deg2_str_clean$diffexpressed == 'DOWN')
 sum(deg2_str_clean$diffexpressed == 'UP')
 
 #recovery
-dim(deg2_rec_clean_direction)
-sum(deg2_rec_clean$diffexpressed == 'DOWN')
-sum(deg2_rec_clean$diffexpressed == 'UP')
-
-#naive
-dim(deg2_nai_clean_direction)
-sum(deg2_nai_clean$diffexpressed == 'DOWN')
-sum(deg2_nai_clean$diffexpressed == 'UP')
+# dim(deg2_rec_clean_direction)
+# sum(deg2_rec_clean$diffexpressed == 'DOWN')
+# sum(deg2_rec_clean$diffexpressed == 'UP')
+# 
+# #naive
+# dim(deg2_nai_clean_direction)
+# sum(deg2_nai_clean$diffexpressed == 'DOWN')
+# sum(deg2_nai_clean$diffexpressed == 'UP')
 
 # write out dataset for topGO
 #write.csv(deg2_str_clean_direction, "outputs/phase2_stress_directional_expression.csv")
 #write.csv(deg2_rec_clean_direction, "outputs/phase2_recovery_directional_expression.csv")
 #write.csv(deg2_nai_clean_direction, "outputs/phase2_naive_directional_expression.csv")
+
+#playing with the padj for phase II stress to look at marginally significant upregulated genes!
+#write.csv(deg2_str_clean_direction, "outputs/phase2_stress_directional_expression_p0.01.csv")
 ```
 
 
@@ -215,5 +218,5 @@ ggplot(data = deg2_str_clean, aes(x = log2FoldChange, y = -log10(padj), fill = d
               legend.position = "none"
               #legend.title = element_blank()
             ))
-ggsave("plots/phase2_stress_volcano.png", last_plot())
+ggsave("plots/phase2_stress_UP_volcano.png", last_plot())
 ```
