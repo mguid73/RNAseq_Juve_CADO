@@ -189,11 +189,11 @@ options(bitmapType = 'cairo')
 sizeGrWindow(12,9) # The user should change the dimensions if the window is too large or too small.
 par(cex = 0.6);
 par(mar = c(0,4,2,0))
-# output the tree as .png file..
+# # output the tree as .png file..
 png("phase2_outputs/sampleClusterTree_Precut.png", 1000, 1000, pointsize=20)
-plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5, 
-     cex.axis = 1.5, cex.main = 2) 
-abline(h = 105 , col = "red") # add line to plot to show the cut-off outlier samples 
+plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,
+     cex.axis = 1.5, cex.main = 2)
+abline(h = 105 , col = "red") # add line to plot to show the cut-off outlier samples
 dev.off()
 ```
 
@@ -480,7 +480,7 @@ moduleColors.custom = customColorOrder[moduleLabels + 1]
 # Save module colors and labels for use in subsequent parts
 save(MEs, moduleLabels, moduleColors, file = "phase2_data/phase2_networkConstruction-stepByStep.RData")
 # write csv - save the module eigengenes
-write.csv(MEs, file = "phase2_data/phase2_WGCNA_ModuleEigengenes.csv")
+#write.csv(MEs, file = "phase2_data/phase2_WGCNA_ModuleEigengenes.csv")
 ```
 
 
@@ -558,17 +558,223 @@ module_purple_genes <- names(dds5)[moduleColors.custom=="purple"]
 length(module_purple_genes)
 
 #save list of module blue genes
-write.csv(module_seashell_genes, "phase2_outputs/phase2_module_seashell_genes.csv", quote=F, row.names = FALSE)
-write.csv(module_green_genes, "phase2_outputs/module_green_genes.csv", quote=F, row.names = FALSE)
-write.csv(module_gold_genes, "phase2_outputs/phase2_module_gold_genes.csv", quote=F, row.names = FALSE)
-write.csv(module_purple_genes, "phase2_outputs/phase2_module_purple_genes.csv", quote=F, row.names = FALSE)
+#write.csv(module_seashell_genes, "phase2_outputs/phase2_module_seashell_genes.csv", quote=F, row.names = FALSE)
+#write.csv(module_green_genes, "phase2_outputs/module_green_genes.csv", quote=F, row.names = FALSE)
+#write.csv(module_gold_genes, "phase2_outputs/phase2_module_gold_genes.csv", quote=F, row.names = FALSE)
+#write.csv(module_purple_genes, "phase2_outputs/phase2_module_purple_genes.csv", quote=F, row.names = FALSE)
 
 ```
 
 
 ## 12. Hub genes
-STILL NEED TO EXPLORE THIS!
+# ============================================================
+# Hub Gene Network Plot - integrated with phase 2 WGCNA script
+# Picks up directly after Step 9 (moduleColors.custom defined)
+# Uses: dm2_mvg, TOM_sign, moduleColors.custom
+# ============================================================
 
+```{r}
+library(igraph)
+library(ggraph)
+library(ggrepel)
+
+# ── SETTINGS: change these per module you want to plot ───────
+module_of_interest <- "gold"  # <-- change to: "green", "gold", or "purple"
+top_n         <- 30    # top N hub genes by each metric
+edge_threshold <- 0.1  # minimum TOM value to draw an edge
+n_labels       <- 15   # how many gene names to label on the plot
+```
+
+```{r}
+# ── 12a. IDENTIFY MODULE GENES ───────────────────────────────
+dds5 <- as.data.frame(dm2_mvg)
+
+module_genes <- names(dds5)[moduleColors.custom == module_of_interest]
+cat("Genes in module '", module_of_interest, "':", length(module_genes), "\n")
+
+# Subset expression matrix to module genes
+expr_mod <- dm2_mvg[, module_genes]
+```
+
+```{r}
+# ── 12b. kME: correlation to module eigengene ─────────────────
+# Use the already-computed MEs — pull the eigengene for this module
+ME_col <- paste0("ME", module_of_interest)
+
+if (!ME_col %in% colnames(MEs)) {
+  stop(paste("Could not find eigengene column:", ME_col,
+             "\nAvailable columns:", paste(colnames(MEs), collapse = ", ")))
+}
+
+ME_vec <- MEs[, ME_col]
+
+kME_vals <- cor(expr_mod, ME_vec, use = "pairwise.complete.obs")
+kME_df   <- data.frame(
+  gene = rownames(kME_vals),
+  kME  = kME_vals[, 1]
+) %>% arrange(desc(kME))
+```
+
+```{r}
+# ── 12c. Intramodular connectivity from TOM_sign ──────────────
+# Subset the already-computed TOM to module genes only
+# (avoids re-running adjacency() with the correct softPower=4, type="signed")
+# Add gene names back to TOM_sign
+dimnames(TOM_sign) <- list(colnames(dm2_mvg), colnames(dm2_mvg))
+TOM_mod  <- TOM_sign[module_genes, module_genes]
+conn_vals <- rowSums(TOM_mod) - 1  # subtract self-connection (diagonal = 1)
+
+conn_df <- data.frame(
+  gene         = names(conn_vals),
+  connectivity = conn_vals
+) %>% arrange(desc(connectivity))
+```
+
+```{r}
+# ── 12d. Select hub genes: union of top N by both metrics ─────
+top_kME  <- kME_df$gene[1:top_n]
+top_conn <- conn_df$gene[1:top_n]
+hub_genes <- union(top_kME, top_conn)
+
+cat("Hub genes selected (union of top", top_n, "by kME and connectivity):",
+    length(hub_genes), "\n")
+```
+
+```{r}
+# ── 12e. Build edge list from TOM ────────────────────────────
+TOM_hub <- TOM_sign[hub_genes, hub_genes]
+
+edge_df <- as.data.frame(as.table(TOM_hub)) %>%
+  dplyr::rename(from = Var1, to = Var2, weight = Freq) %>%
+  filter(as.character(from) < as.character(to),
+         weight >= edge_threshold)
+
+cat("Edges retained (TOM >=", edge_threshold, "):", nrow(edge_df), "\n")
+
+# If too many/few edges, adjust edge_threshold above
+if (nrow(edge_df) > 2000) warning("Many edges — consider raising edge_threshold for a cleaner plot")
+if (nrow(edge_df) == 0)   stop("No edges retained — lower edge_threshold")
+```
+
+```{r}
+# ── 12f. Build igraph object and annotate nodes ───────────────
+g <- graph_from_data_frame(edge_df, directed = FALSE, vertices = hub_genes)
+
+node_meta <- data.frame(gene = hub_genes) %>%
+  left_join(kME_df,  by = "gene") %>%
+  left_join(conn_df, by = "gene") %>%
+  mutate(
+    hub_type = case_when(
+      gene %in% top_kME & gene %in% top_conn ~ "High kME + High Connectivity",
+      gene %in% top_kME                       ~ "High kME only",
+      gene %in% top_conn                      ~ "High Connectivity only",
+      TRUE                                    ~ "Other"
+    )
+  )
+
+V(g)$kME          <- node_meta$kME[match(V(g)$name, node_meta$gene)]
+V(g)$connectivity <- node_meta$connectivity[match(V(g)$name, node_meta$gene)]
+V(g)$hub_type     <- node_meta$hub_type[match(V(g)$name, node_meta$gene)]
+E(g)$weight       <- edge_df$weight
+```
+
+```{r}
+# ── 12g. Plot ─────────────────────────────────────────────────
+# Module-specific color palettes
+node_colors <- list(
+  seashell = c("High kME + High Connectivity" = "#C0392B",
+               "High kME only"                = "#E8A598",
+               "High Connectivity only"        = "#8B6F6F",
+               "Other"                        = "grey80"),
+  green    = c("High kME + High Connectivity" = "#1A7A3E",
+               "High kME only"                = "#5DBB85",
+               "High Connectivity only"        = "#2E8B57",
+               "Other"                        = "grey80"),
+  gold     = c("High kME + High Connectivity" = "#B8860B",
+               "High kME only"                = "#FFD700",
+               "High Connectivity only"        = "#DAA520",
+               "Other"                        = "grey80"),
+  purple   = c("High kME + High Connectivity" = "#6A0572",
+               "High kME only"                = "#B57BCC",
+               "High Connectivity only"        = "#8B008B",
+               "Other"                        = "grey80")
+)
+
+set.seed(42)
+```
+
+```{r}
+p <- ggraph(g, layout = "fr") +
+
+  geom_edge_link(
+    aes(width = weight, alpha = weight),
+    colour = "grey50"
+  ) +
+  scale_edge_width(range = c(0.2, 2),   name = "TOM weight") +
+  scale_edge_alpha(range = c(0.1, 0.6), guide = "none") +
+
+  geom_node_point(
+    aes(size = connectivity, colour = hub_type),
+    alpha = 0.9
+  ) +
+  scale_size(range = c(3, 12), name = "Intramodular\nConnectivity") +
+  scale_colour_manual(
+    name   = "Hub Gene Type",
+    values = node_colors[[module_of_interest]]
+  ) +
+
+  geom_node_label(
+    aes(
+      label  = ifelse(name %in% top_kME[1:n_labels], name, NA),
+      filter = name %in% top_kME[1:n_labels]
+    ),
+    size          = 2.8,
+    repel         = TRUE,
+    label.padding = unit(0.15, "lines"),
+    label.size    = 0.2,
+    fill          = alpha("white", 0.75)
+  ) +
+
+  labs(
+    title    = paste0("WGCNA Phase 2 — '", module_of_interest, "' module hub gene network"),
+    subtitle = paste0("Top ", top_n, " hub genes by kME and intramodular connectivity | ",
+                      "Edge threshold: TOM ≥ ", edge_threshold, " | ",
+                      "softPower = 4, signed network")
+  ) +
+  theme_graph(base_family = "sans") +
+  theme(
+    plot.title    = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 9,  colour = "grey40"),
+    legend.position = "right"
+  )
+
+print(p)
+
+
+# ── 12h. Save plot ────────────────────────────────────────────
+out_prefix <- paste0("phase2_outputs/phase2_hub_network_", module_of_interest)
+
+ggsave(paste0(out_prefix, ".png"),
+       plot = p, width = 12, height = 9, dpi = 300)
+
+ggsave(paste0(out_prefix, ".pdf"),
+       plot = p, width = 12, height = 9)
+
+cat("Plot saved to:", out_prefix, "\n")
+
+
+# ── 12i. Save hub gene table ──────────────────────────────────
+hub_table <- node_meta %>%
+  arrange(desc(kME)) %>%
+  dplyr::select(gene, kME, connectivity, hub_type)
+
+write.csv(hub_table,
+          paste0("phase2_data/phase2_hub_genes_", module_of_interest, ".csv"),
+          row.names = FALSE)
+
+cat("Hub gene table saved!\n")
+print(head(hub_table, 20))
+```
 
 
 ## 13. Heatmaps!
