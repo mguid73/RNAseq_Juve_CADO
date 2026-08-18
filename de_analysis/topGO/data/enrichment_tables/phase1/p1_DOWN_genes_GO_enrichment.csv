@@ -1,0 +1,20 @@
+"","gene_id","GO_Annotation","Term","Annotated","Significant","Expected","Fisher","ontology","prop.sig.genes"
+"1","LOC111118956","GO:0006636","unsaturated fatty acid biosynthetic process",6,1,0.01,0.0053,"Biological Processes",0.166666666666667
+"2","LOC111128694","GO:0002181","cytoplasmic translation",52,1,0.05,0.0448,"Biological Processes",0.0192307692307692
+"3","LOC111133824","GO:0006956","complement activation",8,1,0.01,0.007,"Biological Processes",0.125
+"4","LOC111135408","GO:0006906","vesicle fusion",54,1,0.05,0.0465,"Biological Processes",0.0185185185185185
+"5","LOC111121848","GO:0022627","cytosolic small ribosomal subunit",35,1,0.03,0.0305,"Cellular Components",0.0285714285714286
+"6","LOC111121848","GO:0030686","90S preribosome",43,1,0.04,0.0373,"Cellular Components",0.0232558139534884
+"7","LOC111121848","GO:0032040","small-subunit processome",48,1,0.04,0.0416,"Cellular Components",0.0208333333333333
+"8","LOC111128694","GO:0022625","cytosolic large ribosomal subunit",49,1,0.04,0.0424,"Cellular Components",0.0204081632653061
+"9","LOC111135408","GO:0031201","SNARE complex",47,1,0.04,0.0407,"Cellular Components",0.0212765957446809
+"10","LOC111135796","GO:0031464","Cul4A-RING E3 ubiquitin ligase complex",2,1,0,0.0018,"Cellular Components",0.5
+"11","LOC111109633","GO:0003993","acid phosphatase activity",14,1,0.01,0.01,"Molecular Functions",0.0714285714285714
+"12","LOC111118956","GO:0004768","stearoyl-CoA 9-desaturase activity",4,1,0,0.0029,"Molecular Functions",0.25
+"13","LOC111121848","GO:0003735","structural constituent of ribosome",174,2,0.12,0.0066,"Molecular Functions",0.0114942528735632
+"14","LOC111128694","GO:0003735","structural constituent of ribosome",174,2,0.12,0.0066,"Molecular Functions",0.0114942528735632
+"15","LOC111135408","GO:0005484","SNAP receptor activity",41,1,0.03,0.0289,"Molecular Functions",0.024390243902439
+"16","LOC111135408","GO:0019905","syntaxin binding",39,1,0.03,0.0275,"Molecular Functions",0.0256410256410256
+"17","LOC111135761","GO:0008374","O-acyltransferase activity",30,1,0.02,0.0212,"Molecular Functions",0.0333333333333333
+"18","LOC111135796","GO:0019902","phosphatase binding",18,1,0.01,0.0128,"Molecular Functions",0.0555555555555556
+"19","LOC111137463","GO:0008241","peptidyl-dipeptidase activity",4,1,0,0.0029,"Molecular Functions",0.25

@@ -1,0 +1,692 @@
+---
+title: "Global PCA & Differential Expression Analysis"
+author: "Megan Delatte-Guidry"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+DESeq2 estimates variance-mean dependence in count data and tests for differential expression base on a negative binomial distribution model.   
+
+DESeq2 for Analyzing RNAseq data manual:
+https://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html
+
+Input files:
+- non-normalized count matrix
+- metadata file
+
+Note on non-normalized data from DESeq2 manual: "As input, the DESeq2 package expects count data as obtained, e.g., from RNA-seq or another high-throughput sequencing experiment, in the form of a matrix of integer values. The value in the i-th row and the j-th column of the matrix tells how many reads can be assigned to gene i in sample j. Analogously, for other types of assays, the rows of the matrix might correspond e.g. to binding regions (with ChIP-Seq) or peptide sequences (with quantitative mass spectrometry). We will list method for obtaining count matrices in sections below.
+
+The values in the matrix should be un-normalized counts or estimated counts of sequencing reads (for single-end RNA-seq) or fragments (for paired-end RNA-seq). The RNA-seq workflow describes multiple techniques for preparing such count matrices. It is important to provide count matrices as input for DESeq2’s statistical model (Love, Huber, and Anders 2014) to hold, as only the count values allow assessing the measurement precision correctly. The DESeq2 model internally corrects for library size, so transformed or normalized values such as counts scaled by library size should not be used as input."
+
+
+Load libraries
+```{r, message=FALSE, warning=FALSE}
+library(DESeq2)
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(reshape2)
+library(apeglm)
+library(ggplot2)
+library(vsn)
+library(pheatmap)
+library(RColorBrewer)
+library(genefilter)
+library(rsconnect)
+library(gplots)
+library(ashr)
+library(limma)
+```
+
+## Load in data
+```{r}
+# load in metadata
+sample_info <- read.csv("juve_cado_metadata_w_batches.csv", header=TRUE, sep=",", row.names=1)
+head(sample_info)
+tail(sample_info)
+```
+
+```{r}
+# load in gene count matrix and set the row names header as "gene_id"
+#gene_counts <- as.data.frame(read.csv("gene_count_matrix.csv", row.names="gene_id"))
+gene_counts <- read.csv("gene_count_matrix.csv", row.names = 1, check.names = FALSE)
+head(rownames(gene_counts))
+head(gene_counts[,1:6])
+```
+
+## Check sample names
+Manual: "It is absolutely critical that the columns of the count matrix and the rows of the column data (information about samples) are in the same order. DESeq2 will not make guesses as to which column of the count matrix belongs to which row of the column data, these must be provided to DESeq2 already in consistent order."  
+
+The sample names in `sample_info` and `gene_counts` have to match up and be in the exact same order!
+```{r}
+# remove the "_F" in the column names of `gene_counts`
+colnames(gene_counts) <- sub("_F", "", colnames(gene_counts))
+head(gene_counts)
+
+#check that the sample names are the same in both places
+all(rownames(sample_info) %in% colnames(gene_counts))
+#check the order of the samples
+all(rownames(sample_info) == colnames(gene_counts))
+```
+
+## Subsetting data into PHASE I and PHASE II
+```{r}
+# subset metadata ('sample_info') first
+sample_info <- tibble::rownames_to_column(sample_info, var = "sample.name")
+
+p1_sample_info <- subset(sample_info, phase=="phase1")
+p2_sample_info <- subset(sample_info, phase=="phase2")
+dim(p1_sample_info)
+dim(p2_sample_info)
+
+#split count matrix based on names in each metadata variable
+p1_gene_counts <- gene_counts[, p1_sample_info$sample.name]
+dim(p1_gene_counts)
+p2_gene_counts <- gene_counts[, p2_sample_info$sample.name]
+dim(p2_gene_counts)
+```
+
+
+## Pre-filtering with genefilter()
+While pre-filtering of low count genes isn't necessary, it can be useful for 2 reasons:    
+1. reduce size of the `dds` data object (thus increase speed of count modeling).  
+2. improve visualizations by making them a little cleaner
+
+>Note: I filtered the whole dataset (both phases, all 72 samples) then I split up the dataset into phases following the filtering. 
+
+```{r}
+###filtering values for PoverA
+#set filter values for PoverA (P percent of the samples have counts over A)
+# here P = 0.055 and A = 5 (5.5% of samples would be 4 out of 72 samples)
+filt <- filterfun(pOverA(0.055,5))
+
+#create filter for the counts data
+tfil <- genefilter(gene_counts, filt)
+
+#identify transcripts to keep by count filter
+keep <- gene_counts[tfil,]
+
+#identify gene names in transcript list to keep
+gn.keep <- rownames(keep)
+
+#data filtered in PoverA, P percent of the samples have counts over A
+filt_gene_counts <- as.data.frame(gene_counts[which(rownames(gene_counts) %in% gn.keep),])
+dim(gene_counts)
+dim(filt_gene_counts)
+#write.csv(filt_gene_counts, file="filtered_gene_count_matrix.csv")
+head(filt_gene_counts,10)
+
+p1_filt_gene_counts <- as.data.frame(p1_gene_counts[which(rownames(p1_gene_counts) %in% gn.keep),])
+dim(p1_gene_counts)
+dim(p1_filt_gene_counts)
+#write.csv(p1_filt_gene_counts, file="p1_filtered_gene_count_matrix.csv")
+head(p1_filt_gene_counts,10)
+
+p2_filt_gene_counts <- as.data.frame(p2_gene_counts[which(rownames(p2_gene_counts) %in% gn.keep),])
+dim(p2_gene_counts)
+dim(p2_filt_gene_counts)
+#write.csv(p2_filt_gene_counts, file="p2_filtered_gene_count_matrix.csv")
+head(p2_filt_gene_counts,10)
+```
+
+
+# Differential Expression!
+
+## PHASE I - DESeq2 differential expression analysis 
+
+Building DESeq2 matrix
+```{r}
+# assign the batch numbers as factors not integers
+p1_sample_info$batch <- factor(p1_sample_info$batch, levels = c("1", "2"))
+
+#build deseq matrix (dm#)
+dm1 <- DESeqDataSetFromMatrix(countData = p1_filt_gene_counts,
+                             colData = p1_sample_info,
+                             design = ~ batch + treatment)
+dm1$treatment <- factor(dm1$treatment, levels = c("control", "stress"))
+levels(dm1$treatment)
+dm1
+```
+
+Running DESeq2
+```{r}
+dds1 <- DESeq(dm1) #takes a couple minutes to run
+res1 <- results(dds1)
+resultsNames(dds1)
+
+# LFC shrinkage step with 'ashr' 
+res1_ashr <- lfcShrink(dds1, coef= "treatment_stress_vs_control", type = "ashr", res = res1)
+```
+
+
+Logfold shrinkage models viewed with MAplots. 
+
+**plotMA** 
+"In DESeq2, the function plotMA shows the log2 fold changes attributable to a given variable over the mean of normalized counts for all the samples in the DESeqDataSet.   
+Points will be colored red if the adjusted p value is less than 0.1. Points which fall out of the window are plotted as open triangles pointing either up or down."
+
+#### pre-shrinkage
+```{r}
+DESeq2::plotMA(res1, ylim=c(-30,30))
+```
+
+```{r}
+#LFC shrinkage applied
+DESeq2::plotMA(res1_ashr, ylim=c(-30,30))
+```
+
+```{r}
+#then lets save these results for volcano plots and GO enrichment!
+write.csv(res1_ashr,"outputs/phase1_res_stress_LFCashr.csv")
+```
+
+### Determining significance threshold & save the significant dataset
+Setting the alpha value and creating results sets
+Here I'll set the alpha value as a more conservative 0.05 (compared to the default 0.1). 
+Note: It is important to specific the correct order in the contrasts, with the name of the numerator level for the fold change, and the name of the denominator level for the fold change for the comparison.
+
+```{r}
+summary(res1_ashr)
+sum(res1_ashr$padj!=0, na.rm=TRUE) # 39962 total DEGs
+sum(res1_ashr$padj<0.1, na.rm=TRUE) # 531 DEGs pass p<0.1 cutoff
+sum(res1_ashr$padj<0.05, na.rm=TRUE) # 302 DEGs pass p<0.05 cutoff
+sum(res1_ashr$padj<0.001, na.rm=TRUE) # 81 DEGs pass p<0.001 cutoff
+```
+
+subset significant phase I DEGs (padj <0.05)
+```{r}
+sig_phase1 <- subset(res1_ashr, padj<0.05)
+```
+
+
+## PHASE II - DESeq2 differential expression analysis 
+Building DESeq2 matrix
+```{r}
+# assign the batch numbers as factors not integers
+p2_sample_info$batch <- factor(p2_sample_info$batch, levels = c("2","3", "4", "5"))
+
+#build deseq matrix (dm#)
+dm2 <- DESeqDataSetFromMatrix(countData = p2_filt_gene_counts,
+                             colData = p2_sample_info,
+                             design = ~ batch + treatment)
+dm2$treatment <- factor(dm2$treatment, levels = c("control", "naive","recovery", "stress"))
+levels(dm2$treatment)
+dm2
+```
+
+
+Running DESeq2
+```{r}
+dds2 <- DESeq(dm2) #takes a couple minutes to run
+res2<-results(dds2) 
+head(res2)
+summary(res2)
+resultsNames(dds2)
+
+#unshrunk full DEG datasets split out by treatment vs control
+res_stress_all <- results(dds2, contrast=c("treatment","control", "stress"))
+res_naive_all <- results(dds2, contrast=c("treatment","control", "naive")) 
+res_recovery_all <- results(dds2, contrast=c("treatment","control", "recovery"))
+```
+
+Investigating the models 
+To investigate the models, logfold shrinkage was viewed with MAplots. 
+```{r}
+res2_stress_ashr <- lfcShrink(dds2, coef= "treatment_stress_vs_control", type = "ashr", res = res_stress_all)
+res2_naive_ashr <- lfcShrink(dds2, coef= "treatment_naive_vs_control", type = "ashr", res = res_naive_all)
+res2_recovery_ashr <- lfcShrink(dds2, coef= "treatment_recovery_vs_control", type = "ashr", res = res_recovery_all)
+```
+
+**plotMA** 
+"In DESeq2, the function plotMA shows the log2 fold changes attributable to a given variable over the mean of normalized counts for all the samples in the DESeqDataSet.   
+Points will be colored red if the adjusted p value is less than 0.1. Points which fall out of the window are plotted as open triangles pointing either up or down." Using the ashr shrinkage option allows for specifying the contrasts in the results object."
+```{r}
+DESeq2::plotMA(res_stress_all, ylim=c(-5,5))
+```
+
+```{r}
+DESeq2::plotMA(res2_stress_ashr, ylim=c(-5,5))
+```
+
+### SAVE THE LFC shrunk dataset!
+```{r}
+#then lets save these results for volcano plots and GO enrichment!
+write.csv(res2_stress_ashr,"outputs/phase2_res_stress_LFCashr.csv")
+write.csv(res2_naive_ashr,"outputs/phase2_res_naive_LFCashr.csv")
+write.csv(res2_recovery_ashr,"outputs/phase2_res_recovery_LFCashr.csv")
+```
+
+### Determining significance threshold & save the significant dataset
+Setting the alpha value and creating results sets
+Here I'll set the alpha value as a more conservative 0.05 (compared to the default 0.1). 
+Note: It is important to specific the correct order in the contrasts, with the name of the numerator level for the fold change, and the name of the denominator level for the fold change for the comparison.
+
+Stress vs Control (PII)
+```{r}
+summary(res2_stress_ashr)
+sum(res2_stress_ashr$padj!=0, na.rm=TRUE) #45538 DEGs total
+sum(res2_stress_ashr$padj<0.1, na.rm=TRUE) #1101 DEGs pass p<0.1 cutoff
+sum(res2_stress_ashr$padj<0.05, na.rm=TRUE) #763 DEGs pass p<0.05 cutoff
+sum(res2_stress_ashr$padj<0.001, na.rm=TRUE) #130 DEGs pass p<0.001 cutoff
+```
+Naive vs Control (PII)
+```{r}
+summary(res2_naive_ashr)
+sum(res2_naive_ashr$padj!=0, na.rm=TRUE) #65245 DEGs total
+sum(res2_naive_ashr$padj<0.1, na.rm=TRUE) #623 DEGs pass p<0.1 cutoff
+sum(res2_naive_ashr$padj<0.05, na.rm=TRUE) #449 DEGs pass p<0.05 cutoff
+sum(res2_naive_ashr$padj<0.001, na.rm=TRUE) #206 DEGs pass p<0.001 cutoff
+```
+
+Recovery vs Control (PII)
+```{r}
+summary(res2_recovery_ashr)
+sum(res2_recovery_ashr$padj!=0, na.rm=TRUE) #65245 DEGs total
+sum(res2_recovery_ashr$padj<0.1, na.rm=TRUE) #821 DEGs pass p<0.1 cutoff
+sum(res2_recovery_ashr$padj<0.05, na.rm=TRUE) #587 DEGs pass p<0.05 cutoff
+sum(res2_recovery_ashr$padj<0.001, na.rm=TRUE) #170 DEGs pass p<0.001 cutoff
+```
+
+
+
+
+# Visualizations & plots
+1. volcano plots
+2. heatmaps 
+3. venn diagrams 
+
+## 1. Volcano plots
+A volcano plot is a of scatterplot that shows statistical significance (p-value) versus magnitude of change (fold change). It is a great way of visualizing the results from differential gene expression analysis.
+
+After visualizing the directionality and significance of expressed genes in these volcano plots, I ran a TopGO analysis on the datasets of those identified genes. 
+
+source for plots: https://biostatsquid.com/volcano-plots-r-tutorial/
+
+
+```{r}
+# Loading relevant libraries 
+#library(tidyverse) # includes ggplot2, for data visualization. dplyr, for data manipulation.
+library(ggplot2)
+library(dplyr)
+library(RColorBrewer) # for a colourful plot
+library(ggrepel) # for nice annotations
+library(stringr)
+```
+
+## PHASE I 
+
+Load in and clean up data
+```{r}
+# Import DEG results - full data set with sig and nonsig DEGs following LFC shrink!
+deg1 <- read.csv("../de_analysis/outputs/phase1_res_stress_LFCashr.csv")
+
+# make a new column called "GeneID" in the 'deg' df that is only the gene ID
+deg1$GeneID <- str_extract(deg1$X, "[^|]+$")
+
+#clean up data frame
+#deg1_clean <- deg1[,c(8,3,6,7)] #old indexing
+deg1_clean <- deg1[,c(7,3,5,6)]
+colnames(deg1_clean)
+
+#remove rows with NA for adj. p-value
+deg1_clean <- deg1_clean[!is.na(deg1_clean$padj), ]
+```
+
+
+Add a column to the data frame to specify if they are UP- or DOWN- regulated (log2fc respectively positive or negative)
+```{r}
+# create new column and fill values with "NO" as default
+deg1_clean$diffexpressed <- "NO"
+colnames(deg1_clean)
+
+#see how many up- and downregulated significant DEGs there are (regardless of LFC)
+up <- count(deg1_clean$log2FoldChange > 0 & deg1_clean$padj < 0.05); up # UP = 137
+down <- count(deg1_clean$log2FoldChange < 0 & deg1_clean$padj < 0.05); down # DOWN = 165
+
+# check we got everyone
+count(deg1_clean$padj<0.05) #302
+total = up + down; total #302
+
+#see how many up- and downregulated significant DEGs there are with LFC of |1|
+up_lfc1 <- count(deg1_clean$log2FoldChange > 1 & deg1_clean$padj < 0.05); up_lfc1 # UP = 65
+down_lfc1 <- count(deg1_clean$log2FoldChange < -1 & deg1_clean$padj < 0.05); down_lfc1 # DOWN = 98
+
+# set "UP" based on p <0.05 and LFC of |1|
+deg1_clean$diffexpressed[deg1_clean$log2FoldChange > 1 & deg1_clean$padj < 0.05] <- "UP"
+# set "DOWN" based on previous threshold
+deg1_clean$diffexpressed[deg1_clean$log2FoldChange < -1 & deg1_clean$padj < 0.05] <- "DOWN"
+# Explore a bit
+head(deg1_clean[order(deg1_clean$padj) & deg1_clean$diffexpressed == 'UP', ])
+
+# variable with only up and down
+deg1_clean_sig <- subset(deg1_clean, diffexpressed != 'NO')
+
+#check we got all of the data - should return "TRUE"
+all(nrow(deg1_clean_sig) == sum(nrow(deg1_clean[deg1_clean$diffexpressed == 'DOWN', ]) + nrow(deg1_clean[deg1_clean$diffexpressed == 'UP', ])))
+
+dim(deg1_clean_sig)
+head(deg1_clean_sig)
+sum(deg1_clean_sig$diffexpressed == 'DOWN')
+sum(deg1_clean_sig$diffexpressed == 'UP')
+
+#write out full dataset for volcano plot
+#write.csv(deg1_clean, "../de_analysis/outputs/p1_DEGs.csv")
+
+# write out dataset for topGO
+#write.csv(deg1_clean_sig, "../de_analysis/outputs/p1_DEGs_sig.05.csv")
+```
+
+Plotting
+Note: consider adding GO annotations to plot
+```{r}
+# Create a basic volcano plot with adjusted p-values (to account for multiple hypothesis testing)
+vol <- ggplot(data = deg1_clean, aes(x = log2FoldChange, y = -log10(padj), fill = diffexpressed))  +
+  #add threshold lines (these are mostly arbitrarily chosen)
+  geom_vline(xintercept = c(-0.8, 0.8), col = "gray", linetype = 'dashed') +
+  #chose a pretty stringent p-value cut off 
+  geom_hline(yintercept = -log10(0.05), col = "gray", linetype = 'dashed') +
+  geom_point(pch=21, size = 3) +
+  annotate("text", x = -10, y = 10, label = "Downregulated", color = "cornflowerblue", size = 6) +
+  annotate("text", x = 10, y = 10, label = "Upregulated", color = "maroon", size = 6) +
+  annotate("text", x= 18, y= 30, label = "Phase I Stress", size = 6) +
+  # to set the colours of our variable
+  scale_fill_manual(values = c("cornflowerblue", "grey", "maroon")) 
+                     # to set the labels in case we want to overwrite the categories from the dataframe (UP, DOWN, NO)
+                     #labels = c("Downregulated", "Not significant", "Upregulated")) #removed legend
+  # Biostatsquid theme
+  theme_set(theme_classic(base_size = 20) +
+              theme(
+              axis.title.y = element_text(face = "bold",
+                                          margin = margin(0,20,0,0),
+                                          size = rel(1.1),
+                                          color = 'black'),
+              axis.title.x = element_text(hjust = 0.5,
+                                          face = "bold",
+                                          margin = margin(20,0,0,0),
+                                          size = rel(1.1),
+                                          color = 'black'),
+              plot.title = element_text(hjust = 0.5),
+              legend.position = "none"
+              #legend.title = element_blank()
+            ))
+ggsave("../de_analysis/volcano_plots/p1_volcano_sig.05.png", plot = vol, width = 7, height = 5, units = "in", dpi = 300, bg = "transparent");vol
+```
+
+## PHASE II
+
+Load in and clean up data
+```{r}
+# set treatment comparison - change before running new treatment!!!
+t = "recovery"
+
+# Import DEG results - full data set with sig and nonsig DEGs following LFC shrink!
+deg2 <- read.csv(paste0("../de_analysis/outputs/phase2_res_", t,"_LFCashr.csv"))
+
+# make a new column called "GeneID" in the 'deg' df that is only the gene ID
+deg2$GeneID <- str_extract(deg2$X, "[^|]+$")
+
+#clean up data frame
+#deg2_clean <- deg2[,c(8,3,6,7)] #old indexing
+deg2_clean <- deg2[,c(7,3,5,6)]
+colnames(deg2_clean)
+
+#remove rows with NA for adj. p-value
+deg2_clean <- deg2_clean[!is.na(deg2_clean$padj), ]
+```
+
+Add a column to the data frame to specify if they are UP- or DOWN- regulated (log2fc respectively positive or negative)
+```{r}
+# create new column and fill values with "NO" as default
+deg2_clean$diffexpressed <- "NO"
+colnames(deg2_clean)
+
+#see how many up- and downregulated significant DEGs there are (regardless of LFC)
+up <- count(deg2_clean$log2FoldChange > 0 & deg2_clean$padj < 0.05); up 
+down <- count(deg2_clean$log2FoldChange < 0 & deg2_clean$padj < 0.05); down
+# stress UP = 25 DOWN =738
+# naive UP = 273 DOWN = 176 
+# recovery UP = 214 DOWN = 373
+
+# check we got everyone
+count(deg2_clean$padj<0.05) 
+total = up + down; total 
+
+#see how many up- and downregulated significant DEGs there are with LFC of |1|
+up_lfc1 <- count(deg2_clean$log2FoldChange > 1 & deg2_clean$padj < 0.05); up_lfc1 
+down_lfc1 <- count(deg2_clean$log2FoldChange < -1 & deg2_clean$padj < 0.05); down_lfc1 
+# stress UP = 16 DOWN = 723
+# naive UP = 268 DOWN = 168 
+# recovery UP = 210 DOWN = 368
+
+
+
+# set "UP" based on p <0.05 and |LFC| of 1
+deg2_clean$diffexpressed[deg2_clean$log2FoldChange > 1 & deg2_clean$padj < 0.05] <- "UP"
+# set "DOWN" based on previous threshold
+deg2_clean$diffexpressed[deg2_clean$log2FoldChange < -1 & deg2_clean$padj < 0.05] <- "DOWN"
+# Explore a bit
+head(deg2_clean[order(deg2_clean$padj) & deg2_clean$diffexpressed == 'UP', ])
+
+# variable with only up and down
+deg2_clean_sig <- subset(deg2_clean, diffexpressed != 'NO')
+
+#check we got all of the data - should return "TRUE"
+all(nrow(deg2_clean_sig) == sum(nrow(deg2_clean[deg2_clean$diffexpressed == 'DOWN', ]) + nrow(deg2_clean[deg2_clean$diffexpressed == 'UP', ])))
+
+dim(deg2_clean_sig)
+#head(deg2_clean_sig)
+sum(deg2_clean_sig$diffexpressed == 'DOWN')
+sum(deg2_clean_sig$diffexpressed == 'UP')
+
+#write out full dataset for volcano plot
+write.csv(deg2_clean, paste0("../de_analysis/outputs/p2_", t,"_DEGs.csv"))
+
+# write out dataset for topGO
+write.csv(deg2_clean_sig, paste0("../de_analysis/outputs/p2_", t,"_DEGs_sig.05.csv"))
+```
+
+Plotting
+Note: consider adding GO annotations to plot
+```{r}
+# Create a basic volcano plot with adjusted p-values (to account for multiple hypothesis testing)
+vol <- ggplot(data = deg2_clean, aes(x = log2FoldChange, y = -log10(padj), fill = diffexpressed))  +
+  #add threshold lines (these are mostly arbitrarily chosen)
+  geom_vline(xintercept = c(-0.8, 0.8), col = "gray", linetype = 'dashed') +
+  #chose a pretty stringent p-value cut off 
+  geom_hline(yintercept = -log10(0.05), col = "gray", linetype = 'dashed') +
+  geom_point(pch=21, size = 3) +
+  annotate("text", x = -10, y = 10, label = "Downregulated", color = "cornflowerblue", size = 6) +
+  annotate("text", x = 10, y = 10, label = "Upregulated", color = "maroon", size = 6) +
+  annotate("text", x= 20, y=15, label = paste0("Phase II ", t), size = 6) +
+  # to set the colours of our variable
+  scale_fill_manual(values = c("cornflowerblue", "grey", "maroon")) 
+                     # to set the labels in case we want to overwrite the categories from the dataframe (UP, DOWN, NO)
+                     #labels = c("Downregulated", "Not significant", "Upregulated")) #removed legend
+  # Biostatsquid theme
+  theme_set(theme_classic(base_size = 20) +
+              theme(
+              axis.title.y = element_text(face = "bold",
+                                          margin = margin(0,20,0,0),
+                                          size = rel(1.1),
+                                          color = 'black'),
+              axis.title.x = element_text(hjust = 0.5,
+                                          face = "bold",
+                                          margin = margin(20,0,0,0),
+                                          size = rel(1.1),
+                                          color = 'black'),
+              plot.title = element_text(hjust = 0.5),
+              legend.position = "none"
+              #legend.title = element_blank()
+            ))
+ggsave(paste0("../de_analysis/volcano_plots/p2_", t,"_volcano_sig.05.png"), plot = vol, width = 7, height = 5, units = "in", dpi = 300, bg = "transparent");vol
+```
+
+
+
+## 2. Heatmaps
+
+## PHASE II
+For most of the analysis/visualization I wanted to compare the treatments accross all significant DEGs between all the treatments. So I combined the significant subsets and removed duplicates by using the original matrix, as well as regularize log transformed the list for the PCA and heatmap visualization.
+
+```{r}
+#read in significant data sets for each treatment
+sig_stress <- subset(res2_stress_ashr, padj<0.05)
+sig_naive <- subset(res2_naive_ashr, padj<0.05)
+sig_recovery <- subset(res2_recovery_ashr, padj<0.05)
+
+#combine significant DEGs for all treatment contrasts
+combine2 <- rbind(sig_stress, sig_naive, sig_recovery)
+combine_list2 <- dm2[which(rownames(dm2) %in% rownames(combine2)),] #combined list from the original matrix so dupicates are removed 
+summary(combine_list2)
+#combine_rlog <- rlog(combine_list, blind=FALSE) #setting blind to FALSE takes into account levels and contrasts
+vsd2 <- varianceStabilizingTransformation(combine_list2, blind=FALSE)
+
+dim(combine_list2)
+View(combine_list2)
+```
+
+limma removeBatchEffect()
+```{r}
+mat <- assay(vsd2)
+mm <- model.matrix(~treatment, colData(vsd2))
+mat <- limma::removeBatchEffect(mat, batch=vsd2$batch, design=mm)
+assay(vsd2) <- mat
+```
+
+Heatmap of rlog transformed difference in expression compared to the average across all samples, using adjusted p value of 0.00001 or less. 
+```{r}
+sig.num <- sum(combine2$padj <0.00001, na.rm=T) #set the p value cut off very low here to reduce noise
+sum(combine2$padj <0.00001, na.rm=T)
+sum(combine2$padj!=0)
+topVarGenes <- head(order(rowVars(assay(vsd2)),decreasing=TRUE),sig.num) #sort by decreasing sig
+mat <- assay(vsd2)[ topVarGenes, ] #make an expression object
+mat <- mat - rowMeans(mat) #difference in expression compared to average across all samples
+#col.order <- c()
+#mat <- mat[,col.order]
+df2 <- as.data.frame(colData(vsd2)[c("treatment")]) #make dataframe for column naming 
+
+colfunc <- colorRampPalette(c("deepskyblue", "white", "violetred3")) #make function for the color gradient 
+ann_colors <- list( treatment= c(control="#A29BAD", stress ="#D29F13", naive= "#6BA84C", recovery= "#65A6E2"))
+breakss <- c(-2, -1.9, -1.8, -1.7, -1.6, -1.5, -1.4, -1.3, -1.2, -1.1, -1, -.9, -.8, -.7, -.6, -.5, -.4, -.3, -.2, -.1, 0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2) #this looks very extra but this is how the colors in the heatmap were broken up 
+
+png("../de_analysis/heatmaps/updated_phase2_heatmap.png", units= "in", width=20, height=20, res = 600)
+pheatmap(mat, annotation_col=df2, annotation_colors=ann_colors, annotation_names_col = F, clustering_method = "average", 
+         clustering_distance_rows="euclidean", show_rownames =FALSE, cluster_cols=F,
+         show_colnames =F, breaks= breakss, color = colfunc(40), annotation_legend = F) 
+dev.off()
+```
+
+## 3. Venn Diagrams *********************
+Let's make a Venn diagram of the significant DEGs that overlap across treatments and count how many overlap between the treatments. This is using modified code from [here](https://www.biostars.org/p/288028/).
+```{r}
+sig_res_stress_genes <- row.names(sig_stress) #just gets the names of the genes, which is all that is needed to compare
+sig_res_naive_genes <- row.names(sig_naive)
+sig_res_recovery_genes <- row.names(sig_recovery)
+
+
+comb2 <- c(sig_res_naive_genes, sig_res_recovery_genes, sig_res_stress_genes) #combine the list
+
+comb2_list <- dm2[which(rownames(dm2) %in% comb2),] #gets rid of any duplicates 
+
+comb2_row <- row.names(comb2_list) #make just the names of the genes again
+
+# Comparing each individual list with the combined list
+sig_res_naive_genes.3 <- comb2_row %in% sig_res_naive_genes
+
+sig_res_recovery_genes.3 <- comb2_row %in% sig_res_recovery_genes
+
+sig_res_stress_genes.3 <- comb2_row %in% sig_res_stress_genes 
+
+
+## COMPARING ALL 3 TREATMENTS!
+# Generating venn counts to plot venn diagram 
+counts3 <- cbind(sig_res_naive_genes.3, sig_res_recovery_genes.3, sig_res_stress_genes.3)
+ven3 <- vennCounts(counts3)
+png("../de_analysis/phase2_venn-diagram-all-treatments.png", 1000, 1000)
+vennDiagram(ven3, cex=1, names = c("naive", "recovery", "stress"), circle.col= c("#6BA84C", "#65A6E2", "#D29F13"))
+dev.off()
+```
+
+
+Venn diagram comparing Phase 1 and 2 stress!
+```{r}
+#phase 1 - get just gene names
+sig_phase1_genes <- row.names(sig_phase1)
+#phase 2 - get just gene names
+sig_res_stress_genes <- row.names(sig_stress)
+
+comb <- c(sig_phase1_genes, sig_res_stress_genes) #combine the list
+
+comb_list <- dm2[which(rownames(dm2) %in% comb),] #gets rid of any duplicates 
+
+comb_row <- row.names(comb_list) #make just the names of the genes again
+
+
+# Comparing each individual list with the combined list
+sig_res_stress_genes_comp <- comb_row %in% sig_res_stress_genes
+sig_phase1_genes_comp <- comb_row %in% sig_phase1_genes
+
+# Generating venn counts to plot venn diagram 
+counts <- cbind(sig_phase1_genes_comp, sig_res_stress_genes_comp)
+ven <- vennCounts(counts)
+png("phase2_venn-diagram-p1&2.png", 1000, 1000)
+vennDiagram(ven, cex=1, names = c("phase1", "phase2"))
+dev.off()
+```
+
+
+Venn diagram comparing Phase 1 stress and Phase 2 naive!
+```{r}
+#phase 1 - get just gene names
+sig_phase1_genes <- row.names(sig_phase1)
+#phase 2 - get just gene names
+sig_res_naive_genes <- row.names(sig_naive)
+
+comb <- c(sig_phase1_genes, sig_res_naive_genes) #combine the list
+
+comb_list <- dm2[which(rownames(dm2) %in% comb),] #gets rid of any duplicates 
+
+comb_row <- row.names(comb_list) #make just the names of the genes again
+
+
+# Comparing each individual list with the combined list
+sig_res_naive_genes_comp <- comb_row %in% sig_res_naive_genes
+sig_phase1_genes_comp <- comb_row %in% sig_phase1_genes
+
+# Generating venn counts to plot venn diagram 
+counts <- cbind(sig_phase1_genes_comp, sig_res_naive_genes_comp)
+ven <- vennCounts(counts)
+png("PIstress_PIInaive_venn-diagram.png", 1000, 1000)
+vennDiagram(ven, cex=1, names = c("phase1 stress", "phase2 naive"))
+dev.off()
+```
+
+Venn diagram comparing Phase 1 stress and Phase 2 recovery!
+```{r}
+#phase 1 - get just gene names
+sig_phase1_genes <- row.names(sig_phase1)
+#phase 2 - get just gene names
+sig_res_recovery_genes <- row.names(sig_recovery)
+
+comb <- c(sig_phase1_genes, sig_res_recovery_genes) #combine the list
+
+comb_list <- dm2[which(rownames(dm2) %in% comb),] #gets rid of any duplicates 
+
+comb_row <- row.names(comb_list) #make just the names of the genes again
+
+
+# Comparing each individual list with the combined list
+sig_res_recovery_genes_comp <- comb_row %in% sig_res_recovery_genes
+sig_phase1_genes_comp <- comb_row %in% sig_phase1_genes
+
+# Generating venn counts to plot venn diagram 
+counts <- cbind(sig_phase1_genes_comp, sig_res_recovery_genes_comp)
+ven <- vennCounts(counts)
+png("PIstress_PIIrecovery_venn-diagram.png", 1000, 1000)
+vennDiagram(ven, cex=1, names = c("phase1 stress", "phase2 recovery"))
+dev.off()
+```

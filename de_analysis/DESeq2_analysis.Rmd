@@ -91,45 +91,283 @@ p2_gene_counts <- gene_counts[, p2_sample_info$sample.name]
 dim(p2_gene_counts)
 ```
 
-## Pre-filtering with genefilter
+
+## Pre-filtering with genefilter()
 While pre-filtering of low count genes isn't necessary, it can be useful for 2 reasons:    
 1. reduce size of the `dds` data object (thus increase speed of count modeling).  
 2. improve visualizations by making them a little cleaner
+
+>Note: I filtered the whole dataset (both phases, all 72 samples) then I split up the dataset into phases following the filtering. 
+>I could have filtered phases independently (and I still might come back and try that out).
+
 ```{r}
 ###filtering values for PoverA
 #set filter values for PoverA (P percent of the samples have counts over A)
-# here P = 0.04 and A = 5 (4% of samples would be 3 out of 72 samples)
-filt <- filterfun(pOverA(0.04,5))
+# here P = 0.055 and A = 5 (5.5% of samples would be 4 out of 72 samples)
+filt <- filterfun(pOverA(0.055,5))
 
 #create filter for the counts data
-p1_tfil <- genefilter(p1_gene_counts, filt)
-p2_tfil <- genefilter(p2_gene_counts, filt)
+tfil <- genefilter(gene_counts, filt)
 
 #identify transcripts to keep by count filter
-p1_keep <- p1_gene_counts[p1_tfil,]
-p2_keep <- p2_gene_counts[p2_tfil,]
+keep <- gene_counts[tfil,]
 
 #identify gene names in transcript list to keep
-p1_gn.keep <- rownames(p1_keep)
-p2_gn.keep <- rownames(p2_keep)
+gn.keep <- rownames(keep)
 
 #data filtered in PoverA, P percent of the samples have counts over A
-p1_filt_gene_counts <- as.data.frame(p1_gene_counts[which(rownames(p1_gene_counts) %in% p1_gn.keep),])
+filt_gene_counts <- as.data.frame(gene_counts[which(rownames(gene_counts) %in% gn.keep),])
+dim(gene_counts)
+dim(filt_gene_counts)
+#write.csv(filt_gene_counts, file="filtered_gene_count_matrix.csv")
+head(filt_gene_counts,10)
+
+p1_filt_gene_counts <- as.data.frame(p1_gene_counts[which(rownames(p1_gene_counts) %in% gn.keep),])
+dim(p1_gene_counts)
+dim(p1_filt_gene_counts)
 #write.csv(p1_filt_gene_counts, file="p1_filtered_gene_count_matrix.csv")
 head(p1_filt_gene_counts,10)
 
-p2_filt_gene_counts <- as.data.frame(p2_gene_counts[which(rownames(p2_gene_counts) %in% p2_gn.keep),])
+p2_filt_gene_counts <- as.data.frame(p2_gene_counts[which(rownames(p2_gene_counts) %in% gn.keep),])
+dim(p2_gene_counts)
+dim(p2_filt_gene_counts)
 #write.csv(p2_filt_gene_counts, file="p2_filtered_gene_count_matrix.csv")
 head(p2_filt_gene_counts,10)
 ```
-#> nrow(gene_counts)
-#[1] 97257
-#> nrow(filt_gene_counts)
-#[1] 70981
+
+# Global Transcriptome vizualization
+
+## Global transcriptome across both phases 
+
+Build DeseqDataSet 
+```{r}
+#set batch numbers as factors 
+sample_info$batch <- factor(sample_info$batch, levels = c("1", "2", "3", "4", "5"))
+#sample_info$batch <- factor(sample_info$batch, levels = c("1", "2"))
+
+# actually build the DESeq dataset
+global_dds <- DESeqDataSetFromMatrix(countData = filt_gene_counts,
+                             colData = sample_info, 
+                             design = ~1) # ~1 means there is no design
+
+# apply variance transformation
+global_vsdds <- vst(global_dds, blind = TRUE)
+
+#limma removeBatchEffect()
+mat1 <- assay(global_vsdds)
+mm1 <- model.matrix(~treatment, colData(global_vsdds))
+mat1 <- limma::removeBatchEffect(mat1, batch=global_vsdds$batch, design=mm1)
+assay(global_vsdds) <- mat1
+
+# plot
+plotPCA(global_vsdds, intgroup = "batch")
+```
+limma corrected vs non-limma corrected fancy pca
+```{r}
+pcaData <- plotPCA(global_vsdds,
+                   intgroup = c("batch"),
+                   returnData = TRUE)
+
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+
+ggplot(pcaData,
+       aes(x = PC1, y = PC2,
+           color = batch)) +    
+  geom_point(aes(color=batch), size = 4, alpha=.75) +
+  coord_fixed() +
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+  theme(
+    #legend.position = "none",
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.major.y = element_blank(),
+    axis.title=element_text(face="bold", size=20, color="black"),
+    axis.text=element_text(size=20, color="black"), 
+    axis.text.x = element_text(size = 20),
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+    panel.background = element_rect(fill = alpha("white", 0.1))
+    )
+
+#ggsave("pca_plots/____", last_plot())
+```
+
+Let's get a better look with a fancier biplot
+```{r}
+# get PCA data from DESeq2
+pcaData <- plotPCA(global_vsdds,
+                   intgroup = c("treatment", "phase"),
+                   returnData = TRUE)
+
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+
+ggplot(pcaData,
+       aes(x = PC1, y = PC2,
+           fill = treatment,    # fill by treatment
+           shape = phase)) +     # shape by phase (your stress variable)
+  geom_point(aes(fill=treatment), size = 4, alpha=.75, colour= "black") +
+  scale_fill_manual(values = c(
+    control  = "#A29BAD",
+    stress   = "#D29F13",
+    naive    = "#6BA84C",
+    recovery = "#65A6E2"
+  )) +
+  scale_shape_manual(values = c(
+    phase1 = 21,
+    phase2 = 23
+  )) +
+  guides(
+    fill = guide_legend(
+      override.aes = list(
+        shape  = 21,        # ensure fillable shape in legend
+        colour = "black"    # black outline in legend keys
+      )
+    )
+  ) +
+  coord_fixed() +
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+  theme(
+    #legend.position = "none",
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.major.y = element_blank(),
+    axis.title=element_text(face="bold", size=20, color="black"),
+    axis.text=element_text(size=20, color="black"), 
+    axis.text.x = element_text(size = 20),
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+    panel.background = element_rect(fill = alpha("white", 0.1))
+    )
+
+#ggsave("pca_plots/global_pca_5batch_bytreatmentphase.png", last_plot())
+```
+
+
+## Phase I global expression
+```{r}
+
+p1_sample_info$batch <- factor(p1_sample_info$batch, levels = c("1", "2"))
+
+# actually build the DESeq dataset
+global_dds_1 <- DESeqDataSetFromMatrix(countData = p1_filt_gene_counts,
+                             colData = p1_sample_info, 
+                             design = ~1) # ~1 means there is no design
+
+# apply variance transformation
+global_vsdds_1 <- vst(global_dds_1, blind = TRUE)
+
+#limma removeBatchEffect()
+mat1 <- assay(global_vsdds_1)
+mm1 <- model.matrix(~treatment, colData(global_vsdds_1))
+mat1 <- limma::removeBatchEffect(mat1, batch=global_vsdds_1$batch, design=mm1)
+assay(global_vsdds_1) <- mat1
+
+# plot
+plotPCA(global_vsdds_1, intgroup = "treatment")
+```
+Let's get a better look with a fancier biplot
+```{r}
+# get PCA data from DESeq2
+pcaData <- plotPCA(global_vsdds_1,
+                   intgroup = c("treatment"),
+                   returnData = TRUE)
+
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+
+ggplot(pcaData,
+       aes(x = PC1, y = PC2,
+           fill = treatment))+   # fill by treatment
+  geom_point(aes(fill=treatment), size = 4, alpha=.75, shape=21) +
+  scale_fill_manual(values = c(
+    control  = "#A29BAD",
+    stress   = "#D29F13"
+  )) +
+  coord_fixed() +
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+  theme(
+    #legend.position = "none",
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.major.y = element_blank(),
+    axis.title=element_text(face="bold", size=20, color="black"),
+    axis.text=element_text(size=20, color="black"), 
+    axis.text.x = element_text(size = 20),
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+    panel.background = element_rect(fill = alpha("white", 0.1))
+    )
+
+#ggsave("pca_plots/p1_global_pca_5batch.png", last_plot())
+```
 
 
 
-## PHASE I - DESeq2 analysis & visualization
+## Phase II global expression
+```{r}
+#set batch numbers as factors 
+p2_sample_info$batch <- factor(p2_sample_info$batch, levels = c("2", "3", "4", "5"))
+#p2_sample_info$batch <- factor(p2_sample_info$batch, levels = c("1", "2"))
+
+# build the DESeq dataset
+global_dds_2 <- DESeqDataSetFromMatrix(countData = p2_filt_gene_counts,
+                             colData = p2_sample_info, 
+                             design = ~1) # ~1 means there is no design
+
+# apply variance transformation
+global_vsdds_2 <- vst(global_dds_2, blind = TRUE)
+
+#limma removeBatchEffect()
+mat2 <- assay(global_vsdds_2)
+mm2 <- model.matrix(~treatment, colData(global_vsdds_2))
+mat2 <- limma::removeBatchEffect(mat2, batch=global_vsdds_2$batch, design=mm2)
+assay(global_vsdds_2) <- mat2
+
+# plot
+plotPCA(global_vsdds_2, intgroup = "treatment")
+```
+
+Let's get a better look with a fancier biplot
+```{r}
+# get PCA data from DESeq2
+pcaData <- plotPCA(global_vsdds_2,
+                   intgroup = c("treatment"),
+                   returnData = TRUE)
+
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+
+ggplot(pcaData,
+       aes(x = PC1, y = PC2,
+           fill = treatment)) +     # 
+  geom_point(aes(fill=treatment), size = 4, alpha=.75, shape = 21) +
+  scale_fill_manual(values = c(
+    control  = "#A29BAD",
+    stress   = "#D29F13",
+    naive    = "#6BA84C",
+    recovery = "#65A6E2"
+  )) +
+  coord_fixed() +
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+  theme(
+    #legend.position = "none",
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.major.y = element_blank(),
+    axis.title=element_text(face="bold", size=20, color="black"),
+    axis.text=element_text(size=20, color="black"), 
+    axis.text.x = element_text(size = 20),
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+    panel.background = element_rect(fill = alpha("white", 0.1))
+    )
+
+#ggsave("pca_plots/p2_global_pca_5batch.png", last_plot())
+```
+
+
+# Differential Expression!
+
+
+## PHASE I - DESeq2 differential expression analysis & visualization
 
 Building DESeq2 matrix
 ```{r}
@@ -148,43 +386,47 @@ dm1
 Running DESeq2
 ```{r}
 dds1 <- DESeq(dm1) #takes a couple minutes to run
-res1<-results(dds1) 
-head(res1)
-summary(res1)
+res1 <- results(dds1)
 resultsNames(dds1)
+
+# LFC shrinkage step with 'ashr' 
+res1_ashr <- lfcShrink(dds1, coef= "treatment_stress_vs_control", type = "ashr", res = res1)
+
+#write.csv(res1, "outputs/phase1_res_stress_notshrunk.csv")
+#res1_apeglm <- lfcShrink(dds1, coef= "treatment_stress_vs_control", type="apeglm", res = res1)
 ```
 
-Investigating the models 
-To investigate the models, logfold shrinkage was viewed with MAplots. 
-```{r}
-dds1_shrink <- lfcShrink(dds1, contrast =c("treatment","control", "stress"), type="ashr")
-## using 'ashr' for LFC shrinkage. If used in published research, please cite:
-##     Stephens, M. (2016) False discovery rates: a new deal. Biostatistics, 18:2.
-##     https://doi.org/10.1093/biostatistics/kxw041
-```
+
+Logfold shrinkage models viewed with MAplots. 
 
 **plotMA** 
 "In DESeq2, the function plotMA shows the log2 fold changes attributable to a given variable over the mean of normalized counts for all the samples in the DESeqDataSet.   
-Points will be colored red if the adjusted p value is less than 0.1. Points which fall out of the window are plotted as open triangles pointing either up or down." Using the ashr shrinkage option allows for specifying the contrasts in the results object."
+Points will be colored red if the adjusted p value is less than 0.1. Points which fall out of the window are plotted as open triangles pointing either up or down."
+
+#### pre-shrinkage
 ```{r}
-DESeq2::plotMA(dds1_shrink, ylim=c(-5,5))
+DESeq2::plotMA(res1, ylim=c(-30,30))
 ```
 
+```{r}
+#LFC shrinkage applied
+DESeq2::plotMA(res1_ashr, ylim=c(-30,30))
+```
 
 ```{r}
-#then lets save these results set for later use (pretty sure this is what I'll use for the GO term analysis)
-#write.csv(res1,"outputs/phase1_res_stress.csv")
+#then lets save these results for volcano plots and GO enrichment!
+write.csv(res1_ashr,"outputs/phase1_res_stress_LFCashr.csv")
 ```
 
 Setting the alpha value and creating results sets
 Here I'll set the alpha value as a more conservative 0.05 (compared to the default 0.1). 
 Note: It is important to specific the correct order in the contrasts, with the name of the numerator level for the fold change, and the name of the denominator level for the fold change for the comparison.
 ```{r}
-summary(res1)
-sum(res1$padj!=0, na.rm=TRUE) #35715 DEGs total
-sum(res1$padj<0.1, na.rm=TRUE) #532 pass the filter with 0.1 cutoff
-sum(res1$padj<0.05, na.rm=TRUE) #304 pass the filter with 0.05 cutoff
-sum(res1$padj<0.001, na.rm=TRUE) #79 pass the filter with 0.05 cutoff
+summary(res1_ashr)
+sum(res1_ashr$padj!=0, na.rm=TRUE) #35715 DEGs total
+sum(res1_ashr$padj<0.1, na.rm=TRUE) #532 pass the filter with 0.1 cutoff
+sum(res1_ashr$padj<0.05, na.rm=TRUE) #304 pass the filter with 0.05 cutoff
+sum(res1_ashr$padj<0.001, na.rm=TRUE) #79 pass the filter with 0.05 cutoff
 ```
 
 ```{r}
@@ -202,6 +444,10 @@ summary(sig_res1_comp)
 ordered_sig_res1_comp <-sig_res1_comp[ order(sig_res1_comp$padj ), ] 
 
 head(sig_res1_comp)
+
+#write out PCA data table for composite figure 
+#write.csv(sig_res1_comp, "outputs/sig_PHASEI_PCA_data.csv")
+
 #these ordered lists were written to files for potential later use - GO analysis
 #write.csv(ordered_sig_res1_comp,"outputs/sig_phase1_res_stress.csv")
 ```
@@ -388,6 +634,10 @@ ordered_sig_res_recovery <-sig_res_recovery[ order(sig_res_recovery$padj ), ]
 #write.csv(ordered_sig_res_naive,"outputs/sig_phase2_res_naive.csv")
 #write.csv(ordered_sig_res_recovery,"outputs/sig_phase2_res_recovery.csv")
 
+#write out data for PHASE II PCA - composite figure
+#write.csv(sig_res_stress, "outputs/Stress_PHASEII_PCA_data.csv")
+#write.csv(sig_res_naive, "outputs/Naive_PHASEII_PCA_data.csv")
+#write.csv(sig_res_recovery, "outputs/Recovery_PHASEII_PCA_data.csv")
 ```
 
 
@@ -403,6 +653,7 @@ summary(combine_list2)
 vsd2 <- varianceStabilizingTransformation(combine_list2, blind=FALSE)
 
 dim(combine_list2)
+View(combine_list2)
 ```
 
 limma removeBatchEffect()

@@ -1,0 +1,28 @@
+"","gene_id","GO_Annotation","Term","Annotated","Significant","Expected","Fisher","ontology","prop.sig.genes"
+"1","LOC111108150","GO:0000724","double-strand break repair via homologous recombination",159,3,0.28,0.0026,"Biological Processes",0.0188679245283019
+"2","LOC111119666","GO:0090161","Golgi ribbon formation",2,1,0,0.0035,"Biological Processes",0.5
+"3","LOC111120602","GO:0030100","regulation of endocytosis",13,1,0.02,0.0226,"Biological Processes",0.0769230769230769
+"4","LOC111120602","GO:0032012","regulation of ARF protein signal transduction",12,1,0.02,0.0209,"Biological Processes",0.0833333333333333
+"5","LOC111121716","GO:0000724","double-strand break repair via homologous recombination",159,3,0.28,0.0026,"Biological Processes",0.0188679245283019
+"6","LOC111126611","GO:0030431","sleep",19,1,0.03,0.0329,"Biological Processes",0.0526315789473684
+"7","LOC111126611","GO:0032222","regulation of synaptic transmission, cholinergic",19,1,0.03,0.0329,"Biological Processes",0.0526315789473684
+"8","LOC111126611","GO:1903818","positive regulation of voltage-gated potassium channel activity",19,1,0.03,0.0329,"Biological Processes",0.0526315789473684
+"9","LOC111128971","GO:0006382","adenosine to inosine editing",5,1,0.01,0.0088,"Biological Processes",0.2
+"10","LOC111129947","GO:0000724","double-strand break repair via homologous recombination",159,3,0.28,0.0026,"Biological Processes",0.0188679245283019
+"11","LOC111131487","GO:0000717","nucleotide-excision repair, DNA duplex unwinding",2,1,0,0.0035,"Biological Processes",0.5
+"12","LOC111131487","GO:0045951","positive regulation of mitotic recombination",2,1,0,0.0035,"Biological Processes",0.5
+"13","LOC111134680","GO:0006890","retrograde vesicle-mediated transport, Golgi to ER",23,1,0.04,0.0397,"Biological Processes",0.0434782608695652
+"14","LOC111136999","GO:0071880","adenylate cyclase-activating adrenergic receptor signaling pathway",21,1,0.04,0.0363,"Biological Processes",0.0476190476190476
+"15","LOC111106852","GO:0005615","extracellular space",798,4,1.35,0.043,"Cellular Components",0.0050125313283208
+"16","LOC111107894","GO:0005615","extracellular space",798,4,1.35,0.043,"Cellular Components",0.0050125313283208
+"17","LOC111109364","GO:0005615","extracellular space",798,4,1.35,0.043,"Cellular Components",0.0050125313283208
+"18","LOC111120602","GO:0000139","Golgi membrane",121,2,0.2,0.018,"Cellular Components",0.0165289256198347
+"19","LOC111133635","GO:0043025","neuronal cell body",29,1,0.05,0.048,"Cellular Components",0.0344827586206897
+"20","LOC111134680","GO:0000139","Golgi membrane",121,2,0.2,0.018,"Cellular Components",0.0165289256198347
+"21","LOC111135898","GO:0005615","extracellular space",798,4,1.35,0.043,"Cellular Components",0.0050125313283208
+"22","LOC111121716","GO:0015616","DNA translocase activity",5,1,0.01,0.0097,"Molecular Functions",0.2
+"23","LOC111128971","GO:0003725","double-stranded RNA binding",25,1,0.05,0.0474,"Molecular Functions",0.04
+"24","LOC111128971","GO:0003726","double-stranded RNA adenosine deaminase activity",4,1,0.01,0.0077,"Molecular Functions",0.25
+"25","LOC111128971","GO:0008251","tRNA-specific adenosine deaminase activity",6,1,0.01,0.0116,"Molecular Functions",0.166666666666667
+"26","LOC111133635","GO:0016286","small conductance calcium-activated potassium channel activity",10,1,0.02,0.0192,"Molecular Functions",0.1
+"27","LOC111136999","GO:0001591","dopamine neurotransmitter receptor activity, coupled via Gi/Go",3,1,0.01,0.0058,"Molecular Functions",0.333333333333333

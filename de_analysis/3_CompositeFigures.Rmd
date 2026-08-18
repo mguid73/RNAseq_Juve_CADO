@@ -1,0 +1,477 @@
+---
+title: "Composite Figures for Chapter 3 Juvenile CADO"
+author: "Megan Delatte-Guidry"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# PCA plots
+Using these DESeq2 datasets for both PCA and Heatmaps
+
+## PHASE I
+```{r}
+# prettier pca
+pcaData <- plotPCA(vsd1, intgroup=c("treatment"), returnData=TRUE)
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+percentVar
+pca1 <- ggplot(pcaData, aes(PC1, PC2, color=treatment, label=name)) +
+  geom_point(aes(fill=treatment), pch = 21, size = 7, color= "black") +
+  #geom_text() +
+  #coord_fixed() + 
+  ylab("PC2: 15% Variance Explained") +
+  xlab("PC1:35% Variance Explained") +
+  labs(title = "PCA of 298 significant DEGs") +
+  annotate("text", x = -3, y = 1, label = "control", color = "#A29BAD", fontface="bold", size = 6) +
+  annotate("text", x = 3, y = 2.5, label = "stress", color = "#D29F13", fontface="bold", size = 6) +
+  #theme_linedraw() +
+  scale_fill_manual(values = c(control="#A29BAD", stress ="#D29F13")) +
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "none",
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.major.y = element_blank(),
+    plot.title=element_text(face ="bold", hjust = 0.5, size = 12, color="black"),
+    axis.title=element_text(face="bold", size=12, color="black"),
+    axis.text=element_text(size=12, color="black"), 
+    axis.text.x = element_text(size = 12),
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+    #panel.background = element_rect(fill = alpha("white", 0.1))
+    )
+print(pca1)
+```
+
+## PHASE II
+```{r}
+# prettier pca
+pcaData <- plotPCA(vsd2, intgroup=c("treatment"), returnData=TRUE)
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+percentVar
+pca2 <- ggplot(pcaData, aes(PC1, PC2, color=treatment, label=name)) +
+  geom_point(aes(fill=treatment), pch = 21, size = 7, color= "black") +
+  #geom_text() +
+  #coord_fixed() + 
+  ylab("PC2: 8% Variance Explained") +
+  xlab("PC1:33% Variance Explained") +
+  labs(title = "PCA of 1468 significant DEGs") +
+  #theme_linedraw() +
+  annotate("text", x = -15, y = 20, label = "control", color = "#A29BAD", fontface="bold", size = 6) +
+  annotate("text", x = 50, y = 10, label = "stress", color = "#D29F13", fontface="bold", size = 6) +
+  annotate("text", x = -30, y = -10, label = "naive", color = "#6BA84C", fontface="bold", size = 6) +
+  annotate("text", x = 5, y = -38, label = "recovery", color = "#65A6E2", fontface="bold", size = 6) +
+  scale_fill_manual(values = c(control="#A29BAD", stress ="#D29F13", naive= "#6BA84C", recovery= "#65A6E2")) +
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "none",
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.major.y = element_blank(),
+    plot.title=element_text(face = "bold", hjust = 0.5, size=12, color="black"),
+    axis.title=element_text(face = "bold", size=12, color="black"),
+    axis.text=element_text(size=12, color="black"), 
+    axis.text.x = element_text(size = 12),
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 1)
+    #panel.background = element_rect(fill = alpha("white", 0.1))
+    ); print(pca2)
+
+#ggsave("pca_plots/Phase2_PCA_glam.png", plot = pca2, width = 8, height =8, units = "in", dpi = 300)
+```
+
+
+
+# Heatmaps
+## PHASE I
+```{r}
+sig.num <- sum(combine1$padj <0.00001, na.rm=T) #set the p value cut off very low here, 54 of 298
+sum(combine1$padj <0.00001, na.rm=T)
+sum(combine1$padj!=0)
+topVarGenes <- head(order(rowVars(assay(vsd1)),decreasing=TRUE),sig.num) #sort by decreasing sig
+mat <- assay(vsd1)[ topVarGenes, ] #make an expression object
+mat <- mat - rowMeans(mat) #difference in expression compared to average across all samples
+#col.order <- c("CASE_J03", "CASE_J09", "CASE_J12", "CASE_J13", "CA_J06",   "CA_J08",   "CA_J11",   "CA_J18",   "CON_J02",  "CON_J05" , "CON_J10" , "SE_J01" ,  "SE_J04",   "SE_J07")
+#mat <- mat[,col.order]
+df1 <- as.data.frame(colData(vsd1)[c("treatment")]) #make dataframe for column naming 
+
+
+colfunc <- colorRampPalette(c("deepskyblue", "white", "violetred3")) #make function for the color gradient 
+ann_colors <- list( treatment= c(control="#A29BAD", stress ="#D29F13"))
+breakss <- c(-2, -1.9, -1.8, -1.7, -1.6, -1.5, -1.4, -1.3, -1.2, -1.1, -1, -.9, -.8, -.7, -.6, -.5, -.4, -.3, -.2, -.1, 0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2) #this looks very extra but this is how the colors in the heatmap were broken up 
+
+heatmap1 <- pheatmap(mat, annotation_col=df1, annotation_colors=ann_colors, annotation_names_col = F, clustering_method = "average", 
+         clustering_distance_rows="euclidean", show_rownames =FALSE, cluster_cols=F,
+         show_colnames =F, breaks= breakss, color = colfunc(40), annotation_legend = F) 
+```
+
+## PHASE II
+```{r}
+library(ggplotify)
+sig.num <- sum(combine2$padj <0.00001, na.rm=T) #set the p value cut off very low here, 1174 of 9060
+sum(combine2$padj <0.00001, na.rm=T)
+sum(combine2$padj!=0)
+topVarGenes <- head(order(rowVars(assay(vsd2)),decreasing=TRUE),sig.num) #sort by decreasing sig
+mat <- assay(vsd2)[ topVarGenes, ] #make an expression object
+mat <- mat - rowMeans(mat) #difference in expression compared to average across all samples
+#col.order <- c("CASE_J03", "CASE_J09", "CASE_J12", "CASE_J13")
+#mat <- mat[,col.order]
+df2 <- as.data.frame(colData(vsd2)[c("treatment")]) #make dataframe for column naming 
+
+colfunc <- colorRampPalette(c("#7A9EA8", "white", "#C47A8A")) #make function for the color gradient 
+ann_colors <- list( treatment= c(control="#A29BAD", stress ="#D29F13", naive= "#6BA84C", recovery= "#65A6E2"))
+breakss <- c(-2, -1.9, -1.8, -1.7, -1.6, -1.5, -1.4, -1.3, -1.2, -1.1, -1, -.9, -.8, -.7, -.6, -.5, -.4, -.3, -.2, -.1, 0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2) #this looks very extra but this is how the colors in the heatmap were broken up 
+
+heatmap2 <- pheatmap(mat, annotation_col=df2, annotation_colors=ann_colors, annotation_names_col = F, clustering_method = "average", 
+         clustering_distance_rows="euclidean", show_rownames =FALSE, cluster_cols=F,
+         show_colnames =F, breaks= breakss, color = colfunc(40), annotation_legend = F)
+
+# tab <- table(df2$treatment)
+# labels <- names(tab)
+# counts <- as.numeric(tab)
+# centers <- cumsum(counts) - counts/2
+# 
+# label_df <- data.frame(
+#   treatment = labels,
+#   center = centers,
+#   color = ann_colors$treatment[labels]
+# )
+# 
+# str(label_df)
+# 
+# treatment_strip <- ggplot(label_df, aes(x = center, y = 1, label = treatment)) +
+#   geom_text(aes(color = color), size = 5, fontface = "bold", show.legend = FALSE) +
+#   scale_color_identity() +
+#   scale_x_continuous(limits = c(0, ncol(mat))) +
+#   # scale_x_continuous(
+#   #   limits = c(1, ncol(mat)),   # <-- KEY CHANGE
+#   #   expand = c(0, 0)) +
+#   # coord_cartesian(clip = "off") +
+#   theme_void() +
+#   theme(
+#     plot.margin = margin(0, 6, -6, 6)
+#   )
+# 
+# h2 <- as.ggplot(heatmap2)
+# 
+# heatmap2_labeled <- treatment_strip / h2 +
+#   plot_layout(heights = c(0.07, 1))
+
+print(heatmap2)
+
+# Export to PNG at a specific size
+ggsave("heatmaps/heatmap_glam.png", plot = heatmap2, width = 8, height =8, units = "in", dpi = 300)
+```
+
+
+
+
+# topGO plots
+## PHASE I
+```{r}
+# read data
+up_regulated <- read.csv("../volcano_plots/GO_enrichment/p1_UP_genes_GO_enrichment.csv", header = TRUE)
+down_regulated <- read.csv("../volcano_plots/GO_enrichment/p1_DOWN_genes_GO_enrichment.csv", header = TRUE)
+
+# Add regulation direction column
+up_regulated$Regulation <- "Up-regulated"
+down_regulated$Regulation <- "Down-regulated"
+
+# Select top GO terms separately before combining
+top_up <- up_regulated %>%
+  arrange(Fisher) %>%
+  slice_head(n = 5)
+
+top_down <- down_regulated %>%
+  arrange(Fisher) %>%
+  slice_head(n = 5)
+
+# Combine the pre-filtered datasets
+combined_data <- rbind(top_up, top_down)
+
+# Prepare data for mirrored barplot
+top_terms_mirror <- combined_data %>%
+  mutate(prop.sig.genes = ifelse(Regulation == "Down-regulated", 
+                                  -prop.sig.genes, 
+                                  prop.sig.genes))
+
+# Create mirrored barplot
+topGO1 <- ggplot(top_terms_mirror, aes(x = reorder(Term, abs(prop.sig.genes)), 
+                                    y = prop.sig.genes, 
+                                    fill = Regulation)) +
+  geom_col(width = 0.7, alpha = 0.8) +
+  geom_hline(yintercept = 0, color = "black", linewidth = 0.8) +
+  scale_fill_manual(values = c("Up-regulated" = "#C47A8A", 
+                                "Down-regulated" = "#7A9EA8")) +
+  coord_flip() +
+  theme_minimal() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold"),
+    axis.title = element_text(face = "bold"),
+    axis.text = element_text(color = "black"),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    plot.title=element_text(face = "bold", hjust = 0.5, size = 12, color="black")
+  ) +
+  scale_y_continuous(labels = abs) +
+  labs(
+    x = "GO terms",
+    y = "Proportion of Significant Genes",
+    title = "Top Enriched GO Terms Among Significant DEGs",
+    fill = "Regulation"
+  )
+
+print(topGO1)
+```
+
+
+
+# Volcano plots 
+## PHASE I
+
+```{r}
+deg1_clean <- read.csv("../volcano_plots/outputs/PHASE1_volcano_plot_data.csv")
+
+# Create a basic volcano plot with adjusted p-values (to account for multiple hypothesis testing)
+vol_str1 <- ggplot(data = deg1_clean, aes(x = log2FoldChange, y = -log10(padj), fill = diffexpressed))  +
+  #add threshold lines (these are mostly arbitrarily chosen)
+  geom_vline(xintercept = c(-0.8, 0.8), col = "gray", linetype = 'dashed') +
+  #chose a pretty stringent p-value cut off 
+  geom_hline(yintercept = -log10(0.001), col = "gray", linetype = 'dashed') +
+  geom_point(pch=21, size = 3) +
+  annotate("text", x = -10, y = 10, label = "Downregulated", color = "#7A9EA8", size = 6) +
+  annotate("text", x = 10, y = 10, label = "Upregulated", color = "#C47A8A", size = 6) +
+  # to set the colours of our variable
+  scale_fill_manual(values = c("#7A9EA8", "grey", "#C47A8A")) +
+                     # to set the labels in case we want to overwrite the categories from the dataframe (UP, DOWN, NO)
+                     #labels = c("Downregulated", "Not significant", "Upregulated")) #removed legend
+  labs(title = "Phase I Differential Expression") +
+  # Biostatsquid theme
+  theme_set(theme_classic(base_size = 12) +
+              theme(
+              axis.title.y = element_text(face = "bold",
+                                          margin = margin(0,20,0,0),
+                                          size = rel(1.1),
+                                          color = 'black'),
+              axis.title.x = element_text(hjust = 0.5,
+                                          face = "bold",
+                                          margin = margin(20,0,0,0),
+                                          size = rel(1.1),
+                                          color = 'black'),
+              plot.title=element_text(face = "bold", hjust = 0.5, size = 12, color="black"),
+              legend.position = "none"
+              #legend.title = element_blank()
+            )); print(vol_str1)
+```
+
+
+## PHASE II
+```{r}
+# read in data for plots
+deg2_str_clean <- read.csv("../volcano_plots/outputs/PHASE2_STRESS_volcano_plot_data.csv")
+deg2_rec_clean <- read.csv("../volcano_plots/outputs/PHASE2_RECOVERY_volcano_plot_data.csv")
+deg2_nai_clean <- read.csv("../volcano_plots/outputs/PHASE2_NAIVE_volcano_plot_data.csv")
+
+# PHASE 2 - STRESS
+vol_str2 <- ggplot(data = deg2_str_clean, aes(x = log2FoldChange, y = -log10(padj), fill = diffexpressed))  +
+  #add threshold lines (these are mostly arbitrarily chosen)
+  geom_vline(xintercept = c(-0.8, 0.8), col = "gray", linetype = 'dashed') +
+  #chose a pretty stringent p-value cut off 
+  geom_hline(yintercept = -log10(0.001), col = "gray", linetype = 'dashed') +
+  geom_point(pch=21, size = 3) +
+  annotate("text", x = -10, y = 10, label = "Downregulated", color = "cornflowerblue", size = 6) +
+  annotate("text", x = 10, y = 10, label = "Upregulated", color = "maroon", size = 6) +
+  annotate("text", x= -20, y= 28, label = "Stress", size = 10) +
+  # to set the colours of our variable
+  scale_fill_manual(values = c("cornflowerblue", "grey", "maroon")) 
+                     # to set the labels in case we want to overwrite the categories from the dataframe (UP, DOWN, NO)
+                     #labels = c("Downregulated", "Not significant", "Upregulated")) #removed legend
+  # Biostatsquid theme
+  theme_set(theme_classic(base_size = 20) +
+              theme(
+              axis.title.y = element_text(face = "bold",
+                                          margin = margin(0,20,0,0),
+                                          size = rel(1.1),
+                                          color = 'black'),
+              axis.title.x = element_text(hjust = 0.5,
+                                          face = "bold",
+                                          margin = margin(20,0,0,0),
+                                          size = rel(1.1),
+                                          color = 'black'),
+              plot.title = element_text(hjust = 0.5),
+              legend.position = "none"
+              #legend.title = element_blank()
+            ))
+  
+# PHASE 2 - RECOVERY
+vol_rec2 <- ggplot(data = deg2_rec_clean, aes(x = log2FoldChange, y = -log10(padj), fill = diffexpressed))  +
+  #add threshold lines (these are mostly arbitrarily chosen)
+  geom_vline(xintercept = c(-0.8, 0.8), col = "gray", linetype = 'dashed') +
+  #chose a pretty stringent p-value cut off 
+  geom_hline(yintercept = -log10(0.001), col = "gray", linetype = 'dashed') +
+  geom_point(pch=21, size = 3) +
+  annotate("text", x = -10, y = 10, label = "Downregulated", color = "cornflowerblue", size = 6) +
+  annotate("text", x = 10, y = 10, label = "Upregulated", color = "maroon", size = 6) +
+  annotate("text", x= -20, y= 28, label = "Stress", size = 10) +
+  # to set the colours of our variable
+  scale_fill_manual(values = c("cornflowerblue", "grey", "maroon")) 
+                     # to set the labels in case we want to overwrite the categories from the dataframe (UP, DOWN, NO)
+                     #labels = c("Downregulated", "Not significant", "Upregulated")) #removed legend
+  # Biostatsquid theme
+  theme_set(theme_classic(base_size = 20) +
+              theme(
+              axis.title.y = element_text(face = "bold",
+                                          margin = margin(0,20,0,0),
+                                          size = rel(1.1),
+                                          color = 'black'),
+              axis.title.x = element_text(hjust = 0.5,
+                                          face = "bold",
+                                          margin = margin(20,0,0,0),
+                                          size = rel(1.1),
+                                          color = 'black'),
+              plot.title = element_text(hjust = 0.5),
+              legend.position = "none"
+              #legend.title = element_blank()
+            ))
+  
+# PHASE 2 - NAIVE
+vol_nai2 <- ggplot(data = deg2_nai_clean, aes(x = log2FoldChange, y = -log10(padj), fill = diffexpressed))  +
+  #add threshold lines (these are mostly arbitrarily chosen)
+  geom_vline(xintercept = c(-0.8, 0.8), col = "gray", linetype = 'dashed') +
+  #chose a pretty stringent p-value cut off 
+  geom_hline(yintercept = -log10(0.001), col = "gray", linetype = 'dashed') +
+  geom_point(pch=21, size = 3) +
+  annotate("text", x = -10, y = 10, label = "Downregulated", color = "cornflowerblue", size = 6) +
+  annotate("text", x = 10, y = 10, label = "Upregulated", color = "maroon", size = 6) +
+  annotate("text", x= -20, y= 28, label = "Stress", size = 10) +
+  # to set the colours of our variable
+  scale_fill_manual(values = c("cornflowerblue", "grey", "maroon")) 
+                     # to set the labels in case we want to overwrite the categories from the dataframe (UP, DOWN, NO)
+                     #labels = c("Downregulated", "Not significant", "Upregulated")) #removed legend
+  # Biostatsquid theme
+  theme_set(theme_classic(base_size = 20) +
+              theme(
+              axis.title.y = element_text(face = "bold",
+                                          margin = margin(0,20,0,0),
+                                          size = rel(1.1),
+                                          color = 'black'),
+              axis.title.x = element_text(hjust = 0.5,
+                                          face = "bold",
+                                          margin = margin(20,0,0,0),
+                                          size = rel(1.1),
+                                          color = 'black'),
+              plot.title = element_text(hjust = 0.5),
+              legend.position = "none"
+              #legend.title = element_blank()
+            ))
+```
+
+
+
+
+# Venn Diagram
+## PHASE II
+```{r}
+# install.packages("ggVennDiagram")
+# install.packages("ggplot2")
+
+library(ggVennDiagram)
+library(ggplot2)
+
+# Create unique element IDs for each region
+stress_only      <- paste0("S", 1:542)
+recovery_only    <- paste0("R", 1:268)
+naive_only       <- paste0("N", 1:324)
+
+stress_recovery  <- paste0("SR", 1:186)
+stress_naive     <- paste0("SN", 1:4)
+recovery_naive   <- paste0("RN", 1:122)
+
+all_three        <- paste0("SRN", 1:22)
+
+# Build list
+venn_list <- list(
+  Recovery = c(recovery_only, stress_recovery, recovery_naive, all_three),
+  Naïve    = c(naive_only, stress_naive, recovery_naive, all_three),
+  Stress   = c(stress_only, stress_recovery, stress_naive, all_three)
+)
+
+ggVennDiagram(venn_list, label = "count") +
+  scale_fill_gradient(low = "white", high = "white") +
+  scale_color_manual(values = c("#6FA8DC", "#6AA84F", "#D8A028")) +
+  theme(
+    text = element_text(family = "Helvetica", face = "bold", size = 14),
+    legend.position = "none"
+  )
+```
+
+
+
+
+# COMPOSITE FIGURES
+
+## PHASE I 
+
+```{r}
+top_design <- "
+AAB
+AAB
+"
+top_row <- vol_str1 + pca1 +
+  plot_layout(design = top_design)
+
+ge_phase1 <- top_row / free(topGO1) +
+  plot_annotation(tag_levels = "a", tag_suffix = ")")
+print(ge_phase1)
+# Export to PNG at a specific size
+ggsave("../Composite_Figures/PhaseI_GE.png", plot = ge_phase1, width = 12, height =8, units = "in", dpi = 300)
+```
+
+## PHASE II
+
+```{r}
+library(ggplot2)
+library(patchwork)
+library(png)
+library(grid)
+
+# Load your PNG
+vd <- readPNG("outputs/venn_diagram_w_title.png")
+ht <- readPNG("heatmaps/Phase2_heatmap_glam_labeled_w_title.png")
+pd <- readPNG("outputs/path_diagram_w_titles.png")
+
+# Convert each PNG to a ggplot object
+vd <- ggplot() +
+  annotation_raster(vd, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf) +
+  theme_void()
+ht <- ggplot() +
+  annotation_raster(ht, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf) +
+  theme_void()
+pd <- ggplot() +
+  annotation_raster(pd, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf) +
+  theme_void()
+```
+
+```{r}
+# Combine with image using patchwork
+#ge_phase2 <- pca2 | vd | ht
+
+phase2_design <- "
+AAABBCCCC
+AAABBCCCC
+DDDDDCCCC
+DDDDDCCCC
+"
+ge_phase2 <- (pca2 | vd | ht | pd) +
+  plot_layout(design = phase2_design) +
+  plot_annotation(tag_levels = "a", tag_suffix = ")")
+print(ge_phase2)
+
+# Export to PNG at a specific size
+ggsave("../Composite_Figures/Phase2_GE.png", plot = ge_phase2, width = 16, height =8, units = "in", dpi = 300)
+```
+

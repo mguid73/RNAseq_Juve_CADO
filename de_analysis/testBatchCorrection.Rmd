@@ -1,0 +1,358 @@
+---
+title: "TestBatchCorrection"
+author: "Megan Delatte-Guidry"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# Investigation of batch correction effect on PCA of global gene expression
+
+This analysis evaluates the impact of batch correction on global gene expression patterns by introducing randomly assigned “fake” batch labels across samples. PCA was performed before and after applying limma-based batch correction using these randomized groupings to assess whether correction artificially alters expression structure.
+
+The results show minimal change in PCA structure following correction with fake batches, indicating that limma does not introduce spurious patterns in the absence of true batch effects. This serves as a sanity check for the batch correction approach used in DESeq2_analysis.Rmd, where a five-batch model (representing sequencing lanes) was applied.
+
+In that analysis, batch-corrected PCA revealed treatment-specific clustering. Because treatments were not evenly distributed across sequencing lanes, this raised the possibility of confounding between lane and treatment effects. However, the stability of PCA structure under random batch correction supports the conclusion that observed clustering reflects true biological signal rather than technical artifacts. Overall, these results provide confidence that the lane-based batch correction is appropriate and that global expression patterns—particularly in phase II—are biologically meaningful rather than driven by sequencing lane effects.
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Load libraries
+```{r, message=FALSE, warning=FALSE}
+library(DESeq2)
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(reshape2)
+library(apeglm)
+library(ggplot2)
+library(vsn)
+library(pheatmap)
+library(RColorBrewer)
+library(genefilter)
+library(rsconnect)
+library(gplots)
+library(ashr)
+library(limma)
+```
+
+## Load in data
+```{r}
+# load in metadata
+fsi <- read.csv("juve_cado_metadata_w_fake_batches.csv", header=TRUE, sep=",", row.names=1)
+head(fsi)
+tail(fsi)
+```
+
+```{r}
+# load in gene count matrix and set the row names header as "gene_id"
+#gene_counts <- as.data.frame(read.csv("gene_count_matrix.csv", row.names="gene_id"))
+gene_counts <- read.csv("gene_count_matrix.csv", row.names = 1, check.names = FALSE)
+head(rownames(gene_counts))
+head(gene_counts[,1:6])
+```
+
+## Check sample names
+Manual: "It is absolutely critical that the columns of the count matrix and the rows of the column data (information about samples) are in the same order. DESeq2 will not make guesses as to which column of the count matrix belongs to which row of the column data, these must be provided to DESeq2 already in consistent order."  
+
+The sample names in `fsi` and `gene_counts` have to match up and be in the exact same order!
+```{r}
+# remove the "_F" in the column names of `gene_counts`
+colnames(gene_counts) <- sub("_F", "", colnames(gene_counts))
+head(gene_counts)
+
+#check that the sample names are the same in both places
+all(rownames(fsi) %in% colnames(gene_counts))
+#check the order of the samples
+all(rownames(fsi) == colnames(gene_counts))
+```
+
+## Subsetting data into PHASE I and PHASE II
+```{r}
+# subset metadata ('fsi') first
+fsi <- tibble::rownames_to_column(fsi, var = "sample.name")
+
+p1_fsi <- subset(fsi, phase=="phase1")
+p2_fsi <- subset(fsi, phase=="phase2")
+dim(p1_fsi)
+dim(p2_fsi)
+
+#split count matrix based on names in each metadata variable
+p1_gene_counts <- gene_counts[, p1_fsi$sample.name]
+dim(p1_gene_counts)
+p2_gene_counts <- gene_counts[, p2_fsi$sample.name]
+dim(p2_gene_counts)
+```
+
+
+## Pre-filtering with genefilter
+While pre-filtering of low count genes isn't necessary, it can be useful for 2 reasons:    
+1. reduce size of the `dds` data object (thus increase speed of count modeling).  
+2. improve visualizations by making them a little cleaner
+```{r}
+###filtering values for PoverA
+#set filter values for PoverA (P percent of the samples have counts over A)
+# here P = 0.04 and A = 5 (4% of samples would be 3 out of 72 samples)
+filt <- filterfun(pOverA(0.04,5))
+
+#create filter for the counts data
+tfil <- genefilter(gene_counts, filt)
+p1_tfil <- genefilter(p1_gene_counts, filt)
+p2_tfil <- genefilter(p2_gene_counts, filt)
+
+#identify transcripts to keep by count filter
+keep <- gene_counts[tfil,]
+p1_keep <- p1_gene_counts[p1_tfil,]
+p2_keep <- p2_gene_counts[p2_tfil,]
+
+#identify gene names in transcript list to keep
+gn.keep <- rownames(keep)
+p1_gn.keep <- rownames(p1_keep)
+p2_gn.keep <- rownames(p2_keep)
+
+#data filtered in PoverA, P percent of the samples have counts over A
+filt_gene_counts <- as.data.frame(gene_counts[which(rownames(gene_counts) %in% gn.keep),])
+#write.csv(filt_gene_counts, file="filtered_gene_count_matrix.csv")
+head(filt_gene_counts,10)
+
+p1_filt_gene_counts <- as.data.frame(p1_gene_counts[which(rownames(p1_gene_counts) %in% p1_gn.keep),])
+#write.csv(p1_filt_gene_counts, file="p1_filtered_gene_count_matrix.csv")
+head(p1_filt_gene_counts,10)
+
+p2_filt_gene_counts <- as.data.frame(p2_gene_counts[which(rownames(p2_gene_counts) %in% p2_gn.keep),])
+#write.csv(p2_filt_gene_counts, file="p2_filtered_gene_count_matrix.csv")
+head(p2_filt_gene_counts,10)
+```
+#> nrow(gene_counts)
+#[1] 97257
+#> nrow(filt_gene_counts)
+#[1] 70981
+
+# Global Transcriptome vizualization
+
+## Global transcriptome across both phases 
+
+Build DeseqDataSet 
+```{r}
+#set batch numbers as factors 
+fsi$batch <- factor(fsi$batch, levels = c("1", "2", "3", "4", "5"))
+#fsi$batch <- factor(fsi$batch, levels = c("1", "2"))
+
+# actually build the DESeq dataset
+fbg_dds <- DESeqDataSetFromMatrix(countData = filt_gene_counts,
+                             colData = fsi, 
+                             design = ~1) # ~1 means there is no design
+
+# apply variance transformation
+fbg_vsdds <- vst(fbg_dds, blind = TRUE)
+
+#limma removeBatchEffect()
+#mat1 <- assay(fbg_vsdds)
+#mm1 <- model.matrix(~treatment, colData(fbg_vsdds))
+#mat1 <- limma::removeBatchEffect(mat1, batch=fbg_vsdds$batch, design=mm1)
+#assay(fbg_vsdds) <- mat1
+
+# plot
+plotPCA(fbg_vsdds, intgroup = "batch")
+```
+limma corrected vs non-limma corrected fancy pca
+```{r}
+pcaData <- plotPCA(fbg_vsdds,
+                   intgroup = c("batch"),
+                   returnData = TRUE)
+
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+
+ggplot(pcaData,
+       aes(x = PC1, y = PC2,
+           color = batch)) +    
+  geom_point(aes(color=batch), size = 4, alpha=.75) +
+  coord_fixed() +
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+  theme(
+    #legend.position = "none",
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.major.y = element_blank(),
+    axis.title=element_text(face="bold", size=20, color="black"),
+    axis.text=element_text(size=20, color="black"), 
+    axis.text.x = element_text(size = 20),
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+    panel.background = element_rect(fill = alpha("white", 0.1))
+    )
+
+ggsave("pca_plots/NOTcorrected_fakebatch_allsamples_bybatch.png", last_plot())
+```
+
+Let's get a better look with a fancier biplot
+```{r}
+# get PCA data from DESeq2
+pcaData <- plotPCA(fbg_vsdds,
+                   intgroup = c("treatment", "phase"),
+                   returnData = TRUE)
+
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+
+ggplot(pcaData,
+       aes(x = PC1, y = PC2,
+           fill = treatment,    # fill by treatment
+           shape = phase)) +     # shape by phase (your stress variable)
+  geom_point(aes(fill=treatment), size = 4, alpha=.75, colour= "black") +
+  scale_fill_manual(values = c(
+    control  = "#A29BAD",
+    stress   = "#D29F13",
+    naive    = "#6BA84C",
+    recovery = "#65A6E2"
+  )) +
+  scale_shape_manual(values = c(
+    phase1 = 21,
+    phase2 = 23
+  )) +
+  guides(
+    fill = guide_legend(
+      override.aes = list(
+        shape  = 21,        # ensure fillable shape in legend
+        colour = "black"    # black outline in legend keys
+      )
+    )
+  ) +
+  coord_fixed() +
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+  theme(
+    #legend.position = "none",
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.major.y = element_blank(),
+    axis.title=element_text(face="bold", size=20, color="black"),
+    axis.text=element_text(size=20, color="black"), 
+    axis.text.x = element_text(size = 20),
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+    panel.background = element_rect(fill = alpha("white", 0.1))
+    )
+
+ggsave("pca_plots/NOTcorrected_fakebatch_allsamples_bytreatmentphase.png", last_plot())
+```
+
+
+## Phase I global expression
+```{r}
+
+p1_fsi$batch <- factor(p1_fsi$batch, levels = c("1", "2", "3", "4", "5"))
+
+# actually build the DESeq dataset
+fbg_dds_1 <- DESeqDataSetFromMatrix(countData = p1_filt_gene_counts,
+                             colData = p1_fsi, 
+                             design = ~1) # ~1 means there is no design
+
+# apply variance transformation
+fbg_vsdds_1 <- vst(fbg_dds_1, blind = TRUE)
+
+#limma removeBatchEffect()
+#mat1 <- assay(fbg_vsdds_1)
+#mm1 <- model.matrix(~treatment, colData(fbg_vsdds_1))
+#mat1 <- limma::removeBatchEffect(mat1, batch=fbg_vsdds_1$batch, design=mm1)
+#assay(fbg_vsdds_1) <- mat1
+
+# plot
+plotPCA(fbg_vsdds_1, intgroup = "treatment")
+```
+Let's get a better look with a fancier biplot
+```{r}
+# get PCA data from DESeq2
+pcaData <- plotPCA(fbg_vsdds_1,
+                   intgroup = c("treatment"),
+                   returnData = TRUE)
+
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+
+ggplot(pcaData,
+       aes(x = PC1, y = PC2,
+           fill = treatment))+   # fill by treatment
+  geom_point(aes(fill=treatment), size = 4, alpha=.75, shape=21) +
+  scale_fill_manual(values = c(
+    control  = "#A29BAD",
+    stress   = "#D29F13"
+  )) +
+  coord_fixed() +
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+  theme(
+    #legend.position = "none",
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.major.y = element_blank(),
+    axis.title=element_text(face="bold", size=20, color="black"),
+    axis.text=element_text(size=20, color="black"), 
+    axis.text.x = element_text(size = 20),
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+    panel.background = element_rect(fill = alpha("white", 0.1))
+    )
+
+ggsave("pca_plots/p1_NOTcorrected_fakebatch_bytreatment.png", last_plot())
+```
+
+
+
+## Phase II global expression
+```{r}
+#set batch numbers as factors 
+p2_fsi$batch <- factor(p2_fsi$batch, levels = c("1","2", "3", "4", "5"))
+#p2_fsi$batch <- factor(p2_fsi$batch, levels = c("1", "2"))
+
+# build the DESeq dataset
+fbg_dds_2 <- DESeqDataSetFromMatrix(countData = p2_filt_gene_counts,
+                             colData = p2_fsi, 
+                             design = ~1) # ~1 means there is no design
+
+# apply variance transformation
+fbg_vsdds_2 <- vst(fbg_dds_2, blind = TRUE)
+
+#limma removeBatchEffect()
+mat2 <- assay(fbg_vsdds_2)
+mm2 <- model.matrix(~treatment, colData(fbg_vsdds_2))
+mat2 <- limma::removeBatchEffect(mat2, batch=fbg_vsdds_2$batch, design=mm2)
+assay(fbg_vsdds_2) <- mat2
+
+# plot
+plotPCA(fbg_vsdds_2, intgroup = "treatment")
+```
+
+Let's get a better look with a fancier biplot
+```{r}
+# get PCA data from DESeq2
+pcaData <- plotPCA(fbg_vsdds_2,
+                   intgroup = c("treatment"),
+                   returnData = TRUE)
+
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+
+ggplot(pcaData,
+       aes(x = PC1, y = PC2,
+           fill = treatment)) +     # 
+  geom_point(aes(fill=treatment), size = 4, alpha=.75, shape = 21) +
+  scale_fill_manual(values = c(
+    control  = "#A29BAD",
+    stress   = "#D29F13",
+    naive    = "#6BA84C",
+    recovery = "#65A6E2"
+  )) +
+  coord_fixed() +
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+  theme(
+    #legend.position = "none",
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.major.y = element_blank(),
+    axis.title=element_text(face="bold", size=20, color="black"),
+    axis.text=element_text(size=20, color="black"), 
+    axis.text.x = element_text(size = 20),
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+    panel.background = element_rect(fill = alpha("white", 0.1))
+    )
+
+ggsave("pca_plots/p2_corrected_fakebatch_bytreatment.png", last_plot())
+```

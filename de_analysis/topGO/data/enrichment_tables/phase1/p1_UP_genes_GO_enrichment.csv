@@ -1,0 +1,44 @@
+"","gene_id","GO_Annotation","Term","Annotated","Significant","Expected","Fisher","ontology","prop.sig.genes"
+"1","LOC111103611","GO:0000079","regulation of cyclin-dependent protein serine/threonine kinase activity",31,1,0.04,0.0391,"Biological Processes",0.032258064516129
+"2","LOC111103611","GO:1900087","positive regulation of G1/S transition of mitotic cell cycle",2,1,0,0.0026,"Biological Processes",0.5
+"3","LOC111105688","GO:0000245","spliceosomal complex assembly",21,1,0.03,0.0267,"Biological Processes",0.0476190476190476
+"4","LOC111105688","GO:0050684","regulation of mRNA processing",32,1,0.04,0.0403,"Biological Processes",0.03125
+"5","LOC111108535","GO:0055088","lipid homeostasis",22,1,0.03,0.0279,"Biological Processes",0.0454545454545455
+"6","LOC111119460","GO:0043484","regulation of RNA splicing",36,1,0.05,0.0453,"Biological Processes",0.0277777777777778
+"7","LOC111125333","GO:0007026","negative regulation of microtubule depolymerization",5,1,0.01,0.0064,"Biological Processes",0.2
+"8","LOC111125333","GO:0031122","cytoplasmic microtubule organization",26,1,0.03,0.0329,"Biological Processes",0.0384615384615385
+"9","LOC111126062","GO:0032468","Golgi calcium ion homeostasis",2,1,0,0.0026,"Biological Processes",0.5
+"10","LOC111126062","GO:0032472","Golgi calcium ion transport",2,1,0,0.0026,"Biological Processes",0.5
+"11","LOC111126062","GO:0071421","manganese ion transmembrane transport",2,1,0,0.0026,"Biological Processes",0.5
+"12","LOC111133928","GO:0001666","response to hypoxia",8,1,0.01,0.0102,"Biological Processes",0.125
+"13","LOC111133928","GO:0035331","negative regulation of hippo signaling",1,1,0,0.0013,"Biological Processes",1
+"14","LOC111133928","GO:2000637","positive regulation of gene silencing by miRNA",1,1,0,0.0013,"Biological Processes",1
+"15","LOC111134680","GO:0006890","retrograde vesicle-mediated transport, Golgi to ER",23,1,0.03,0.0292,"Biological Processes",0.0434782608695652
+"16","LOC111135642","GO:0007417","central nervous system development",33,1,0.04,0.0416,"Biological Processes",0.0303030303030303
+"17","LOC111137023","GO:0006694","steroid biosynthetic process",32,1,0.04,0.0403,"Biological Processes",0.03125
+"18","LOC111103611","GO:0000307","cyclin-dependent protein kinase holoenzyme complex",25,1,0.02,0.0237,"Cellular Components",0.04
+"19","LOC111103611","GO:0005634","nucleus",3481,6,3.33,0.0279,"Cellular Components",0.00172364263142775
+"20","LOC111119460","GO:0005634","nucleus",3481,6,3.33,0.0279,"Cellular Components",0.00172364263142775
+"21","LOC111125333","GO:0036449","microtubule minus-end",2,1,0,0.0019,"Cellular Components",0.5
+"22","LOC111127981","GO:0000159","protein phosphatase type 2A complex",7,1,0.01,0.0067,"Cellular Components",0.142857142857143
+"23","LOC111127981","GO:0005634","nucleus",3481,6,3.33,0.0279,"Cellular Components",0.00172364263142775
+"24","LOC111133928","GO:0000932","P-body",39,1,0.04,0.0367,"Cellular Components",0.0256410256410256
+"25","LOC111133928","GO:0005634","nucleus",3481,6,3.33,0.0279,"Cellular Components",0.00172364263142775
+"26","LOC111133928","GO:0005912","adherens junction",48,1,0.05,0.045,"Cellular Components",0.0208333333333333
+"27","LOC111134680","GO:0030134","COPII-coated ER to Golgi transport vesicle",40,1,0.04,0.0376,"Cellular Components",0.025
+"28","LOC111135642","GO:0005634","nucleus",3481,6,3.33,0.0279,"Cellular Components",0.00172364263142775
+"29","LOC111103611","GO:0016538","cyclin-dependent protein serine/threonine kinase regulator activity",36,1,0.04,0.0361,"Molecular Functions",0.0277777777777778
+"30","LOC111105688","GO:0005524","ATP binding",1286,4,1.31,0.0384,"Molecular Functions",0.0031104199066874
+"31","LOC111117941","GO:0004714","transmembrane receptor protein tyrosine kinase activity",48,1,0.05,0.0479,"Molecular Functions",0.0208333333333333
+"32","LOC111117941","GO:0005524","ATP binding",1286,4,1.31,0.0384,"Molecular Functions",0.0031104199066874
+"33","LOC111123885","GO:0005524","ATP binding",1286,4,1.31,0.0384,"Molecular Functions",0.0031104199066874
+"34","LOC111125333","GO:0005516","calmodulin binding",35,1,0.04,0.0351,"Molecular Functions",0.0285714285714286
+"35","LOC111125333","GO:0030507","spectrin binding",2,1,0,0.002,"Molecular Functions",0.5
+"36","LOC111125333","GO:0051011","microtubule minus-end binding",11,1,0.01,0.0112,"Molecular Functions",0.0909090909090909
+"37","LOC111125991","GO:0008048","calcium sensitive guanylate cyclase activator activity",1,1,0,0.001,"Molecular Functions",1
+"38","LOC111126062","GO:0005384","manganese ion transmembrane transporter activity",5,1,0.01,0.0051,"Molecular Functions",0.2
+"39","LOC111127981","GO:0072542","protein phosphatase activator activity",6,1,0.01,0.0061,"Molecular Functions",0.166666666666667
+"40","LOC111131917","GO:0005524","ATP binding",1286,4,1.31,0.0384,"Molecular Functions",0.0031104199066874
+"41","LOC111134324","GO:0008194","UDP-glycosyltransferase activity",122,2,0.12,0.0457,"Molecular Functions",0.0163934426229508
+"42","LOC111135642","GO:0001228","DNA-binding transcription activator activity, RNA polymerase II-specific",31,1,0.03,0.0312,"Molecular Functions",0.032258064516129
+"43","LOC111137023","GO:0003854","3-beta-hydroxy-delta5-steroid dehydrogenase activity",5,1,0.01,0.0051,"Molecular Functions",0.2
