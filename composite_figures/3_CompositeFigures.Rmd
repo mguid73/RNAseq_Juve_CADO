@@ -430,7 +430,8 @@ top_row <- vol_str1 + pca1 +
   plot_layout(design = top_design)
 
 ge_phase1 <- top_row / free(topGO1) +
-  plot_annotation(tag_levels = "a", tag_suffix = ")")
+  plot_annotation(tag_levels = "a", tag_suffix = ")")&
+  theme(plot.tag = element_text(size = 20, face = "bold"))
 print(ge_phase1)
 # Export to PNG at a specific size
 ggsave("../Composite_Figures/PhaseI_GE.png", plot = ge_phase1, width = 12, height =8, units = "in", dpi = 300)
@@ -448,7 +449,7 @@ getwd()
 # Load your PNG
 vd <- readPNG("../de_analysis/venn_diagrams/venn_diagram_w_title.png")
 ht <- readPNG("../de_analysis/heatmaps/phase2_heatmap_glam_labeled_w_title.png")
-pd <- readPNG("path_diagram_w_titles.png")
+pd <- readPNG("images/path_diagram_w_titles.png")
 
 # Convert each PNG to a ggplot object
 vd <- ggplot() +
@@ -475,10 +476,11 @@ DDDDDCCCC
 
 ge_phase2 <- (pca2 | vd | ht | pd) +
   plot_layout(design = phase2_design) +
-  plot_annotation(tag_levels = "a", tag_suffix = ")")
+  plot_annotation(tag_levels = "a", tag_suffix = ")") &
+  theme(plot.tag = element_text(size = 20, face = "bold"))
 print(ge_phase2)
 
 # Export to PNG at a specific size
-ggsave("Figure4_Phase2_DEG.png", plot = ge_phase2, width = 16, height =8, units = "in", dpi = 300)
+ggsave("../manuscript_figures/Figure4_Phase2_DEG.png", plot = ge_phase2, width = 16, height =8, units = "in", dpi = 300)
 ```
 
