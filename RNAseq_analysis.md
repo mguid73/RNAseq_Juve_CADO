@@ -103,6 +103,19 @@ do
 done > number_of_raw_reads.txt
 ```
 
+Make a tsv with 2 columns (file and reads)
+```
+awk 'BEGIN {print "file\treads"}
+     /^File:/ {file = $2}
+     /^Reads:/ {print file "\t" $2}' number_of_raw_reads.txt > file_reads_table.tsv
+```
+
+Sum up the number total reads across the data set
+```
+total_reads=$(awk -F'\t' 'NR > 1 {sum += $2} END {print sum}' file_reads_table.tsv)
+echo "$total_reads"
+```
+
 ## 2. Raw read quality check
 **Purpose:** Establish a baseline of what the read quality looks like to help determine trimming parameters in the next step.
 
@@ -210,6 +223,28 @@ ll *.fastqc.zip | wc -l #check to make sure we have 144 files (2 per sample - fw
 multiqc . #output a multiqc report
 ```
 
+```
+for fq in *.fq.gz
+do
+    echo "File: $fq"
+    reads=$(zcat "$fq" | wc -l)
+    echo "Reads: $((reads / 4))"
+done > number_of_trimmed_reads.txt
+```
+
+Make a tsv with 2 columns (file and reads)
+```
+awk 'BEGIN {print "file\treads"}
+     /^File:/ {file = $2}
+     /^Reads:/ {print file "\t" $2}' number_of_trimmed_reads.txt > trimmedfile_reads_table.tsv
+```
+
+Sum up the number total reads across the data set
+```
+total_reads=$(awk -F'\t' 'NR > 1 {sum += $2} END {print sum}' trimmedfile_reads_table.tsv)
+echo "$total_reads"
+```
+
 ***Trimmed reads look good! The biggest change was in the Adapter content plot, as the adapter seqs were removed.***
 
 
@@ -289,6 +324,25 @@ for i in *.fq.gz.bam; do
     samtools flagstat ${i} | grep "mapped (" >> mapped_read_counts
     done
 ```
+pull out mapping percentages to a nice table!
+```
+printf "file\tpercent_mapped\tpercent_primary_mapped\n" > mapped_read_counts.tsv
+
+awk '
+/\.bam$/ {sub(/\_F.trim.fq.gz.bam$/,"",$0); file=$0}
+/ mapped \(/ && !/primary/ {
+    split($0,a,"[()]")
+    split(a[2],b," ")
+    mapped=b[1]
+}
+/ primary mapped \(/ {
+    split($0,a,"[()]")
+    split(a[2],b," ")
+    primary=b[1]
+    print file "\t" mapped "\t" primary
+}
+' mapped_read_counts >> mapped_read_counts.tsv
+```
 
 Find the min, max, and average of the mapping percentages
 ```
@@ -332,7 +386,65 @@ Average: 81.68%
 
 Alignment summaries stored in /mapping/summaries.
 
+### Checking out unmapped reads 
+```
+# install package for blast taxa id
+conda activate Ch3
+conda install -c bioconda entrez-direct
 
+# check install
+esearch -version
+xtract -help | head
+```
+
+```
+# extract unmapped reads from bam file (example)
+samtools view -b -f 4 hisat2.bam > unmapped.bam
+
+# convert unmapped reads into a fastq -> fasta file (example)
+bedtools bamtofastq -i unmapped.bam -fq unmapped.fastq
+seqtk seq -A unmapped.fastq > unmapped.fasta
+
+# BLAST 
+blastn -query unmapped.fasta -db nt -remote \
+  -max_target_seqs 10 -evalue 1e-10 -outfmt 6 \
+  -out unmapped_nt.tsv
+
+# Keep only best hit per query (highest bitscore)
+sort -k1,1 -k12,12nr unmapped_nt.tsv \
+  | awk '!seen[$1]++' > unmapped_nt.best.tsv
+
+# pull out accession ID
+cut -f2 unmapped_nt.best.tsv | sort -u > accessions.txt
+
+# Fetch GenBank records, then extract taxonomy lines 
+cat accessions.txt \
+| epost -db nuccore \
+| esummary \
+| xtract -pattern DocumentSummary \
+    -element AccessionVersion,Organism,Title > accession_organism_description.tsv
+
+# check for percentage of mitochondria related IDs
+total=$(wc -l < accession_organism_description.tsv)
+
+mito=$(awk -F'\t' '{print $3}' accession_organism_description.tsv \
+       | grep -i -E "mitochondrial|mitochondria|mitochondrion" | wc -l)
+
+percent=$(python - <<EOF
+total = $total
+mito = $mito
+print(100.0 * mito / total if total else 0)
+EOF
+)
+
+echo "Percent mitochondrial: $percent"
+```
+
+These workflow steps are also in the script `check_unmapped_reads.sh` where for a select few sample .bam files, I calculated the percent mitochondria-related reads for a subsample of 100k unmapped reads per samples. 
+
+Warning: [blastn] conversion_warning: Searches from this IP address have consumed a large amount of server CPU time. Future searches may be penalized in fairness to other users. Please consider the BLAST+ binaries: https://www.ncbi.nlm.nih.gov/books/NBK279690/ 
+
+Look into BLAST+
 
 ## 6. Assembly with [StringTie](https://ccb.jhu.edu/software/stringtie/index.shtml?t=manual)
 **Purpose:** Assemble the mapped reads with StringTie's network flow algorithm from multiple splice variants at a gene locus into probable transcripts. From there, transcript expression abundance can be quantified and analyzed.  
