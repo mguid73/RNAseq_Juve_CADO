@@ -1,0 +1,51 @@
+"","gene_id","GO_Annotation","Term","Annotated","Significant","Expected","Fisher","ontology","prop.sig.genes"
+"1","LOC111104020","GO:0023041","neuronal signal transduction",2,1,0.01,0.0057,"Biological Processes",0.5
+"2","LOC111105298","GO:0042744","hydrogen peroxide catabolic process",8,1,0.02,0.0225,"Biological Processes",0.125
+"3","LOC111105298","GO:0045454","cell redox homeostasis",13,1,0.04,0.0363,"Biological Processes",0.0769230769230769
+"4","LOC111106613","GO:0101030","tRNA-guanine transglycosylation",6,1,0.02,0.0169,"Biological Processes",0.166666666666667
+"5","LOC111112412","GO:0018008","N-terminal peptidyl-glycine N-myristoylation",7,1,0.02,0.0197,"Biological Processes",0.142857142857143
+"6","LOC111113398","GO:0001514","selenocysteine incorporation",4,1,0.01,0.0113,"Biological Processes",0.25
+"7","LOC111117921","GO:0006355","regulation of transcription, DNA-templated",1660,8,4.71,0.0377,"Biological Processes",0.00481927710843374
+"8","LOC111118300","GO:0006355","regulation of transcription, DNA-templated",1660,8,4.71,0.0377,"Biological Processes",0.00481927710843374
+"9","LOC111118300","GO:0043966","histone H3 acetylation",9,1,0.03,0.0253,"Biological Processes",0.111111111111111
+"10","LOC111121973","GO:0006355","regulation of transcription, DNA-templated",1660,8,4.71,0.0377,"Biological Processes",0.00481927710843374
+"11","LOC111125988","GO:0035434","copper ion transmembrane transport",5,1,0.01,0.0141,"Biological Processes",0.2
+"12","LOC111129466","GO:0035721","intraciliary retrograde transport",9,1,0.03,0.0253,"Biological Processes",0.111111111111111
+"13","LOC111131607","GO:0010821","regulation of mitochondrion organization",14,1,0.04,0.0391,"Biological Processes",0.0714285714285714
+"14","LOC111131607","GO:1900407","regulation of cellular response to oxidative stress",8,1,0.02,0.0225,"Biological Processes",0.125
+"15","LOC111134230","GO:0030866","cortical actin cytoskeleton organization",15,1,0.04,0.0418,"Biological Processes",0.0666666666666667
+"16","LOC111134230","GO:0051639","actin filament network formation",6,1,0.02,0.0169,"Biological Processes",0.166666666666667
+"17","LOC111135084","GO:0000281","mitotic cytokinesis",18,1,0.05,0.0499,"Biological Processes",0.0555555555555556
+"18","LOC111135901","GO:0015874","norepinephrine transport",2,1,0.01,0.0057,"Biological Processes",0.5
+"19","LOC111135901","GO:0051583","dopamine uptake involved in synaptic transmission",2,1,0.01,0.0057,"Biological Processes",0.5
+"20","LOC111104020","GO:0030867","rough endoplasmic reticulum membrane",7,1,0.02,0.0214,"Cellular Components",0.142857142857143
+"21","LOC111106359","GO:0000151","ubiquitin ligase complex",171,3,0.53,0.0125,"Cellular Components",0.0175438596491228
+"22","LOC111118776","GO:0031462","Cul2-RING ubiquitin ligase complex",7,1,0.02,0.0214,"Cellular Components",0.142857142857143
+"23","LOC111129466","GO:0030991","intraciliary transport particle A",7,1,0.02,0.0214,"Cellular Components",0.142857142857143
+"24","LOC111131607","GO:0000151","ubiquitin ligase complex",171,3,0.53,0.0125,"Cellular Components",0.0175438596491228
+"25","LOC111135901","GO:0032809","neuronal cell body membrane",3,1,0.01,0.0092,"Cellular Components",0.333333333333333
+"26","LOC111135901","GO:0042734","presynaptic membrane",10,1,0.03,0.0305,"Cellular Components",0.1
+"27","LOC111136991","GO:0005665","RNA polymerase II, core complex",15,1,0.05,0.0454,"Cellular Components",0.0666666666666667
+"28","LOC111105298","GO:0008379","thioredoxin peroxidase activity",6,1,0.02,0.0152,"Molecular Functions",0.166666666666667
+"29","LOC111106442","GO:0008270","zinc ion binding",2113,11,5.39,0.0158,"Molecular Functions",0.00520586843350686
+"30","LOC111106627","GO:0008270","zinc ion binding",2113,11,5.39,0.0158,"Molecular Functions",0.00520586843350686
+"31","LOC111107407","GO:0008270","zinc ion binding",2113,11,5.39,0.0158,"Molecular Functions",0.00520586843350686
+"32","LOC111108040","GO:0008270","zinc ion binding",2113,11,5.39,0.0158,"Molecular Functions",0.00520586843350686
+"33","LOC111110896","GO:0008270","zinc ion binding",2113,11,5.39,0.0158,"Molecular Functions",0.00520586843350686
+"34","LOC111111685","GO:0008270","zinc ion binding",2113,11,5.39,0.0158,"Molecular Functions",0.00520586843350686
+"35","LOC111112412","GO:0004379","glycylpeptide N-tetradecanoyltransferase activity",7,1,0.02,0.0177,"Molecular Functions",0.142857142857143
+"36","LOC111112602","GO:0046592","polyamine oxidase activity",6,1,0.02,0.0152,"Molecular Functions",0.166666666666667
+"37","LOC111113398","GO:0003730","mRNA 3'-UTR binding",18,1,0.05,0.045,"Molecular Functions",0.0555555555555556
+"38","LOC111113398","GO:0035368","selenocysteine insertion sequence binding",2,1,0.01,0.0051,"Molecular Functions",0.5
+"39","LOC111117921","GO:0008270","zinc ion binding",2113,11,5.39,0.0158,"Molecular Functions",0.00520586843350686
+"40","LOC111118300","GO:0004402","histone acetyltransferase activity",15,1,0.04,0.0376,"Molecular Functions",0.0666666666666667
+"41","LOC111118300","GO:0008270","zinc ion binding",2113,11,5.39,0.0158,"Molecular Functions",0.00520586843350686
+"42","LOC111118776","GO:0008270","zinc ion binding",2113,11,5.39,0.0158,"Molecular Functions",0.00520586843350686
+"43","LOC111121973","GO:0043565","sequence-specific DNA binding",763,4,1.95,0.0422,"Molecular Functions",0.00524246395806029
+"44","LOC111122156","GO:0008270","zinc ion binding",2113,11,5.39,0.0158,"Molecular Functions",0.00520586843350686
+"45","LOC111124843","GO:0043565","sequence-specific DNA binding",763,4,1.95,0.0422,"Molecular Functions",0.00524246395806029
+"46","LOC111125896","GO:0015421","oligopeptide-transporting ATPase activity",3,1,0.01,0.0076,"Molecular Functions",0.333333333333333
+"47","LOC111125988","GO:0005375","copper ion transmembrane transporter activity",6,1,0.02,0.0152,"Molecular Functions",0.166666666666667
+"48","LOC111128450","GO:0004499","N,N-dimethylaniline monooxygenase activity",9,1,0.02,0.0227,"Molecular Functions",0.111111111111111
+"49","LOC111131607","GO:0008270","zinc ion binding",2113,11,5.39,0.0158,"Molecular Functions",0.00520586843350686
+"50","LOC111135901","GO:0005330","dopamine:sodium symporter activity",2,1,0.01,0.0051,"Molecular Functions",0.5

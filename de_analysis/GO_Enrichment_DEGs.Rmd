@@ -144,36 +144,27 @@ return(allScore < 0.05)}
 ```
 
 ### Biological Processes
-
-Create `topGOdata` object, which is required for topGO analysis
 ```{r}
+#Create `topGOdata` object, which is required for topGO analysis
 GO_UP_BP <-new("topGOdata", ontology="BP", gene2GO=gene2go_topgo, allGenes=UP_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
-
 GO_DOWN_BP <-new("topGOdata", ontology="BP", gene2GO=gene2go_topgo, allGenes=DOWN_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
-```
 
-Run GO enrichment test 
-```{r}
+
+#Run GO enrichment test 
 GO_UP_BP_FE <- runTest(GO_UP_BP, algorithm="weight01", statistic="fisher")
-
 GO_DOWN_BP_FE <- runTest(GO_DOWN_BP, algorithm="weight01", statistic="fisher")
-```
 
-Generate results table 
-```{r}
+
+#Generate results table 
 GO_UP_BP_RT <- GenTable(GO_UP_BP, Fisher = GO_UP_BP_FE, orderBy = "Fisher",  topNodes = 50, numChar = 100)
-
 GO_DOWN_BP_RT <- GenTable(GO_DOWN_BP, Fisher = GO_DOWN_BP_FE, orderBy = "Fisher",  topNodes = 50, numChar = 100)
-```
-Only taking the top 100 GO terms 
+#Only taking the top 100 GO terms 
 
-Filter by significant results
-```{r}
+#Filter by significant results
 GO_UP_BP_RT$Fisher<-as.numeric(GO_UP_BP_RT$Fisher)
-GO_UP_BP_RT_sig<-GO_UP_BP_RT[GO_UP_BP_RT$Fisher<0.05,]
-
+GO_UP_BP_RT_sig<-GO_UP_BP_RT[GO_UP_BP_RT$Fisher<0.05,] #sig UP
 GO_DOWN_BP_RT$Fisher<-as.numeric(GO_DOWN_BP_RT$Fisher)
-GO_DOWN_BP_RT_sig<-GO_DOWN_BP_RT[GO_DOWN_BP_RT$Fisher<0.05,]
+GO_DOWN_BP_RT_sig<-GO_DOWN_BP_RT[GO_DOWN_BP_RT$Fisher<0.05,] #sig DOWN
 ```
 
 Merge `GO_UP_BP_RT_sig` with GO and gene info. 
@@ -215,35 +206,25 @@ GO_DOWN_BP_RT_sig_gene$ontology <- "Biological Processes"
 ```
 
 ### Cellular Components
-Create `topGOdata` object, which is required for topGO analysis
 ```{r}
+#Create `topGOdata` object, which is required for topGO analysis
 GO_UP_CC <-new("topGOdata", ontology="CC", gene2GO=gene2go_topgo, allGenes=UP_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
-
 GO_DOWN_CC <-new("topGOdata", ontology="CC", gene2GO=gene2go_topgo, allGenes=DOWN_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
-```
 
-Run GO enrichment test 
-```{r}
+#Run GO enrichment test 
 GO_UP_CC_FE <- runTest(GO_UP_CC, algorithm="weight01", statistic="fisher")
-
 GO_DOWN_CC_FE <- runTest(GO_DOWN_CC, algorithm="weight01", statistic="fisher")
-```
 
-Generate results table 
-```{r}
+#Generate results table 
 GO_UP_CC_RT <- GenTable(GO_UP_CC, Fisher = GO_UP_CC_FE, orderBy = "Fisher",  topNodes = 50, numChar = 100)
-
 GO_DOWN_CC_RT <- GenTable(GO_DOWN_CC, Fisher = GO_DOWN_CC_FE, orderBy = "Fisher",  topNodes = 50, numChar = 100)
-```
-Only taking the top 100 GO terms 
+#Only taking the top 100 GO terms 
 
-Filter by significant results
-```{r}
+#Filter by significant results
 GO_UP_CC_RT$Fisher<-as.numeric(GO_UP_CC_RT$Fisher)
-GO_UP_CC_RT_sig<-GO_UP_CC_RT[GO_UP_CC_RT$Fisher<0.05,]
-
+GO_UP_CC_RT_sig<-GO_UP_CC_RT[GO_UP_CC_RT$Fisher<0.05,] #sig UP
 GO_DOWN_CC_RT$Fisher<-as.numeric(GO_DOWN_CC_RT$Fisher)
-GO_DOWN_CC_RT_sig<-GO_DOWN_CC_RT[GO_DOWN_CC_RT$Fisher<0.05,]
+GO_DOWN_CC_RT_sig<-GO_DOWN_CC_RT[GO_DOWN_CC_RT$Fisher<0.05,] #sig DOWN
 ```
 
 Merge `GO_UP_CC_RT_sig` with GO and gene info. 
@@ -286,36 +267,25 @@ GO_DOWN_CC_RT_sig_gene$ontology <- "Cellular Components"
 
 
 ### Molecular Functions
-
-Create `topGOdata` object, which is required for topGO analysis
 ```{r}
+#Create `topGOdata` object, which is required for topGO analysis
 GO_UP_MF <-new("topGOdata", ontology="MF", gene2GO=gene2go_topgo, allGenes=UP_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
-
 GO_DOWN_MF <-new("topGOdata", ontology="MF", gene2GO=gene2go_topgo, allGenes=DOWN_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
-```
 
-Run GO enrichment test 
-```{r}
+#Run GO enrichment test 
 GO_UP_MF_FE <- runTest(GO_UP_MF, algorithm="weight01", statistic="fisher")
-
 GO_DOWN_MF_FE <- runTest(GO_DOWN_MF, algorithm="weight01", statistic="fisher")
-```
 
-Generate results table 
-```{r}
+#Generate results table 
 GO_UP_MF_RT <- GenTable(GO_UP_MF, Fisher = GO_UP_MF_FE, orderBy = "Fisher",  topNodes = 50, numChar = 100)
-
 GO_DOWN_MF_RT <- GenTable(GO_DOWN_MF, Fisher = GO_DOWN_MF_FE, orderBy = "Fisher",  topNodes = 50, numChar = 100)
-```
-Only taking the top 100 GO terms 
+#Only taking the top 100 GO terms 
 
-Filter by significant results
-```{r}
+#Filter by significant results
 GO_UP_MF_RT$Fisher<-as.numeric(GO_UP_MF_RT$Fisher)
-GO_UP_MF_RT_sig<-GO_UP_MF_RT[GO_UP_MF_RT$Fisher<0.05,]
-
+GO_UP_MF_RT_sig<-GO_UP_MF_RT[GO_UP_MF_RT$Fisher<0.05,] #sig UP
 GO_DOWN_MF_RT$Fisher<-as.numeric(GO_DOWN_MF_RT$Fisher)
-GO_DOWN_MF_RT_sig<-GO_DOWN_MF_RT[GO_DOWN_MF_RT$Fisher<0.05,]
+GO_DOWN_MF_RT_sig<-GO_DOWN_MF_RT[GO_DOWN_MF_RT$Fisher<0.05,] #sig DOWN
 ```
 
 Merge `GO_UP_MF_RT_sig` with GO and gene info. 
@@ -356,8 +326,7 @@ GO_DOWN_MF_RT_sig_gene <- DOWN_gene2go %>%
 GO_DOWN_MF_RT_sig_gene$ontology <- "Molecular Functions"
 ```
 
-### Join ontologies
-
+## Join ontologies
 Bind `GO_UP_BP_RT_sig_gene`, `GO_UP_CC_RT_sig_gene`, and `GO_UP_MF_RT_sig_gene` to make a df that has significantly enriched GO terms for all ontologies 
 ```{r}
 GO_UP_sig_genes <- rbind(GO_UP_BP_RT_sig_gene, GO_UP_CC_RT_sig_gene, GO_UP_MF_RT_sig_gene)

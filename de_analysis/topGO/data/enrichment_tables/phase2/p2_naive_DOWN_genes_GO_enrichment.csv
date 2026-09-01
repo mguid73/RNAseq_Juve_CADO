@@ -1,0 +1,36 @@
+"","gene_id","GO_Annotation","Term","Annotated","Significant","Expected","Fisher","ontology","prop.sig.genes"
+"1","LOC111125988","GO:0035434","copper ion transmembrane transport",5,1,0.01,0.0084,"Biological Processes",0.2
+"2","LOC111131872","GO:0030100","regulation of endocytosis",13,1,0.02,0.0218,"Biological Processes",0.0769230769230769
+"3","LOC111131872","GO:0097320","plasma membrane tubulation",5,1,0.01,0.0084,"Biological Processes",0.2
+"4","LOC111133398","GO:0006689","ganglioside catabolic process",23,1,0.04,0.0382,"Biological Processes",0.0434782608695652
+"5","LOC111134230","GO:0030866","cortical actin cytoskeleton organization",15,1,0.03,0.0251,"Biological Processes",0.0666666666666667
+"6","LOC111134230","GO:0051639","actin filament network formation",6,1,0.01,0.0101,"Biological Processes",0.166666666666667
+"7","LOC111135403","GO:0006481","C-terminal protein methylation",2,1,0,0.0034,"Biological Processes",0.5
+"8","LOC111135901","GO:0015874","norepinephrine transport",2,1,0,0.0034,"Biological Processes",0.5
+"9","LOC111135901","GO:0051583","dopamine uptake involved in synaptic transmission",2,1,0,0.0034,"Biological Processes",0.5
+"10","LOC111136140","GO:0099536","synaptic signaling",344,2,0.58,0.0066,"Biological Processes",0.00581395348837209
+"11","LOC111107019","GO:0048471","perinuclear region of cytoplasm",29,1,0.05,0.048,"Cellular Components",0.0344827586206897
+"12","LOC111128085","GO:0005871","kinesin complex",13,1,0.02,0.0218,"Cellular Components",0.0769230769230769
+"13","LOC111128085","GO:0043227","membrane-bounded organelle",5646,10,9.56,0.014,"Cellular Components",0.00177116542685087
+"14","LOC111135433","GO:0005844","polysome",12,1,0.02,0.0201,"Cellular Components",0.0833333333333333
+"15","LOC111135901","GO:0032809","neuronal cell body membrane",3,1,0.01,0.0051,"Cellular Components",0.333333333333333
+"16","LOC111135901","GO:0042734","presynaptic membrane",10,1,0.02,0.0168,"Cellular Components",0.1
+"17","LOC111101076","GO:0000978","RNA polymerase II proximal promoter sequence-specific DNA binding",460,3,0.66,0.0272,"Molecular Functions",0.00652173913043478
+"18","LOC111101076","GO:0001228","DNA-binding transcription activator activity, RNA polymerase II-specific",31,1,0.04,0.0434,"Molecular Functions",0.032258064516129
+"19","LOC111103835","GO:0000978","RNA polymerase II proximal promoter sequence-specific DNA binding",460,3,0.66,0.0272,"Molecular Functions",0.00652173913043478
+"20","LOC111103835","GO:0001227","DNA-binding transcription repressor activity, RNA polymerase II-specific",4,1,0.01,0.0057,"Molecular Functions",0.25
+"21","LOC111103835","GO:0042826","histone deacetylase binding",12,1,0.02,0.017,"Molecular Functions",0.0833333333333333
+"22","LOC111107019","GO:0005096","GTPase activator activity",86,2,0.12,0.0067,"Molecular Functions",0.0232558139534884
+"23","LOC111118959","GO:0000978","RNA polymerase II proximal promoter sequence-specific DNA binding",460,3,0.66,0.0272,"Molecular Functions",0.00652173913043478
+"24","LOC111123483","GO:0005096","GTPase activator activity",86,2,0.12,0.0067,"Molecular Functions",0.0232558139534884
+"25","LOC111125452","GO:0030695","GTPase regulator activity",92,3,0.13,0.008,"Molecular Functions",0.0326086956521739
+"26","LOC111125988","GO:0005375","copper ion transmembrane transporter activity",6,1,0.01,0.0085,"Molecular Functions",0.166666666666667
+"27","LOC111128085","GO:0019894","kinesin binding",8,1,0.01,0.0114,"Molecular Functions",0.125
+"28","LOC111128450","GO:0004499","N,N-dimethylaniline monooxygenase activity",9,1,0.01,0.0128,"Molecular Functions",0.111111111111111
+"29","LOC111128450","GO:0050661","NADP binding",26,1,0.04,0.0365,"Molecular Functions",0.0384615384615385
+"30","LOC111131538","GO:0001784","phosphotyrosine residue binding",2,1,0,0.0029,"Molecular Functions",0.5
+"31","LOC111132623","GO:0005220","inositol 1,4,5-trisphosphate-sensitive calcium-release channel activity",5,1,0.01,0.0071,"Molecular Functions",0.2
+"32","LOC111132623","GO:0070679","inositol 1,4,5 trisphosphate binding",14,1,0.02,0.0198,"Molecular Functions",0.0714285714285714
+"33","LOC111133398","GO:0004563","beta-N-acetylhexosaminidase activity",18,1,0.03,0.0254,"Molecular Functions",0.0555555555555556
+"34","LOC111135403","GO:0018423","protein C-terminal leucine carboxyl O-methyltransferase activity",1,1,0,0.0014,"Molecular Functions",1
+"35","LOC111135901","GO:0005330","dopamine:sodium symporter activity",2,1,0,0.0029,"Molecular Functions",0.5

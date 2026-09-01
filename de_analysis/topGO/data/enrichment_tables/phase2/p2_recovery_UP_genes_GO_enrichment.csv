@@ -1,0 +1,48 @@
+"","gene_id","GO_Annotation","Term","Annotated","Significant","Expected","Fisher","ontology","prop.sig.genes"
+"1","LOC111100471","GO:0043066","negative regulation of apoptotic process",70,2,0.1,0.0048,"Biological Processes",0.0285714285714286
+"2","LOC111100471","GO:0051726","regulation of cell cycle",249,3,0.37,0.0057,"Biological Processes",0.0120481927710843
+"3","LOC111103270","GO:0031398","positive regulation of protein ubiquitination",28,1,0.04,0.0409,"Biological Processes",0.0357142857142857
+"4","LOC111103270","GO:0043066","negative regulation of apoptotic process",70,2,0.1,0.0048,"Biological Processes",0.0285714285714286
+"5","LOC111103270","GO:0051726","regulation of cell cycle",249,3,0.37,0.0057,"Biological Processes",0.0120481927710843
+"6","LOC111118714","GO:0009143","nucleoside triphosphate catabolic process",18,1,0.03,0.0265,"Biological Processes",0.0555555555555556
+"7","LOC111122190","GO:0006616","SRP-dependent cotranslational protein targeting to membrane, translocation",3,1,0,0.0045,"Biological Processes",0.333333333333333
+"8","LOC111122190","GO:0045048","protein insertion into ER membrane",5,1,0.01,0.0074,"Biological Processes",0.2
+"9","LOC111123608","GO:0016126","sterol biosynthetic process",19,1,0.03,0.0279,"Biological Processes",0.0526315789473684
+"10","LOC111124666","GO:0010754","negative regulation of cGMP-mediated signaling",5,1,0.01,0.0074,"Biological Processes",0.2
+"11","LOC111124666","GO:0010821","regulation of mitochondrion organization",14,1,0.02,0.0206,"Biological Processes",0.0714285714285714
+"12","LOC111124666","GO:0043951","negative regulation of cAMP-mediated signaling",3,1,0,0.0045,"Biological Processes",0.333333333333333
+"13","LOC111124666","GO:0046069","cGMP catabolic process",5,1,0.01,0.0074,"Biological Processes",0.2
+"14","LOC111125014","GO:0009953","dorsal/ventral pattern formation",7,1,0.01,0.0104,"Biological Processes",0.142857142857143
+"15","LOC111125014","GO:0030509","BMP signaling pathway",42,2,0.06,0.0336,"Biological Processes",0.0476190476190476
+"16","LOC111130818","GO:0051726","regulation of cell cycle",249,3,0.37,0.0057,"Biological Processes",0.0120481927710843
+"17","LOC111134064","GO:0030510","regulation of BMP signaling pathway",18,1,0.03,0.0265,"Biological Processes",0.0555555555555556
+"18","LOC111136074","GO:0015015","heparan sulfate proteoglycan biosynthetic process, enzymatic modification",3,1,0,0.0045,"Biological Processes",0.333333333333333
+"19","LOC111103265","GO:0016020","membrane",5066,11,7.08,0.0431,"Cellular Components",0.00217133833399131
+"20","LOC111114538","GO:0031462","Cul2-RING ubiquitin ligase complex",7,1,0.01,0.0097,"Cellular Components",0.142857142857143
+"21","LOC111117570","GO:0016020","membrane",5066,11,7.08,0.0431,"Cellular Components",0.00217133833399131
+"22","LOC111118237","GO:0016020","membrane",5066,11,7.08,0.0431,"Cellular Components",0.00217133833399131
+"23","LOC111124666","GO:0048471","perinuclear region of cytoplasm",29,1,0.04,0.0398,"Cellular Components",0.0344827586206897
+"24","LOC111127320","GO:0016020","membrane",5066,11,7.08,0.0431,"Cellular Components",0.00217133833399131
+"25","LOC111133635","GO:0043025","neuronal cell body",29,1,0.04,0.0398,"Cellular Components",0.0344827586206897
+"26","LOC111133803","GO:0016020","membrane",5066,11,7.08,0.0431,"Cellular Components",0.00217133833399131
+"27","LOC111133837","GO:0016020","membrane",5066,11,7.08,0.0431,"Cellular Components",0.00217133833399131
+"28","LOC111136074","GO:0016020","membrane",5066,11,7.08,0.0431,"Cellular Components",0.00217133833399131
+"29","LOC111099655","GO:0016624","oxidoreductase activity, acting on the aldehyde or oxo group of donors, disulfide as acceptor",8,1,0.01,0.0114,"Molecular Functions",0.125
+"30","LOC111099985","GO:0005506","iron ion binding",188,2,0.27,0.0294,"Molecular Functions",0.0106382978723404
+"31","LOC111099985","GO:0016712","oxidoreductase activity, acting on paired donors, with incorporation or reduction of molecular oxyge...",30,1,0.04,0.042,"Molecular Functions",0.0333333333333333
+"32","LOC111100471","GO:0043027","cysteine-type endopeptidase inhibitor activity involved in apoptotic process",38,2,0.05,0.0013,"Molecular Functions",0.0526315789473684
+"33","LOC111103270","GO:0043027","cysteine-type endopeptidase inhibitor activity involved in apoptotic process",38,2,0.05,0.0013,"Molecular Functions",0.0526315789473684
+"34","LOC111114538","GO:0031625","ubiquitin protein ligase binding",35,1,0.05,0.0488,"Molecular Functions",0.0285714285714286
+"35","LOC111118714","GO:0047429","nucleoside-triphosphate diphosphatase activity",10,1,0.01,0.0142,"Molecular Functions",0.1
+"36","LOC111123608","GO:0000254","C-4 methylsterol oxidase activity",8,1,0.01,0.0114,"Molecular Functions",0.125
+"37","LOC111123608","GO:0005506","iron ion binding",188,2,0.27,0.0294,"Molecular Functions",0.0106382978723404
+"38","LOC111124666","GO:0004115","3',5'-cyclic-AMP phosphodiesterase activity",6,1,0.01,0.0085,"Molecular Functions",0.166666666666667
+"39","LOC111124666","GO:0004118","cGMP-stimulated cyclic-nucleotide phosphodiesterase activity",5,1,0.01,0.0071,"Molecular Functions",0.2
+"40","LOC111124666","GO:0042803","protein homodimerization activity",18,1,0.03,0.0254,"Molecular Functions",0.0555555555555556
+"41","LOC111124666","GO:0047555","3',5'-cyclic-GMP phosphodiesterase activity",5,1,0.01,0.0071,"Molecular Functions",0.2
+"42","LOC111125014","GO:0005025","transforming growth factor beta receptor activity, type I",3,1,0,0.0043,"Molecular Functions",0.333333333333333
+"43","LOC111125014","GO:0046332","SMAD binding",19,1,0.03,0.0268,"Molecular Functions",0.0526315789473684
+"44","LOC111133635","GO:0005516","calmodulin binding",35,1,0.05,0.0488,"Molecular Functions",0.0285714285714286
+"45","LOC111133635","GO:0016286","small conductance calcium-activated potassium channel activity",10,1,0.01,0.0142,"Molecular Functions",0.1
+"46","LOC111133837","GO:0004970","ionotropic glutamate receptor activity",32,1,0.05,0.0447,"Molecular Functions",0.03125
+"47","LOC111136074","GO:0017095","heparan sulfate 6-O-sulfotransferase activity",1,1,0,0.0014,"Molecular Functions",1

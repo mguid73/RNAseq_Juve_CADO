@@ -1,0 +1,45 @@
+"","gene_id","GO_Annotation","Term","Annotated","Significant","Expected","Fisher","ontology","prop.sig.genes"
+"1","LOC111114067","GO:0006412","translation",662,6,0.85,0.00046,"Biological Processes",0.00906344410876133
+"2","LOC111118595","GO:0006368","transcription elongation by RNA polymerase II",22,1,0.03,0.0279,"Biological Processes",0.0454545454545455
+"3","LOC111122600","GO:0006412","translation",662,6,0.85,0.00046,"Biological Processes",0.00906344410876133
+"4","LOC111122819","GO:0006412","translation",662,6,0.85,0.00046,"Biological Processes",0.00906344410876133
+"5","LOC111125548","GO:0000028","ribosomal small subunit assembly",13,1,0.02,0.01658,"Biological Processes",0.0769230769230769
+"6","LOC111125548","GO:0006412","translation",662,6,0.85,0.00046,"Biological Processes",0.00906344410876133
+"7","LOC111126482","GO:0006412","translation",662,6,0.85,0.00046,"Biological Processes",0.00906344410876133
+"8","LOC111126482","GO:2001235","positive regulation of apoptotic signaling pathway",7,1,0.01,0.00896,"Biological Processes",0.142857142857143
+"9","LOC111135946","GO:0006122","mitochondrial electron transport, ubiquinol to cytochrome c",8,1,0.01,0.01023,"Biological Processes",0.125
+"10","LOC111137690","GO:0019346","transsulfuration",7,1,0.01,0.00896,"Biological Processes",0.142857142857143
+"11","LOC111114067","GO:0005840","ribosome",188,6,0.25,0.038,"Cellular Components",0.0319148936170213
+"12","LOC111114067","GO:0022627","cytosolic small ribosomal subunit",35,3,0.05,1.2e-05,"Cellular Components",0.0857142857142857
+"13","LOC111117966","GO:0005851","eukaryotic translation initiation factor 2B complex",6,1,0.01,0.0079,"Cellular Components",0.166666666666667
+"14","LOC111118595","GO:0008023","transcription elongation factor complex",32,1,0.04,0.0416,"Cellular Components",0.03125
+"15","LOC111120879","GO:0005854","nascent polypeptide-associated complex",3,1,0,0.004,"Cellular Components",0.333333333333333
+"16","LOC111120879","GO:0042788","polysomal ribosome",2,1,0,0.0026,"Cellular Components",0.5
+"17","LOC111122600","GO:0005840","ribosome",188,6,0.25,0.038,"Cellular Components",0.0319148936170213
+"18","LOC111122819","GO:0005840","ribosome",188,6,0.25,0.038,"Cellular Components",0.0319148936170213
+"19","LOC111125548","GO:0005840","ribosome",188,6,0.25,0.038,"Cellular Components",0.0319148936170213
+"20","LOC111125548","GO:0022627","cytosolic small ribosomal subunit",35,3,0.05,1.2e-05,"Cellular Components",0.0857142857142857
+"21","LOC111126482","GO:0022627","cytosolic small ribosomal subunit",35,3,0.05,1.2e-05,"Cellular Components",0.0857142857142857
+"22","LOC111135946","GO:0005750","mitochondrial respiratory chain complex III",7,1,0.01,0.0092,"Cellular Components",0.142857142857143
+"23","LOC111101889","GO:0016231","beta-N-acetylglucosaminidase activity",1,1,0,0.001,"Molecular Functions",1
+"24","LOC111108587","GO:0022829","wide pore channel activity",29,1,0.03,0.0292,"Molecular Functions",0.0344827586206897
+"25","LOC111109804","GO:0003723","RNA binding",786,4,0.8,0.0191,"Molecular Functions",0.00508905852417303
+"26","LOC111114067","GO:0003735","structural constituent of ribosome",174,5,0.18,7.2e-07,"Molecular Functions",0.028735632183908
+"27","LOC111117966","GO:0003743","translation initiation factor activity",48,1,0.05,0.0478,"Molecular Functions",0.0208333333333333
+"28","LOC111118595","GO:0000993","RNA polymerase II complex binding",14,1,0.01,0.0142,"Molecular Functions",0.0714285714285714
+"29","LOC111118606","GO:0004714","transmembrane receptor protein tyrosine kinase activity",48,1,0.05,0.0478,"Molecular Functions",0.0208333333333333
+"30","LOC111122600","GO:0003735","structural constituent of ribosome",174,5,0.18,7.2e-07,"Molecular Functions",0.028735632183908
+"31","LOC111122600","GO:0031386","protein tag activity",9,1,0.01,0.0091,"Molecular Functions",0.111111111111111
+"32","LOC111122600","GO:0031625","ubiquitin protein ligase binding",35,1,0.04,0.0351,"Molecular Functions",0.0285714285714286
+"33","LOC111122819","GO:0003735","structural constituent of ribosome",174,5,0.18,7.2e-07,"Molecular Functions",0.028735632183908
+"34","LOC111125413","GO:0003723","RNA binding",786,4,0.8,0.0191,"Molecular Functions",0.00508905852417303
+"35","LOC111125413","GO:0003924","GTPase activity",294,2,0.3,0.0356,"Molecular Functions",0.00680272108843537
+"36","LOC111125548","GO:0003735","structural constituent of ribosome",174,5,0.18,7.2e-07,"Molecular Functions",0.028735632183908
+"37","LOC111125548","GO:0019843","rRNA binding",36,1,0.04,0.0361,"Molecular Functions",0.0277777777777778
+"38","LOC111126482","GO:0003723","RNA binding",786,4,0.8,0.0191,"Molecular Functions",0.00508905852417303
+"39","LOC111126482","GO:0003735","structural constituent of ribosome",174,5,0.18,7.2e-07,"Molecular Functions",0.028735632183908
+"40","LOC111128076","GO:0001228","DNA-binding transcription activator activity, RNA polymerase II-specific",31,1,0.03,0.0311,"Molecular Functions",0.032258064516129
+"41","LOC111135946","GO:0008121","ubiquinol-cytochrome-c reductase activity",1,1,0,0.001,"Molecular Functions",1
+"42","LOC111135946","GO:0051537","2 iron, 2 sulfur cluster binding",28,1,0.03,0.0282,"Molecular Functions",0.0357142857142857
+"43","LOC111137010","GO:0003924","GTPase activity",294,2,0.3,0.0356,"Molecular Functions",0.00680272108843537
+"44","LOC111137690","GO:0004792","thiosulfate sulfurtransferase activity",7,1,0.01,0.0071,"Molecular Functions",0.142857142857143

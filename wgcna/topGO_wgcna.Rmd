@@ -10,9 +10,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Gene Ontology Enrichment Analysis on WGCNA modules
-
-Notes****
-
 ```{r, warning=FALSE, echo=FALSE}
 library(topGO)
 library(stringr)
@@ -46,7 +43,6 @@ In terminal:
 ```
 
 Now I can make a new .tab file with just the gene ID and GO IDs (3rd and 5th columns) renamed "gene_id" and "GO_Annotation". The gene_name column will have one unique observation per row and all associated GO terms will be saved in the same row, with values separated by ;
-
 ```{bash}
 #awk 'NR>9 {print $3 "\t" $5}' gene_ontology.gaf | 
 #sed '1i gene_id\tGO_Annotation' | 
@@ -66,112 +62,198 @@ Now I can make a new .tab file with just the gene ID and GO IDs (3rd and 5th col
 ```
 
 Gene IDs for the different modules are in the following files:
-phase1_outputs/phase1_module_<color>_genes.csv
-phase2_outputs/phase2_module_<color>_genes.csv
+module_lists/module_<color>_genes.csv
 
-Make a file with gene IDs and GO IDs for the color
+## Make a file with gene IDs and GO IDs for the color
 
-### Phase I BLUE
+### GOLD
 ```{r}
 # load data
-p1_blue <- read.csv("phase1_outputs/phase1_module_blue_genes.csv", header = TRUE, sep = ",")
-p1_blue
+gold <- read.csv("module_lists/module_gold_genes.csv", header = TRUE, sep = ",")
+gold
 # load go annotation file to assign go terms to color module
 go_terms <- read.table("gene2go_full.tab", header = TRUE, sep="\t")
 head(go_terms)
 
 # reformat gene_id column to be just LOC#, add in go annotation, remove 'MSTRG' rows and NA rows
-p1_blue$gene_id <- str_extract(p1_blue$x, "[^|]+$")
-dim(p1_blue)
-p1_blue_wGO <- merge(p1_blue, go_terms, by = "gene_id", all.x = TRUE)
-dim(p1_blue_wGO)
+gold$gene_id <- str_extract(gold$x, "[^|]+$")
+dim(gold)
+gold_wGO <- merge(gold, go_terms, by = "gene_id", all.x = TRUE)
+dim(gold_wGO)
 #clean up 
-p1_blue_wGO <- na.omit(p1_blue_wGO)
-p1_blue_wGO <- p1_blue_wGO[, c("gene_id", "GO_Annotation")]
-dim(p1_blue_wGO)
+gold_wGO <- na.omit(gold_wGO)
+gold_wGO <- gold_wGO[, c("gene_id", "GO_Annotation")]
+dim(gold_wGO)
 
-#write.table(p1_blue_wGO, "p1_blue_genes_GO_header.tab", sep = "\t", row.names=FALSE)
+write.table(gold_wGO, "module_goterms/gold_genes_GO_header.tab", sep = "\t", row.names=FALSE)
 ```
 
-### Phase II SEASHELL
+### LEMON
 ```{r}
 # load data
-p2_seashell <- read.csv("phase2_outputs/phase2_module_seashell_genes.csv", header = TRUE, sep = ",")
-p2_seashell
+lemon <- read.csv("module_lists/module_lemon_genes.csv", header = TRUE, sep = ",")
+dim(lemon)
 # load go annotation file to assign go terms to color module
 go_terms <- read.table("gene2go_full.tab", header = TRUE, sep="\t")
-head(go_terms)
+dim(go_terms); colnames(go_terms)
 
 # reformat gene_id column to be just LOC#, add in go annotation, remove 'MSTRG' rows and NA rows
-p2_seashell$gene_id <- str_extract(p2_seashell$x, "[^|]+$")
-dim(p2_seashell)
-p2_seashell_wGO <- merge(p2_seashell, go_terms, by = "gene_id", all.x = TRUE)
-dim(p2_seashell_wGO)
+lemon$gene_id <- str_extract(lemon$x, "[^|]+$")
+dim(lemon)
+lemon_wGO <- merge(lemon, go_terms, by = "gene_id", all.x = TRUE)
+dim(lemon_wGO)
 #clean up 
-p2_seashell_wGO <- na.omit(p2_seashell_wGO)
-p2_seashell_wGO <- p2_seashell_wGO[, c("gene_id", "GO_Annotation")]
-dim(p2_seashell_wGO)
+lemon_wGO <- na.omit(lemon_wGO)
+lemon_wGO <- lemon_wGO[, c("gene_id", "GO_Annotation")]
+dim(lemon_wGO)
 
-write.table(p2_seashell_wGO, "p2_seashell_genes_GO_header.tab", sep = "\t", row.names=FALSE)
+write.table(lemon_wGO, "module_goterms/lemon_genes_GO_header.tab", sep = "\t", row.names=FALSE)
 ```
 
-### Phase II GOLD
+### SAGE
 ```{r}
 # load data
-p2_gold <- read.csv("phase2_outputs/phase2_module_gold_genes.csv", header = TRUE, sep = ",")
-p2_gold
+sage <- read.csv("module_lists/module_sage_genes.csv", header = TRUE, sep = ",")
+dim(sage)
 # load go annotation file to assign go terms to color module
 go_terms <- read.table("gene2go_full.tab", header = TRUE, sep="\t")
-head(go_terms)
+dim(go_terms); colnames(go_terms)
 
 # reformat gene_id column to be just LOC#, add in go annotation, remove 'MSTRG' rows and NA rows
-p2_gold$gene_id <- str_extract(p2_gold$x, "[^|]+$")
-dim(p2_gold)
-p2_gold_wGO <- merge(p2_gold, go_terms, by = "gene_id", all.x = TRUE)
-dim(p2_gold_wGO)
+sage$gene_id <- str_extract(sage$x, "[^|]+$")
+dim(sage)
+sage_wGO <- merge(sage, go_terms, by = "gene_id", all.x = TRUE)
+dim(sage_wGO)
 #clean up 
-p2_gold_wGO <- na.omit(p2_gold_wGO)
-p2_gold_wGO <- p2_gold_wGO[, c("gene_id", "GO_Annotation")]
-dim(p2_gold_wGO)
+sage_wGO <- na.omit(sage_wGO)
+sage_wGO <- sage_wGO[, c("gene_id", "GO_Annotation")]
+dim(sage_wGO)
 
-#write.table(p2_gold_wGO, "p2_gold_genes_GO_header.tab", sep = "\t", row.names=FALSE)
+write.table(sage_wGO, "module_goterms/sage_genes_GO_header.tab", sep = "\t", row.names=FALSE)
 ```
 
-### Phase II PURPLE
+### MINT
 ```{r}
 # load data
-p2_purple <- read.csv("phase2_outputs/phase2_module_purple_genes.csv", header = TRUE, sep = ",")
-p2_purple
+mint <- read.csv("module_lists/module_mint_genes.csv", header = TRUE, sep = ",")
+dim(mint)
 # load go annotation file to assign go terms to color module
 go_terms <- read.table("gene2go_full.tab", header = TRUE, sep="\t")
-head(go_terms)
+dim(go_terms); colnames(go_terms)
 
 # reformat gene_id column to be just LOC#, add in go annotation, remove 'MSTRG' rows and NA rows
-p2_purple$gene_id <- str_extract(p2_purple$x, "[^|]+$")
-dim(p2_purple)
-p2_purple_wGO <- merge(p2_purple, go_terms, by = "gene_id", all.x = TRUE)
-dim(p2_purple_wGO)
+mint$gene_id <- str_extract(mint$x, "[^|]+$")
+dim(mint)
+mint_wGO <- merge(mint, go_terms, by = "gene_id", all.x = TRUE)
+dim(mint_wGO)
 #clean up 
-p2_purple_wGO <- na.omit(p2_purple_wGO)
-p2_purple_wGO <- p2_purple_wGO[, c("gene_id", "GO_Annotation")]
-dim(p2_purple_wGO)
+mint_wGO <- na.omit(mint_wGO)
+mint_wGO <- mint_wGO[, c("gene_id", "GO_Annotation")]
+dim(mint_wGO)
 
-#write.table(p2_purple_wGO, "p2_purple_genes_GO_header.tab", sep = "\t", row.names=FALSE)
+write.table(mint_wGO, "module_goterms/mint_genes_GO_header.tab", sep = "\t", row.names=FALSE)
 ```
 
-Read in expressed genes file - maybe I'll use this??
+### FOREST
 ```{r}
-p1_filt_counts <- read.csv("../de_analysis/outputs/p1_filtered_gene_count_matrix.csv")
-head(p1_filt_counts)
+# load data
+forest <- read.csv("module_lists/module_forest_genes.csv", header = TRUE, sep = ",")
+dim(forest)
+# load go annotation file to assign go terms to color module
+go_terms <- read.table("gene2go_full.tab", header = TRUE, sep="\t")
+dim(go_terms); colnames(go_terms)
+
+# reformat gene_id column to be just LOC#, add in go annotation, remove 'MSTRG' rows and NA rows
+forest$gene_id <- str_extract(forest$x, "[^|]+$")
+dim(forest)
+forest_wGO <- merge(forest, go_terms, by = "gene_id", all.x = TRUE)
+dim(forest_wGO)
+#clean up 
+forest_wGO <- na.omit(forest_wGO)
+forest_wGO <- forest_wGO[, c("gene_id", "GO_Annotation")]
+dim(forest_wGO)
+
+write.table(forest_wGO, "module_goterms/forest_genes_GO_header.tab", sep = "\t", row.names=FALSE)
+```
+
+### LILAC
+```{r}
+# load data
+lilac <- read.csv("module_lists/module_lilac_genes.csv", header = TRUE, sep = ",")
+dim(lilac)
+# load go annotation file to assign go terms to color module
+go_terms <- read.table("gene2go_full.tab", header = TRUE, sep="\t")
+dim(go_terms); colnames(go_terms)
+
+# reformat gene_id column to be just LOC#, add in go annotation, remove 'MSTRG' rows and NA rows
+lilac$gene_id <- str_extract(lilac$x, "[^|]+$")
+dim(lilac)
+lilac_wGO <- merge(lilac, go_terms, by = "gene_id", all.x = TRUE)
+dim(lilac_wGO)
+#clean up 
+lilac_wGO <- na.omit(lilac_wGO)
+lilac_wGO <- lilac_wGO[, c("gene_id", "GO_Annotation")]
+dim(lilac_wGO)
+
+write.table(lilac_wGO, "module_goterms/lilac_genes_GO_header.tab", sep = "\t", row.names=FALSE)
+```
+
+### IRIS
+```{r}
+# load data
+iris <- read.csv("module_lists/module_iris_genes.csv", header = TRUE, sep = ",")
+dim(iris)
+# load go annotation file to assign go terms to color module
+go_terms <- read.table("gene2go_full.tab", header = TRUE, sep="\t")
+dim(go_terms); colnames(go_terms)
+
+# reformat gene_id column to be just LOC#, add in go annotation, remove 'MSTRG' rows and NA rows
+iris$gene_id <- str_extract(iris$x, "[^|]+$")
+dim(iris)
+iris_wGO <- merge(iris, go_terms, by = "gene_id", all.x = TRUE)
+dim(iris_wGO)
+#clean up 
+iris_wGO <- na.omit(iris_wGO)
+iris_wGO <- iris_wGO[, c("gene_id", "GO_Annotation")]
+dim(iris_wGO)
+
+write.table(iris_wGO, "module_goterms/iris_genes_GO_header.tab", sep = "\t", row.names=FALSE)
+```
+
+### PLUM
+```{r}
+# load data
+plum <- read.csv("module_lists/module_plum_genes.csv", header = TRUE, sep = ",")
+dim(plum)
+# load go annotation file to assign go terms to color module
+go_terms <- read.table("gene2go_full.tab", header = TRUE, sep="\t")
+dim(go_terms); colnames(go_terms)
+
+# reformat gene_id column to be just LOC#, add in go annotation, remove 'MSTRG' rows and NA rows
+plum$gene_id <- str_extract(plum$x, "[^|]+$")
+dim(plum)
+plum_wGO <- merge(plum, go_terms, by = "gene_id", all.x = TRUE)
+dim(plum_wGO)
+#clean up 
+plum_wGO <- na.omit(plum_wGO)
+plum_wGO <- plum_wGO[, c("gene_id", "GO_Annotation")]
+dim(plum_wGO)
+
+write.table(plum_wGO, "module_goterms/plum_genes_GO_header.tab", sep = "\t", row.names=FALSE)
 ```
 
 
+
+## TOPGO ANALYSIS 
 Read in gene2go information 
-
 ```{r}
-all_gene2go<-read.delim("gene2go_full.tab", sep="\t")
-module_gene2go<-read.delim("p2_purple_genes_GO_header.tab", sep="\t")
+# SET MODULE COLOR 
+color <- "plum"
+module_gene2go<-read.delim(paste0("module_goterms/", color,"_genes_GO_header.tab"), sep="\t")
 View(module_gene2go)
+
+# ALL ANNOTATED GENE ONTOLOGY INFO
+all_gene2go<-read.delim("gene2go_full.tab", sep="\t")
 ```
 
 Make list of genes for input to TopGO
@@ -197,31 +279,24 @@ return(allScore < 0.05)}
 ```
 
 ### Biological Processes
-
-Create `topGOdata` object, which is required for topGO analysis
 ```{r}
+#Create `topGOdata` object, which is required for topGO analysis
 GO_OUT_BP_pi <-new("topGOdata", ontology="BP", gene2GO=gene2go_topgo, allGenes=mod_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
-```
 
-Run GO enrichment test 
-```{r}
+#Run GO enrichment test 
 GO_OUT_BP_FE_pi <- runTest(GO_OUT_BP_pi, algorithm="weight01", statistic="fisher")
-```
 
-Generate results table 
-```{r}
+#Generate results table 
 GO_OUT_BP_En_pi <- GenTable(GO_OUT_BP_pi, Fisher = GO_OUT_BP_FE_pi, orderBy = "Fisher",  topNodes = 50, numChar = 100)
-```
-Only taking the top 100 GO terms 
 
-Filter by significant results
-```{r}
+#Only taking the top 100 GO terms 
+
+#Filter by significant results
 GO_OUT_BP_En_pi$Fisher<-as.numeric(GO_OUT_BP_En_pi$Fisher)
 GO_OUT_BP_En_sig_pi<-GO_OUT_BP_En_pi[GO_OUT_BP_En_pi$Fisher<0.05,]
-```
 
-Merge `GO_OUT_BP_En_sig_pi` with GO and gene info. 
-```{r}
+
+#Merge `GO_OUT_BP_En_sig_pi` with GO and gene info. 
 # Separate GO terms 
 module_gene2go <- module_gene2go %>%
   separate_rows(GO_Annotation, sep = ";")
@@ -240,30 +315,23 @@ GO_OUT_BP_En_sig_gene_pi$ontology <- "Biological Processes"
 ```
 
 ### Cellular Components
-Create `topGOdata` object, which is required for topGO analysis
 ```{r}
+#Create `topGOdata` object, which is required for topGO analysis
 GO_OUT_CC_pi <-new("topGOdata", ontology="CC", gene2GO=gene2go_topgo, allGenes=mod_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
-```
 
-Run GO enrichment test 
-```{r}
+#Run GO enrichment test 
 GO_OUT_CC_FE_pi <- runTest(GO_OUT_CC_pi, algorithm="weight01", statistic="fisher")
-```
 
-Generate results table 
-```{r}
+#Generate results table 
 GO_OUT_CC_En_pi <- GenTable(GO_OUT_CC_pi, Fisher = GO_OUT_CC_FE_pi, orderBy = "Fisher",  topNodes = 50, numChar = 100)
-```
-Only taking the top 100 GO terms 
+#Only taking the top 100 GO terms 
 
-Filter by significant results
-```{r}
+#Filter by significant results
 GO_OUT_CC_En_pi$Fisher<-as.numeric(GO_OUT_CC_En_pi$Fisher)
 GO_OUT_CC_En_sig_pi<-GO_OUT_CC_En_pi[GO_OUT_CC_En_pi$Fisher<0.05,]
-```
 
-Merge `GO_OUT_CC_En_sig_pi` with GO and gene info. 
-```{r}
+
+#Merge `GO_OUT_CC_En_sig_pi` with GO and gene info. 
 # Separate GO terms 
 module_gene2go <- module_gene2go %>%
   separate_rows(GO_Annotation, sep = ";")
@@ -287,27 +355,19 @@ GO_OUT_CC_En_sig_gene_pi$ontology <- "Cellular Components"
 Create `topGOdata` object, which is required for topGO analysis
 ```{r}
 GO_OUT_MF_pi <-new("topGOdata", ontology="MF", gene2GO=gene2go_topgo, allGenes=mod_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
-```
 
-Run GO enrichment test 
-```{r}
+#Run GO enrichment test 
 GO_OUT_MF_FE_pi <- runTest(GO_OUT_MF_pi, algorithm="weight01", statistic="fisher")
-```
 
-Generate results table 
-```{r}
+#Generate results table 
 GO_OUT_MF_En_pi <- GenTable(GO_OUT_MF_pi, Fisher = GO_OUT_MF_FE_pi, orderBy = "Fisher",  topNodes = 50, numChar = 100)
-```
-Only taking the top 100 GO terms 
+#Only taking the top 100 GO terms 
 
-Filter by significant results
-```{r}
+#Filter by significant results
 GO_OUT_MF_En_pi$Fisher<-as.numeric(GO_OUT_MF_En_pi$Fisher)
 GO_OUT_MF_En_sig_pi<-GO_OUT_MF_En_pi[GO_OUT_MF_En_pi$Fisher<0.05,]
-```
 
-Merge `GO_OUT_MF_En_sig_pi` with GO and gene info. 
-```{r}
+#Merge `GO_OUT_MF_En_sig_pi` with GO and gene info. 
 # Separate GO terms 
 module_gene2go <- module_gene2go %>%
   separate_rows(GO_Annotation, sep = ";")
@@ -341,56 +401,60 @@ merged_out_genes <- GO_OUT_En_sig_gene_pi %>%
 merged_out_genes <- unique(merged_out_genes)
 ```
 
+Write out enriched GO terms for the given module color
 ```{r}
 # Write to csv 
-#write.csv(merged_out_genes, "module_GO_enrichment/p2_purple_genes_GO_enrichment.csv")
+write.csv(merged_out_genes, paste0("module_go_enrichment/",color,"_genes_GO_enrichment.csv"))
 ```
 
 
+## Visualization Lagniappe
 
-Plot - need to work out 
+Set color and read in GO enrichment data for plotting below
 ```{r}
-GO_plot_pi <- ggplot(merged_out_genes, aes(x = Term, y = -log(Fisher), size = prop.sig.genes, fill = -log(Fisher))) +
+color <- "plum"
+merged_out_genes <- read.csv(paste0("module_go_enrichment/",color,"_genes_GO_enrichment.csv"))
+```
+
+Bubble plot - update colors!
+```{r}
+GO_plot_pi <- ggplot(merged_out_genes, aes(x = Term, y = -log(Fisher), size = Annotated, fill = -log(Fisher))) +
   expand_limits(y = 1.5) +
-  ylim(1, 7.25) +
+  #ylim(1, 40) +
   #Add horizontal lines with a single aesthetic value
-  geom_hline(yintercept = -log10(0.01), linetype = "longdash", colour = "black", linewidth = .6) +
-  geom_hline(yintercept = -log10(0.001), linetype = "solid", colour = "black", linewidth = .6) +
+  geom_hline(yintercept = -log(0.01), linetype = "longdash", colour = "black", linewidth = .6) +
+  geom_hline(yintercept = -log(0.001), linetype = "solid", colour = "black", linewidth = .6) +
   geom_point(shape = 21) + 
-  scale_size(range = c(2, 12)) + 
-  scale_fill_continuous(low = "#1AD3D1FF", high = "#4686FBFF") +
+  scale_size(range = c(2, 8)) + 
+  #scale_fill_continuous(low = "goldenrod1", high = "goldenrod4") + #gold
+  #scale_fill_continuous(low = "khaki", high = "khaki4") + #lemon
+  #scale_fill_continuous(low = "honeydew", high = "honeydew4") + #sage
+  #scale_fill_continuous(low = "palegreen", high = "palegreen4") + #mint
+  #scale_fill_continuous(low = "seagreen", high = "#1E5938") + #forest
+  #scale_fill_continuous(low = "thistle", high = "thistle4") + #lilac
+  #scale_fill_continuous(low = "mediumpurple", high = "mediumpurple4") + #iris
+  #scale_fill_continuous(low = "plum4", high = "#5C3A5C") + #plum
   xlab('') + 
   ylab('Enrichment score') +
-  #labs(caption = 'Cut-off lines at p=0.01 and p=0.001') +
+  labs(caption = 'Cut-off lines at p=0.01 (dashed) and p=0.001 (solid)', 
+       title = paste0("Module ", color, " enriched GO terms")) +
   theme_bw() +
   facet_grid(vars(ontology), scales = "free", space = "free_y") +
   coord_flip(); GO_plot_pi
 
 ggsave(
-  "GO_plot_pi.png",
+  paste0("bubble_plots/",color,"_GO_bubbleplot.png"),
   plot = GO_plot_pi,
   width = 8,
-  height = 10,
+  height = 6,
   dpi = 300
 )
-
 ```
 
-Lastly, I'm just going to save the figure as a .png
 
+Looking for overlaps between enriched GO terms 
 ```{r}
-# Open PNG device with high resolution and transparent background
-png(filename = "GO_plot_pi.png",
-    width = 2000,   # width in pixels (adjust for desired size)
-    height = 2000,  # height in pixels
-    res = 200,      # resolution in dpi for high quality
-    bg = "transparent")  # transparent background
 
-# Print the plot object
-print(GO_plot_pi)
-
-# Close the device to finalize the file
-dev.off()
 ```
 
 

@@ -1,0 +1,114 @@
+"","gene_id","GO_Annotation","Term","Annotated","Significant","Expected","Fisher","ontology","prop.sig.genes"
+"1","LOC111100400","GO:0043066","negative regulation of apoptotic process",70,2,0.29,0.03378,"Biological Processes",0.0285714285714286
+"2","LOC111100621","GO:0043066","negative regulation of apoptotic process",70,2,0.29,0.03378,"Biological Processes",0.0285714285714286
+"3","LOC111100706","GO:0006082","organic acid metabolic process",592,3,2.44,0.00752,"Biological Processes",0.00506756756756757
+"4","LOC111100706","GO:0006805","xenobiotic metabolic process",41,2,0.17,0.01238,"Biological Processes",0.0487804878048781
+"5","LOC111102252","GO:0006082","organic acid metabolic process",592,3,2.44,0.00752,"Biological Processes",0.00506756756756757
+"6","LOC111102252","GO:0006805","xenobiotic metabolic process",41,2,0.17,0.01238,"Biological Processes",0.0487804878048781
+"7","LOC111103361","GO:0002224","toll-like receptor signaling pathway",157,5,0.65,0.00047,"Biological Processes",0.0318471337579618
+"8","LOC111103361","GO:0006954","inflammatory response",118,4,0.49,0.00867,"Biological Processes",0.0338983050847458
+"9","LOC111104287","GO:0050728","negative regulation of inflammatory response",10,1,0.04,0.0405,"Biological Processes",0.1
+"10","LOC111105298","GO:0042744","hydrogen peroxide catabolic process",8,1,0.03,0.03253,"Biological Processes",0.125
+"11","LOC111106800","GO:0006622","protein targeting to lysosome",4,1,0.02,0.0164,"Biological Processes",0.25
+"12","LOC111106800","GO:0045022","early endosome to late endosome transport",11,1,0.05,0.04446,"Biological Processes",0.0909090909090909
+"13","LOC111109956","GO:0002224","toll-like receptor signaling pathway",157,5,0.65,0.00047,"Biological Processes",0.0318471337579618
+"14","LOC111109956","GO:0006954","inflammatory response",118,4,0.49,0.00867,"Biological Processes",0.0338983050847458
+"15","LOC111112151","GO:0002224","toll-like receptor signaling pathway",157,5,0.65,0.00047,"Biological Processes",0.0318471337579618
+"16","LOC111112151","GO:0006954","inflammatory response",118,4,0.49,0.00867,"Biological Processes",0.0338983050847458
+"17","LOC111112412","GO:0018008","N-terminal peptidyl-glycine N-myristoylation",7,1,0.03,0.02852,"Biological Processes",0.142857142857143
+"18","LOC111116643","GO:0002224","toll-like receptor signaling pathway",157,5,0.65,0.00047,"Biological Processes",0.0318471337579618
+"19","LOC111119588","GO:0046952","ketone body catabolic process",2,1,0.01,0.00823,"Biological Processes",0.5
+"20","LOC111119669","GO:0048598","embryonic morphogenesis",8,1,0.03,0.03253,"Biological Processes",0.125
+"21","LOC111119669","GO:1901888","regulation of cell junction assembly",4,1,0.02,0.0164,"Biological Processes",0.25
+"22","LOC111122527","GO:0007507","heart development",6,1,0.02,0.0245,"Biological Processes",0.166666666666667
+"23","LOC111123884","GO:0006516","glycoprotein catabolic process",10,1,0.04,0.0405,"Biological Processes",0.1
+"24","LOC111128883","GO:0090263","positive regulation of canonical Wnt signaling pathway",4,1,0.02,0.0164,"Biological Processes",0.25
+"25","LOC111130837","GO:0051126","negative regulation of actin nucleation",2,1,0.01,0.00823,"Biological Processes",0.5
+"26","LOC111135901","GO:0015874","norepinephrine transport",2,1,0.01,0.00823,"Biological Processes",0.5
+"27","LOC111135901","GO:0051583","dopamine uptake involved in synaptic transmission",2,1,0.01,0.00823,"Biological Processes",0.5
+"28","LOC111136264","GO:0002224","toll-like receptor signaling pathway",157,5,0.65,0.00047,"Biological Processes",0.0318471337579618
+"29","LOC111106800","GO:0005769","early endosome",40,2,0.16,0.011,"Cellular Components",0.05
+"30","LOC111106800","GO:0031313","extrinsic component of endosome membrane",5,1,0.02,0.02,"Cellular Components",0.2
+"31","LOC111108357","GO:0005769","early endosome",40,2,0.16,0.011,"Cellular Components",0.05
+"32","LOC111123236","GO:0044666","MLL3/4 complex",4,1,0.02,0.016,"Cellular Components",0.25
+"33","LOC111133546","GO:0019773","proteasome core complex, alpha-subunit complex",8,1,0.03,0.032,"Cellular Components",0.125
+"34","LOC111135901","GO:0032809","neuronal cell body membrane",3,1,0.01,0.012,"Cellular Components",0.333333333333333
+"35","LOC111135901","GO:0042734","presynaptic membrane",10,1,0.04,0.04,"Cellular Components",0.1
+"36","LOC111100580","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"37","LOC111100706","GO:0005506","iron ion binding",188,4,0.73,0.00615,"Molecular Functions",0.0212765957446809
+"38","LOC111100706","GO:0016712","oxidoreductase activity, acting on paired donors, with incorporation or reduction of molecular oxyge...",30,2,0.12,0.00602,"Molecular Functions",0.0666666666666667
+"39","LOC111100706","GO:0020037","heme binding",209,3,0.81,0.04765,"Molecular Functions",0.0143540669856459
+"40","LOC111101179","GO:0008270","zinc ion binding",2113,18,8.19,0.00098,"Molecular Functions",0.00851869380028396
+"41","LOC111102252","GO:0005506","iron ion binding",188,4,0.73,0.00615,"Molecular Functions",0.0212765957446809
+"42","LOC111102252","GO:0016712","oxidoreductase activity, acting on paired donors, with incorporation or reduction of molecular oxyge...",30,2,0.12,0.00602,"Molecular Functions",0.0666666666666667
+"43","LOC111102252","GO:0020037","heme binding",209,3,0.81,0.04765,"Molecular Functions",0.0143540669856459
+"44","LOC111103347","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"45","LOC111103347","GO:0008270","zinc ion binding",2113,18,8.19,0.00098,"Molecular Functions",0.00851869380028396
+"46","LOC111103361","GO:0004888","transmembrane signaling receptor activity",1277,7,4.95,0.01366,"Molecular Functions",0.00548159749412686
+"47","LOC111103361","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"48","LOC111103658","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"49","LOC111105298","GO:0008379","thioredoxin peroxidase activity",6,1,0.02,0.02304,"Molecular Functions",0.166666666666667
+"50","LOC111106359","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"51","LOC111106442","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"52","LOC111106442","GO:0008270","zinc ion binding",2113,18,8.19,0.00098,"Molecular Functions",0.00851869380028396
+"53","LOC111106627","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"54","LOC111106627","GO:0008270","zinc ion binding",2113,18,8.19,0.00098,"Molecular Functions",0.00851869380028396
+"55","LOC111106631","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"56","LOC111106631","GO:0008270","zinc ion binding",2113,18,8.19,0.00098,"Molecular Functions",0.00851869380028396
+"57","LOC111107262","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"58","LOC111107262","GO:0008270","zinc ion binding",2113,18,8.19,0.00098,"Molecular Functions",0.00851869380028396
+"59","LOC111107786","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"60","LOC111107786","GO:0008270","zinc ion binding",2113,18,8.19,0.00098,"Molecular Functions",0.00851869380028396
+"61","LOC111108277","GO:0008270","zinc ion binding",2113,18,8.19,0.00098,"Molecular Functions",0.00851869380028396
+"62","LOC111108357","GO:0005545","1-phosphatidylinositol binding",3,1,0.01,0.01159,"Molecular Functions",0.333333333333333
+"63","LOC111108387","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"64","LOC111109956","GO:0004888","transmembrane signaling receptor activity",1277,7,4.95,0.01366,"Molecular Functions",0.00548159749412686
+"65","LOC111109956","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"66","LOC111110122","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"67","LOC111110849","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"68","LOC111110896","GO:0008270","zinc ion binding",2113,18,8.19,0.00098,"Molecular Functions",0.00851869380028396
+"69","LOC111111685","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"70","LOC111111685","GO:0008270","zinc ion binding",2113,18,8.19,0.00098,"Molecular Functions",0.00851869380028396
+"71","LOC111112151","GO:0004888","transmembrane signaling receptor activity",1277,7,4.95,0.01366,"Molecular Functions",0.00548159749412686
+"72","LOC111112151","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"73","LOC111112412","GO:0004379","glycylpeptide N-tetradecanoyltransferase activity",7,1,0.03,0.02683,"Molecular Functions",0.142857142857143
+"74","LOC111112969","GO:0008270","zinc ion binding",2113,18,8.19,0.00098,"Molecular Functions",0.00851869380028396
+"75","LOC111112972","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"76","LOC111112972","GO:0008270","zinc ion binding",2113,18,8.19,0.00098,"Molecular Functions",0.00851869380028396
+"77","LOC111114240","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"78","LOC111114901","GO:0005381","iron ion transmembrane transporter activity",5,1,0.02,0.01924,"Molecular Functions",0.2
+"79","LOC111114901","GO:0005384","manganese ion transmembrane transporter activity",5,1,0.02,0.01924,"Molecular Functions",0.2
+"80","LOC111114901","GO:0015086","cadmium ion transmembrane transporter activity",3,1,0.01,0.01159,"Molecular Functions",0.333333333333333
+"81","LOC111116643","GO:0004888","transmembrane signaling receptor activity",1277,7,4.95,0.01366,"Molecular Functions",0.00548159749412686
+"82","LOC111116643","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"83","LOC111117040","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"84","LOC111117040","GO:0008270","zinc ion binding",2113,18,8.19,0.00098,"Molecular Functions",0.00851869380028396
+"85","LOC111117921","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"86","LOC111117921","GO:0008270","zinc ion binding",2113,18,8.19,0.00098,"Molecular Functions",0.00851869380028396
+"87","LOC111119201","GO:0000254","C-4 methylsterol oxidase activity",8,1,0.03,0.03061,"Molecular Functions",0.125
+"88","LOC111119201","GO:0005506","iron ion binding",188,4,0.73,0.00615,"Molecular Functions",0.0212765957446809
+"89","LOC111119588","GO:0008260","3-oxoacid CoA-transferase activity",3,1,0.01,0.01159,"Molecular Functions",0.333333333333333
+"90","LOC111119669","GO:0072518","Rho-dependent protein serine/threonine kinase activity",2,1,0.01,0.00774,"Molecular Functions",0.5
+"91","LOC111121675","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"92","LOC111122156","GO:0008270","zinc ion binding",2113,18,8.19,0.00098,"Molecular Functions",0.00851869380028396
+"93","LOC111122527","GO:0044548","S100 protein binding",1,1,0,0.00388,"Molecular Functions",1
+"94","LOC111122534","GO:0004888","transmembrane signaling receptor activity",1277,7,4.95,0.01366,"Molecular Functions",0.00548159749412686
+"95","LOC111123236","GO:0042800","histone methyltransferase activity (H3-K4 specific)",7,1,0.03,0.02683,"Molecular Functions",0.142857142857143
+"96","LOC111123884","GO:0004567","beta-mannosidase activity",1,1,0,0.00388,"Molecular Functions",1
+"97","LOC111124301","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"98","LOC111124305","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"99","LOC111124626","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"100","LOC111125864","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"101","LOC111129694","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"102","LOC111130018","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"103","LOC111133542","GO:0004573","mannosyl-oligosaccharide glucosidase activity",4,1,0.02,0.01542,"Molecular Functions",0.25
+"104","LOC111135258","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"105","LOC111135258","GO:0008270","zinc ion binding",2113,18,8.19,0.00098,"Molecular Functions",0.00851869380028396
+"106","LOC111135598","GO:0005506","iron ion binding",188,4,0.73,0.00615,"Molecular Functions",0.0212765957446809
+"107","LOC111135598","GO:0020037","heme binding",209,3,0.81,0.04765,"Molecular Functions",0.0143540669856459
+"108","LOC111135625","GO:0005515","protein binding",6226,37,24.14,0.00297,"Molecular Functions",0.00594282043045294
+"109","LOC111135625","GO:0008270","zinc ion binding",2113,18,8.19,0.00098,"Molecular Functions",0.00851869380028396
+"110","LOC111135901","GO:0005330","dopamine:sodium symporter activity",2,1,0.01,0.00774,"Molecular Functions",0.5
+"111","LOC111136264","GO:0004888","transmembrane signaling receptor activity",1277,7,4.95,0.01366,"Molecular Functions",0.00548159749412686
+"112","LOC111136991","GO:0032549","ribonucleoside binding",412,2,1.6,0.01939,"Molecular Functions",0.00485436893203883
+"113","LOC111138171","GO:0008270","zinc ion binding",2113,18,8.19,0.00098,"Molecular Functions",0.00851869380028396

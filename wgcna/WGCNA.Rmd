@@ -7,6 +7,11 @@ output: github_document
 
 # Weighed Gene Co-Network Analysis (WGCNA) for Juvenile CADO RNAseq project
 
+IMPORTANT TO CONSIDER FOR RE-ANALYSIS:
+- generate filtered dataset with both phases included
+- reorganize beginning of script (steps 1 & 2)
+- set model to accomodate two phase design 
+
 
 ## Steps: 
 1. [Load packages and data](#1-load-packages-and-data)
@@ -43,29 +48,7 @@ library(ComplexHeatmap)
 library(circlize)
 library(reshape)
 library(ggplot2)
-library(genefilter)
 #library(hrbrthemes)
-```
-
-Load data - Raw count matrix file and treatment/metadata file. This is the same files that went into DESeq. You could start with the filtered count file that you wrote out in the DESeq script, but I showed that same process below.
-
-```{r}
-#count matrix with rownames=sample ID and colnames=gene ID
-##these are my raw counts, will filter in next steps
-count_data <- as.data.frame(read.csv("../de_analysis/gene_count_matrix.csv", row.names = 1, check.names = FALSE))
-# remove the "_F" from the sample name 
-colnames(count_data) <- sub("_F", "", colnames(count_data))
-head(count_data)
-dim(count_data)
-
-#metadata about the treatments
-treatment_data <- read.csv(file="../de_analysis/juve_cado_metadata_w_batches.csv", sep=',', header=TRUE, row.names=1)
-dim(treatment_data)
-
-#check that the sample names are the same in both places
-all(rownames(treatment_data) %in% colnames(count_data))
-#check the order of the samples
-all(rownames(treatment_data) == colnames(count_data))
 ```
 
 The following setting is important, do not omit. (as recommended by WGCNA authors - view tutorial)
@@ -76,8 +59,9 @@ options(stringsAsFactors = FALSE)
 
 ## 2. Pre-processing data
 
-Preliminary filtering of the counts with P over A.\
-I want to remove all rows that have less than 4% of samples with less than 5 counts. I am starting with the raw counts ('count_data' variable).
+*Preliminary filtering of the counts with P over A*\
+I used the filtered gene count matrix file I created with genefilter() in R version 3.6.0 with `de_analysis/DESeq2_analysis.Rmd`\
+I removed all rows that have less than 5.5% of samples with less than 5 counts (5.5% would be 4 out of 72 samples)
 
 While pre-filtering of low count genes isn't necessary, it can be useful for 2 reasons:\
 1. reduce size of the data object (thus increase speed of modeling).\
@@ -85,49 +69,25 @@ While pre-filtering of low count genes isn't necessary, it can be useful for 2 r
 
 [Read here for the pre processing steps using WGCNA!](https://bmcbioinformatics.biomedcentral.com/track/pdf/10.1186/1471-2105-9-559.pdf)
 
-genefilter() was not available for version 4.3.2 of R so I read in the filtered gene count matrix files (see next code chunk) from when I created them in version 3.6.0 with `de_analysis/DESeq2_analysis.Rmd`.
-
+*Read in data*\
 ```{r}
-#Filtering the count data
-#set filter values for PoverA, P percent of the samples have counts over A
-# filt <- filterfun(pOverA(0.04,5))
-# 
-# #create filter for the counts data
-# tfil <- genefilter(count_data, filt)
-# 
-# #identify transcripts to keep by count filter
-# keep <- count_data[tfil,]
-# 
-# #identify transcript list
-# gn.keep <- rownames(keep)
-# 
-# #data filtered in PoverA, P percent of the samples have counts over A
-# count_data_filt <- as.data.frame(count_data[which(rownames(count_data) %in% gn.keep),])
-# dim(count_data) #97257 
-# dim(count_data_filt) #70981
-# head(count_data_filt,10)
-# 
-# # sanity check - make sure all of your samples in both datasets
-# dim(treatment_data)[1] ==  dim(count_data_filt)[2]
-# TRUE = count data and treatment data matrices contain all 72 samples - yay
-```
+# read in treatment metadata 
+treatment_data <- read.csv(file="../de_analysis/juve_cado_metadata_w_batches.csv", sep=',', header=TRUE, row.names = 1)
+dim(treatment_data)
 
-**Reading in filtered gene counts and splitting by phase.**\
-IMPORTANT TO NOTE! These files were split by PHASE (1 or 2) which is pretty much a necessity with running DESeq2
+# read in filtered count data 
+## These data have been filtered to exclude any gene that has less than 10 counts 
+count_data <- as.data.frame(read.csv("../de_analysis/wgcna_over10_filtered_gene_count_matrix.csv", row.names = 1, check.names = FALSE))
+dim(count_data)
 
-```{r}
-# subset metadata ('treatment_data') first
+#check that the sample names are the same in both places
+all(rownames(treatment_data) %in% colnames(count_data))
+#check the order of the samples
+all(rownames(treatment_data) == colnames(count_data))
+
+# change row.names of treatment_data to the first column called sample.names
 treatment_data <- tibble::rownames_to_column(treatment_data, var = "sample.name")
-p1_treatment_data <- subset(treatment_data, phase=="phase1")
-p2_treatment_data <- subset(treatment_data, phase=="phase2")
-dim(p1_treatment_data)
-dim(p2_treatment_data)
-
-# read in filtered count data for each phase
-p1_count_data <- as.data.frame(read.csv("../de_analysis/outputs/p1_filtered_gene_count_matrix.csv", row.names = 1, check.names = FALSE))
-p2_count_data <- as.data.frame(read.csv("../de_analysis/outputs/p2_filtered_gene_count_matrix.csv", row.names = 1, check.names = FALSE))
-dim(p1_count_data)
-dim(p2_count_data)
+head(treatment_data)
 ```
 
 > *Notes on data normalization!* The question of how to normalize this dataset came up. The creators of WGCNA insist that "properly normalized" data is required. It turns out transforming your data (ex vst or log) is a type of normalization method.
@@ -136,39 +96,43 @@ dim(p2_count_data)
 
 > **We will use a variance stabilizing transformation here (vst transformation)** This transformation is recommended in the R documentation for using WGCNA on RNAseq data <https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/faq.html/>
 
-#### PHASE 1
+#### Formatting data in DESeq matrix and perform vst 
 
-Create 'dds' object (DESeqDataSet) & vst transform the 'dds' object for WGCNA (following matrix contruction laid out in `de_analysis/DESeq2_analysis.Rmd`) Then we'll transform the data and select only the top most variable genes to look at in the analysis
+Create 'dds' object (DESeqDataSet) & vst transform the 'dds' object for WGCNA (following matrix construction laid out in `de_analysis/DESeq2_analysis.Rmd`) Then we'll transform the data and select only the top most variable genes to look at in the analysis
 
 ```{r}
 # assign the batch numbers as factors not integers
-p1_treatment_data$batch <- factor(p1_treatment_data$batch, levels = c("1", "2"))
+treatment_data$batch <- factor(treatment_data$batch, levels = c("1", "2", "3", "4", "5"))
 
 #build deseq matrix (dm#)
-dm1 <- DESeqDataSetFromMatrix(countData = p1_count_data,
-                             colData = p1_treatment_data,
-                             design = ~ batch + treatment)
-dm1$treatment <- factor(dm1$treatment, levels = c("control", "stress"))
-levels(dm1$treatment)
-dm1
+dm <- DESeqDataSetFromMatrix(countData = count_data,
+                             colData = treatment_data,
+                             design = ~ batch + phase.treat)
+dm$phase.treat <- factor(dm$phase.treat, levels = c("1_control", "1_stress", "2_control", "2_stress", "2_naive", "2_recovery"))
+levels(dm$phase.treat)
+dm
 
 # transform the data  ========================================================== #
-# run in order (kept name as dm1_vst)
-dm1_vst <- vst(dm1) # transform it vst (variance stabilized transformation)
-dm1_vst <- assay(dm1_vst) # call only the transformed counts in the dds object
-dim(dm1_vst)
+# run in order (kept name as dm_vst)
+dm_vst <- vst(dm) # transform it vst (variance stabilized transformation)
+dm_vst <- assay(dm_vst) # call only the transformed counts in the dds object
+dim(dm_vst)
+dm_vst_t <- t(dm_vst)
+dim(dm_vst_t)
 
-# lets pair down to look at the top 5,000 most variable genes instead of the list of 68,435 genes
-MostVaryGenes <- head(order(rowVars(dm1_vst), decreasing = TRUE), 5000)
+#############
+## OPTIONAL FOR DATA REDUCTION - NOT USING IN FAVOR OF COUNT BASED FILTERING
+# lets pair down to look at the top 10,000 most variable genes instead of the list of 68,435 genes
+#MostVaryGenes <- head(order(rowVars(dm_vst), decreasing = TRUE), 10000)
 # make that information into a matrix
-VMostVaryGenes_Mat <- dm1_vst[ MostVaryGenes, ] #which in the DESeq2 style matrix are those genes?
-dim(VMostVaryGenes_Mat)
+#VMostVaryGenes_Mat <- dm_vst[ MostVaryGenes, ] #which in the DESeq2 style matrix are those genes?
+#dim(VMostVaryGenes_Mat)
 # make that matrix a dataframe
-dm1_vst_5000 <- as.data.frame(VMostVaryGenes_Mat)
-dim(dm1_vst_5000)
+#dm_vst_5000 <- as.data.frame(VMostVaryGenes_Mat)
+#dim(dm_vst_5000)
 # transpose columns to rows and vice versa
-dm1_mvg <- t(dm1_vst_5000) 
-dim(dm1_mvg)
+#dm_mvg <- t(dm_vst_5000) 
+#dim(dm_mvg)
 ```
 
 ## 3. Determine outliers with cluster tree
@@ -176,47 +140,86 @@ dim(dm1_mvg)
 WGCNA Sample tree - omit outlier sample(s)
 ```{r}
 # checks before we start....
-dim(dm1_mvg) #  24 samples; 5000 genes
-gsg = goodSamplesGenes(dm1_mvg, verbose = 3);  # We first check for genes and samples with too many missing values:
+dim(dm_vst_t) #  72 samples; 14,177 genes
+gsg = goodSamplesGenes(dm_vst_t, verbose = 3);  # We first check for genes and samples with too many missing values:
 gsg$allOK # If the statement returns TRUE, all genes have passed the cuts. 
+table(gsg$goodGenes)
+table(gsg$goodSamples)
 ```
 
 Plot cluster tree and look for potential outliers - look at the plotted tree!!
 ```{r}
 # call the cluster and set window dimensions to view..
-sampleTree = hclust(dist(dm1_mvg), method = "average") # Next we cluster the samples (in contrast to clustering genes that will come later)  to see if there are any obvious outliers.
+sampleTree = hclust(dist(dm_vst_t), method = "average") # Next we cluster the samples (in contrast to clustering genes that will come later)  to see if there are any obvious outliers.
 options(bitmapType = 'cairo')
 sizeGrWindow(12,9) # The user should change the dimensions if the window is too large or too small.
 par(cex = 0.6);
 par(mar = c(0,4,2,0))
 # output the tree as .png file..
-png("outputs/sampleClusterTree_Precut.png", 1000, 1000, pointsize=20)
-plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5, 
-     cex.axis = 1.5, cex.main = 2) 
-abline(h = 100 , col = "red") # add line to plot to show the cut-off outlier samples 
+png("outputs/sampleClusterTree_Precut.png", 1000, 800, pointsize=18)
+precut_tree <- plot(sampleTree, main = "Sample clustering to detect outliers - WGCNA", sub="", xlab="", cex.lab = 1.5, 
+     cex.axis = 1.5, cex.main = 2)+ abline(h = 115 , col = "red");precut_tree # add line to plot to show the cut-off outlier samples 
 dev.off()
 ```
 
+Plot PCA of samples w/ outliers in red
+```{r}
+pca <- prcomp(dm_vst_t)
+pca.data <- pca$x
+
+pca.var <- pca$sdev^2
+pca.var.percent <- round(pca.var/sum(pca.var)*100, digits = 2)
+
+pca.data <- as.data.frame(pca.data)
+pca.data$SampleName <- rownames(pca.data)
+
+pca.data$Outliers <- ifelse(pca.data$SampleName %in% c("J1_14SC2_4", "J2_14SC2_2", "J2_14SN2_1", "J2_14SN2_2", "J2_14SN3_3","J2_14SR1_2", "J2_14SR1_4", "J2_14SS1_4"), 
+                           as.character(pca.data$SampleName), "Other")
+
+png("outputs/outliers_pca.png", 800, 600)
+out_pca <- ggplot(pca.data, aes(PC1, PC2, color = Outliers)) +
+  #geom_point(size=2) +
+  scale_color_manual(values = c("J1_14SC2_4" = "red",
+                                "J2_14SC2_2"= "red",
+                                "J2_14SN2_1"= "red",
+                                "J2_14SN2_2"= "red",
+                                "J2_14SN3_3"= "red",
+                                "J2_14SR1_2"= "red",
+                                "J2_14SR1_4"= "red",
+                                "J2_14SS1_4"= "red",
+                                "Other"= "grey10")) +
+  geom_text(label = rownames(pca.data), size = 4) +
+  labs(title = "PCA of samples w/ cluster tree outliers in red - WGCNA",
+       x= paste0('PC1: ', pca.var.percent[1], ' %'),
+       y= paste0('PC2: ', pca.var.percent[2], ' %')) +
+  theme_bw() + 
+  theme(legend.position = "none",
+        axis.text = element_text(size = 16),
+        axis.title = element_text(size = 16),
+        title = element_text(face = "bold", size = 18)); out_pca
+dev.off()
+```
 
 ## 4. Cut outliers and replot tree
 
-**For now, I'll just cut that one outlier ('J1_14SC2_4')**
+##**I'll cut outliers (1 PI control; 1 PII control; 1 PII stress; 3 PII naive; 2 PII recovery)**
 
 Cutting the outlier(s) and re-plotting the tree. 
-I did not use these steps for these data given the lack of outliers. But in the event you have an outlier, you'd want to follow the code below to obtain a new data matrix sans outliers and make a new post-cut tree.
 ```{r}
 # cut the tree and omit  ========================================================== #
-clust = cutreeStatic(sampleTree, cutHeight = 100, minSize = 10) # Determine cluster under the line
-table(clust) # 0 = cut; 1 = kept; says it will cut 1 and save 35; exactly what we want!
-keepSamples = (clust==1) # 'keepsamples' boolean to call the main dataset - notice there is one occurrence of FLASE - this is sample I am cutting
+clust = cutreeStatic(sampleTree, cutHeight = 115, minSize = 10) # Determine cluster under the line
+table(clust) # 0 = cut; 1 = kept; says it will cut 8 and save 64; exactly what we want!
+keepSamples = (clust==1) # 'keepsamples' boolean to call the main dataset - notice there are occurrences of FALSE - these are the samples I am cutting
 
 # integrate keepsamples  ========================================================== #
-dm1_mvg = dm1_mvg[keepSamples, ] # integreat the boolean 'keepsamples' to ommit oultilers determined in the sample tree above
-nGenes = ncol(dm1_mvg) # number of genes == 5000
-nSamples = nrow(dm1_mvg) # number of samples == 23  - the cut tree removed 1 sample
+dm_vst_t = dm_vst_t[keepSamples, ] # integreat the boolean 'keepsamples' to ommit oultilers determined in the sample tree above
+nGenes = ncol(dm_vst_t) # number of genes == 14177
+nSamples = nrow(dm_vst_t) # number of samples == 64  - the cut tree removed 8 sample
+```
 
+```{r}
 # plot the tree with the 'keep samples'  =========================================== #
-sampleTree2 = hclust(dist(dm1_mvg), method = "average") # Next we cluster the samples (in contrast to clustering genes that will come later)  to see if there are any obvious outliers.
+sampleTree2 = hclust(dist(dm_vst_t), method = "average") # Next we cluster the samples (in contrast to clustering genes that will come later)  to see if there are any obvious outliers.
 png("outputs/ClusterTree_Postcut.png", 1000, 1000, pointsize=20)
 plot(sampleTree2, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,
      cex.axis = 1.5, cex.main = 2)
@@ -226,44 +229,47 @@ dev.off()
 ## 5. Updating matrices for following analyses.  
 !!! do this whether or not you cut samples !!!
 ```{r}
-dim(dm1_mvg)
-dim(p1_treatment_data)
+dim(dm_vst_t)
+dim(treatment_data)
 
 # Form a data frame analogous to expression data that will hold the clinical traits.
-samples = rownames(dm1_mvg);# start new variable 'd7.Samples' calling the row names of the gene data (sample as 'Mouse' in trait data)
-TreatRows = match(samples, treatment_data$sample); # match the names - calls the list number of 'd7.Samples' matching 'd7.Treatment.data$Sample.Name'
+samples = rownames(dm_vst_t);# start new variable 'd7.Samples' calling the row names of the gene data (sample as 'Mouse' in trait data)
+TreatRows = match(samples, treatment_data$sample.name); # match the names - calls the list number of 'd7.Samples' matching 'd7.Treatment.data$Sample.Name'
 Traits = treatment_data[TreatRows, -1]; # insert TreatRows as the row numbers in 'treatment_data'
 rownames(Traits) = treatment_data[TreatRows, 1]; # inserts the new TreatRows - matches sample IDs
-all(rownames(Traits) == rownames(dm1_mvg))  # should be TRUE
+all(rownames(Traits) == rownames(dm_vst_t))  # should be TRUE
 dim(Traits)
 ```
 
 
 ## 6. Prepare trait data
 ```{r}
-str_traits     <-  Traits %>% dplyr::select('treatment') %>% #treatment as control vs stress
-                            dplyr::mutate(control = as.factor(as.numeric(treatment == "control")))  %>%  # call occurrence of 'control' as 0s and 1s (factor)
-                            dplyr::mutate(stress = as.factor(as.numeric(treatment == "stress")))  %>%  # call occurrence of 'stress'  as 0s and 1s (factor)
-                            dplyr::select(-treatment)
-str_traits  # final dataset of 0,1 for treatment groups - stress only!
+# COMBINE TREATMENT DATA
+all_traits <-   Traits %>% dplyr::select('phase.treat') %>% #build matrix with all treatment groups
+  dplyr::mutate(p1_control = as.factor(as.numeric(phase.treat == "1_control")))  %>%  # call occurrence of 'control' as 0s and 1s (factor)
+  dplyr::mutate(p1_stress = as.factor(as.numeric(phase.treat == "1_stress")))  %>%  # call occurrence of 'stress' as 0s and 1s (factor)
+  dplyr::mutate(p2_control = as.factor(as.numeric(phase.treat == "2_control")))  %>%  # call occurrence of 'control' as 0s and 1s (factor)
+  dplyr::mutate(p2_stress = as.factor(as.numeric(phase.treat == "2_stress")))  %>%  # call occurrence of 'stress' as 0s and 1s (factor)
+  dplyr::mutate(p2_naive = as.factor(as.numeric(phase.treat == "2_naive")))  %>%  # call occurrence of 'naive' as 0s and 1s (factor)
+  dplyr::mutate(p2_recovery = as.factor(as.numeric(phase.treat == "2_recovery")))  %>%  # call occurrence of 'recovery' as 0s and 1s (factor)
+  dplyr::select(-phase.treat)
+all_traits
 ```
 
 
 ## 7. Cluster samples by trait
-*make sure you are using the right sample tree!!*
-Since I didn't cut any samples, I am using the original tree built.
+*make sure you are using the right sample tree w/ outlier samples removed!!*
 ```{r}
-# phase 1 stress v control treatment
-png("outputs/phase1_ClusterTree.png", 1000, 1000, pointsize=20)
-p1_traitColors = labels2colors(str_traits); # Convert traits to a color representation: white means low, red means high, grey means missing entry
-plotDendroAndColors(sampleTree2, p1_traitColors, # Plot the sample dendrogram and the colors underneath.
-                    groupLabels = names(str_traits), 
-                    main = "PHASE 1 - Sample dendrogram and trait heatmap")
+png("outputs/AllTraits_ClusterTree.png", 1000, 1000, pointsize=20)
+traitColors = labels2colors(all_traits); # Convert traits to a color representation: white means low, red means high, grey means missing entry
+plotDendroAndColors(sampleTree2, traitColors, # Plot the sample dendrogram and the colors underneath.
+                    groupLabels = names(all_traits), 
+                    main = "Sample dendrogram and trait heatmap")
 dev.off()
 
 # write some of the data thus far.... 
-#save(dm1_mvg, Traits, file = "data/phase1_dataInput.RData")
-#write.csv(dm1_mvg, "data/phase1_vstTransformed_WGCNAdata.csv") # # write the vst transformed data 
+#save(dm_vst_t, Traits, file = "data/dataInput.RData")
+#write.csv(dm_vst_t, "data/vstTransformed_WGCNAdata.csv") # write the vst transformed data 
 ```
 
 ## 8. Set softpower threshold
@@ -277,11 +283,11 @@ I need to pick a power where scale free topology of the matrix is met. From some
 
 <https://peterlangfelder.com/2018/11/25/signed-or-unsigned-which-network-type-is-preferable/>
 ```{r}
-dim(dm1_mvg) # again double check you have the correct data...
+dim(dm_vst_t) # again double check you have the correct data...
 # Choose a set of soft-thresholding powers
 powers = c(c(1:10), seq(from = 12, to=20, by=2))
 # Call the network topology analysis function
-sft = pickSoftThreshold(dm1_mvg, powerVector = powers, verbose = 5) #...wait for this to finish (~4mins)
+sft = pickSoftThreshold(dm_vst_t, powerVector = powers, verbose = 5) #...wait for this to finish (~20mins w/ full dataset)
 #  pickSoftThreshold 
 #  performs the analysis of network topology and aids the
 #  user in choosing a proper soft-thresholding power.
@@ -290,7 +296,7 @@ sft = pickSoftThreshold(dm1_mvg, powerVector = powers, verbose = 5) #...wait for
 
 # png to output 
 sizeGrWindow(9, 5) # set window size 
-png("outputs/phase1_ScaleTopology_SoftThresh.png", 1000, 1000, pointsize=20)
+png("outputs/ScaleTopology_SoftThresh.png", 1000, 1000, pointsize=20)
         par(mfrow = c(1,2));
         cex1 = 0.9;
         
@@ -299,7 +305,7 @@ png("outputs/phase1_ScaleTopology_SoftThresh.png", 1000, 1000, pointsize=20)
              main = paste("Scale independence"));
         text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
              labels=powers,cex=cex1,col="red");
-        abline(h=0.95,col="red") # look at at cut off at power of 3 - this line corresponds to using an R^2 cut-off of h
+        abline(h=0.8,col="red") # look at at cut off at power of 3 - this line corresponds to using an R^2 cut-off of h
         
         plot(sft$fitIndices[,1], sft$fitIndices[,5], # Mean connectivity as a function of the soft-thresholding power
              xlab="Soft Threshold (power)",ylab="Mean Connectivity", type="n",
@@ -310,14 +316,14 @@ dev.off() # output
 
 # The left panel... shows the scale-free fit index (y-axis) 
 # as a function of the soft-thresholding power (x-axis). 
-# We choose the power 5, which is the lowest power for which the scale-free 
+# We choose the power 8, which is the lowest power for which the scale-free 
 # topology index curve flattens out upon reaching a high value (in this case, roughly 0.90).
 # The right panel.... displays the mean connectivity
 # (degree, y-axis) as a function of the soft-thresholding power (x-axis).
 ```
 These data look good based on the plots here. 
 
-**I'll pick _5_ as my softpower threshold because this is where the Scale Free Topology R sq value is >=0.9 and the curve starts to flatten out.**
+**I'll pick _8_ as my softpower threshold because this is where the Scale Free Topology R sq value is >=0.9 and the curve starts to flatten out.**
 
 
 ## 9. Stepwise module construction
@@ -328,10 +334,10 @@ https://ramellose.github.io/networktutorials/wgcna.html
 https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/10cpm/TechnicalReports/signedTOM.pdf
 
 ```{r}
-softPower = 5 # set your soft threshold based on the plots above 
+softPower = 8 # set your soft threshold based on the plots above 
 
 # signed - must call the type, defaults to unsigned
-adjacency_sign = adjacency(dm1_mvg, power = softPower, type="signed") # this takes a long time.. just wait...(~seconds)
+adjacency_sign = adjacency(dm_vst_t, power = softPower, type="signed") # this takes time.. just wait...(~10mins for full dataset)
 ```
 
 #### Step 2: Turn adjacency into topological overlap matrix
@@ -340,7 +346,7 @@ and the corresponding dissimilarity, from a given adjacency matrix.
 
 # signed matrix
 ```{r}
-TOM_sign       = TOMsimilarity(adjacency_sign, TOMType="signed")  # this takes a long time.. just wait... (?)
+TOM_sign       = TOMsimilarity(adjacency_sign, TOMType="signed")  # this takes a long time.. just wait... (~2.5hrs for the full dataset)
 dissTOM_sign   = 1-TOM_sign
 ```
 
@@ -355,9 +361,10 @@ plot(geneTree_sign, xlab="", sub="", main = "Gene clustering on TOM-based dissim
      labels = FALSE, hang = 0.04)
 ```
 #### Step 4: Set module size and 'cutreeDynamic' to create clusters 
+
 ```{r}
 # We like large modules, so we set the minimum module size relatively high:
-minModuleSize = 100; # set this for the subseqent call - WGCNA authors recommend diligence when calling module size to avoid too many/too few modules...
+minModuleSize = 50; # set this for the subseqent call - WGCNA authors recommend diligence when calling module size to avoid too many/too few modules...
 # Module identification using dynamic tree cut:
 dynamicMods_sign = cutreeDynamic(dendro = geneTree_sign, distM = dissTOM_sign,
                                  deepSplit = 1, pamRespectsDendro = FALSE,
@@ -383,37 +390,53 @@ plotDendroAndColors(geneTree_sign, dynamicColors_sign, "Dynamic Tree Cut - SIGNE
 # Calculate eigengenes ========================================================== # 
 
 # MEList = moduleEigengenes(dim1_mvg, colors = dynamicColors)
-MEList = moduleEigengenes(dm1_mvg, colors = dynamicColors_sign)
+MEList = moduleEigengenes(dm_vst_t, colors = dynamicColors_sign)
 MEs    = MEList$eigengenes # you can view MEs, condenses gene counts down to a single number for each sample representative of that expression pattern 
 
-#remove module grey (full of NAs)
+#remove module grey - option if you have a module grey (unassigned genes) - I didn't here
 #MEs <- MEs[c(1,2,4,5)]
 
 # Calculate dissimilarity of module eigengenes
 MEDiss = 1-cor(MEs)
 METree = hclust(as.dist(MEDiss), method = "average") # Cluster module eigengenes
 
+# grouping the clusters from a cut-off
+MEDissThres = 0.25
+
 # Plot the result ================================================================ #
 sizeGrWindow(7, 6)
-png("outputs/phase1_ClusterEigengenes.png", 1000, 1000, pointsize=20)
-plot(METree, main = "PHASE 1 Clustering of module eigengenes - SIGNED (dissimilarity calc = MEDiss = 1-cor(MEs))",
+png("outputs/ClusterEigengenes_cutoff.png", 1000, 1000, pointsize=20)
+plot(METree, main = "Clustering of module eigengenes - SIGNED (dissimilarity calc = MEDiss = 1-cor(MEs))",
      xlab = "", sub = "")
+abline(h=MEDissThres, col = "red")
 dev.off()
 ```
 
 #### Step 7: Specify the cut line for the dendrogram (module) - Calc MODULE EIGENGENES (mergeMEs)
-not necessary for this dataset - METree above looks to be parsed well into the 4 module (after removing the empty "catch all" module grey)
-*If you are skipping this step, move on to Step 9*
+Here, all of my modules are more 25% different from each other so I won't be merging any. Default cut height for merging modules is less than 25% dissimilarity. I could explore merging modules mint and forest (30% different) and modules iris and plum (27% different), but I don't find that this is necessary. More information on merging modules: https://fuzzyatelin.github.io/bioanth-stats/module-F21-Group1/module-F21-Group1.html#Module_Merging
+```{r}
+# MEDiss
+# # merge modules whose distance is less than given cutHeight
+# merge <- mergeCloseModules(dm_vst_t, dynamicColors_sign, cutHeight = .35)
+# 
+# # The merged module colors, assigning one color to each module
+# mergedColors = merge$colors
+# 
+# # Eigengenes of the new merged modules
+# mergedMEs = merge$newMEs
+```
+
 
 #### Step 8: Plot dendrogram with the cut line 'MEDissThres' ---- NOT USING HERE!
 use 'mergedColors' we needed to merge related eigengene modules together 
 ```{r}
 # sizeGrWindow(12, 9)
-# png("Analysis/Output/WGCNA/10cpm/Day7/Day7_ClusterDendrogram_signed.png", 1000, 1000, pointsize=20)
+# png("outputs/ClusterDendrogram.png", 1000, 1000, pointsize=20)
 # plotDendroAndColors(geneTree_sign, cbind(dynamicColors_sign, mergedColors),
-#                     c("Dynamic Tree Cut", "Merged dynamic"),
+#                     c("Original Modules", "Merged Modules"),
 #                     dendroLabels = FALSE, hang = 0.03,
-#                     addGuide = TRUE, guideHang = 0.05)
+#                     addGuide = TRUE, guideHang = 0.05,
+#                     main = "Gene dendrogram and module colors for original and merged modules")
 # dev.off()
 ```
 
@@ -421,17 +444,44 @@ use 'mergedColors' we needed to merge related eigengene modules together
 ```{r}
 # Rename to moduleColors
 moduleColors = dynamicColors_sign
+
 # Construct numerical labels corresponding to the colors
-#colorOrder = c("grey", standardColors(50));
+#colorOrder = c("grey", standardColors(50)); #I didn't have any genes that were not assigned so I won't keep grey here
 colorOrder = c(standardColors(50))
-moduleLabels = match(moduleColors, colorOrder)-1;
+moduleLabels = match(moduleColors, colorOrder); #add -1 if module grey present
+#customColorOrder = c("goldenrod", "honeydew3", "palegreen", "seagreen", "thistle", "mediumpurple", "khaki2", "plum4") 
+customColorOrder = c("goldenrod", "honeydew3", "palegreen", "seagreen", "thistle", "mediumpurple", "khaki2", "plum4") 
+moduleColors.custom = customColorOrder[moduleLabels]
 
 # Save module colors and labels for use in subsequent parts
-#save(MEs, moduleLabels, moduleColors, file = "data/phase1_networkConstruction-stepByStep.RData")
+save(MEs, moduleLabels, moduleColors.custom, file = "data/networkConstruction-stepByStep.RData")
 # write csv - save the module eigengenes
-#write.csv(MEs, file = "data/phase1_WGCNA_ModuleEigengenes.csv")
+write.csv(MEs, file = "data/WGCNA_ModuleEigengenes.csv")
 ```
 
+Side quest - plot module eigengene dissimilarity tree using display names (for supplemental)
+```{r}
+# #pull display names as the column names for MEs data
+# MEs_display_names <- MEs
+# MEs_display_names
+# colnames(MEs_display_names) <- c("gold",      "lemon",      "sage",     "mint",    "forest",   "lilac",         "iris",  "plum")
+# MEs_display_names
+# 
+# # Calculate dissimilarity of module eigengenes
+# MEDiss_display = 1-cor(MEs_display_names)
+# METree_display = hclust(as.dist(MEDiss_display), method = "average") # Cluster module eigengenes
+# 
+# # grouping the clusters from a cut-off
+# MEDissThres = 0.25
+# 
+# # Plot the result ================================================================ #
+# sizeGrWindow(7, 6)
+# png("outputs/ClusterEigengenes_cutoff_displayColors.png", 1000, 1000, pointsize=20)
+# plot(METree_display, main = "Clustering of module eigengenes - SIGNED (dissimilarity calc = MEDiss = 1-cor(MEs))",
+#      xlab = "", sub = "")
+# abline(h=MEDissThres, col = "red")
+# dev.off()
+```
 
 ## 10. Prepare for module trait associations
 Identify modules that are significantly associated with the measured  traits (here as treatment)
@@ -440,94 +490,151 @@ Since we already have a summary profile (eigengene) for each module,
 we simply correlate eigengenes with external traits and look for the  significant associations:
 ```{r}
 # Define numbers of genes and samples
-nGenes = ncol(dm1_mvg); 
-nSamples = nrow(dm1_mvg); 
+nGenes = ncol(dm_vst_t); 
+nSamples = nrow(dm_vst_t); 
 # Recalculate MEs with color labels
-MEs0 = moduleEigengenes(dm1_mvg, moduleColors)$eigengenes
+MEs0 = moduleEigengenes(dm_vst_t, moduleColors.custom)$eigengenes
 MEs = orderMEs(MEs0) # reorders the columns (colors/modules)
 ```
 
 ## 11. Module trait coorelation 
 ```{r}
 # ALL TRAIT DATA
-dim(Traits)  # 23  8
-dim(MEs)  # 23 5
+dim(Traits)  # 64  8
+dim(MEs)  # 64  7
 
-# stress treatment
-str_traits_asnum    <- data.frame(lapply(str_traits, function(x) as.numeric(as.character(x))),
-                                check.names=F, row.names = row.names(str_traits))
-moduleTraitCor_str      = cor(MEs, str_traits_asnum, use = "p");
-moduleTraitPvalue_str   = corPvalueStudent(moduleTraitCor_str, nSamples);
-print("stress Module Correlation p-values")
-moduleTraitPvalue_str
+# treatment coorelation
+all_traits_asnum    <- data.frame(lapply(all_traits, function(x) as.numeric(as.character(x))),
+                                check.names=F, row.names = row.names(all_traits))
+moduleTraitCor     = cor(MEs, all_traits_asnum, use = "p");
+moduleTraitPvalue   = corPvalueStudent(moduleTraitCor, nSamples);
+print("Module Correlation p-values")
+moduleTraitPvalue
 ```
+
+____*NAME KEY!!*____
+"MEgoldenrod" = gold
+"MEkhaki2" = lemon
+"MEhoneydew3" = sage    
+"MEpalegreen" = mint
+"MEseagreen" = forest     
+"MEthistle" = lilac      
+"MEmediumpurple" = iris
+"MEplum4" = plum
+
+
+
+## 12. Write out modules to csv files (for GO enrichment)
+
+First, we have to create a new matrix with the display names from the heatmaps that match up to the proper modules
+```{r}
+# change moduleColors.custom to new names (in the same order!!! - very important**)
+#module_names = c("goldenrod", "honeydew3", "palegreen", "seagreen", "thistle", "mediumpurple", "khaki2", "plum4")  #original module name
+display_names = c("gold",      "sage",      "mint",     "forest",    "lilac",   "iris",         "lemon",  "plum")   #module name for plot
+moduleColors.display = display_names[moduleLabels]
+
+# make data frame from dds object to pull from 
+dds_modules = as.data.frame((dm_vst_t))
+dim(dds_modules) 
+
+# Prove that the display name is referencing the correct module  ***
+mod_genes <- names(dds_modules)[moduleColors.custom=="goldenrod"] 
+display_genes <- names(dds_modules)[moduleColors.display=="gold"]
+length(mod_genes)==length(display_genes) # should be TRUE
+mod_genes == display_genes # should all be TRUE
+```
+
 
 ```{r}
-dds5 = as.data.frame((dm1_mvg))
-dim(dds5) 
-module_blue_genes <- names(dds5)[moduleColors=="blue"]
-length(module_blue_genes)
+# assign modules to variables
+gold_genes <- names(dds_modules)[moduleColors.display=="gold"] 
+lemon_genes <- names(dds_modules)[moduleColors.display=="lemon"] 
+sage_genes <- names(dds_modules)[moduleColors.display=="sage"] 
+mint_genes <- names(dds_modules)[moduleColors.display=="mint"] 
+forest_genes <- names(dds_modules)[moduleColors.display=="forest"] 
+lilac_genes <- names(dds_modules)[moduleColors.display=="lilac"] 
+iris_genes <- names(dds_modules)[moduleColors.display=="iris"] 
+plum_genes <- names(dds_modules)[moduleColors.display=="plum"] 
 
-#save list of module blue genes
-#write.csv(module_blue_genes, "phase1_module_blue_genes.csv", quote=F, row.names = FALSE)
-
+#save list of genes that comprise each module
+write.csv(gold_genes, "module_lists/module_gold_genes.csv", quote=F, row.names = FALSE)
+write.csv(lemon_genes, "module_lists/module_lemon_genes.csv", quote=F, row.names = FALSE)
+write.csv(sage_genes, "module_lists/module_sage_genes.csv", quote=F, row.names = FALSE)
+write.csv(mint_genes, "module_lists/module_mint_genes.csv", quote=F, row.names = FALSE)
+write.csv(forest_genes, "module_lists/module_forest_genes.csv", quote=F, row.names = FALSE)
+write.csv(lilac_genes, "module_lists/module_lilac_genes.csv", quote=F, row.names = FALSE)
+write.csv(iris_genes, "module_lists/module_iris_genes.csv", quote=F, row.names = FALSE)
+write.csv(plum_genes, "module_lists/module_plum_genes.csv", quote=F, row.names = FALSE)
 ```
 
 
-## 12. Hub genes
-STILL NEED TO EXPLORE THIS!
+Set color legend for heatmap 
+```{r}
+#rename modules for heatmap - ensure that they line up with names(MEs)
+names(MEs)
+#names(MEs) =     "MEgoldenrod","MEkhaki2", "MEhoneydew3", "MEpalegreen","MEseagreen", "MEthistle", "MEmediumpurple", "MEplum4"
+color_legend <- c("gold",       "lemon",    "sage",         "mint",      "forest",     "lilac",      "iris",          "plum")
+```
 
 
 
 ## 13. Heatmaps!
-
 ```{r}
 sizeGrWindow(10,10)
-# Will display correlations and their p-values
-p1.matrix <-  paste(signif(moduleTraitCor_str, 2), "\n(",
-                                      signif(moduleTraitPvalue_str, 1), ")", sep = "")
+all.matrix <- paste(signif(moduleTraitCor, 2), "\n(",
+                      signif(moduleTraitPvalue, 1), ")", sep = "")
 
-par(mar = c(8, 9.5, 5, 3));
-# Display the correlation values within a heatmap plot
-png("outputs/phase1_heatmap.png", 700, 800, pointsize=20)
-labeledHeatmap(Matrix = moduleTraitCor_str,
-               xLabels = names(str_traits),
+# Force it back into a matrix matching moduleTraitCor
+dim(all.matrix) <- dim(moduleTraitCor)
+
+# make function for heatmap colors
+colfunc <- colorRampPalette(c("cornflowerblue", "grey100", "maroon"))
+
+# set x-axis names - make sure they align with names(all_traits)
+names(all_traits)
+treatment_names = c("Phase I Control", "Phase I Stress", "Phase II Control", "Phase II Stress", "Phase II Naive", "Phase II Recovery")
+
+#par(mar = c(8, 9.5, 5, 3))
+png("heatmaps/WGCNA_heatmap.png", 800, 800, pointsize=16)
+
+par(mar = c(8, 7, 5, 3),
+    font = 2)
+
+# textMatrix = NULL so the function draws NO text itself
+labPos <- labeledHeatmap(Matrix = moduleTraitCor,
+               xLabels = treatment_names,
                yLabels = names(MEs),
-               ySymbols = names(MEs),
+               #ySymbols = names(MEs),
+               ySymbols = color_legend,
                colorLabels = TRUE,
-               colors = blueWhiteRed(50),
-               textMatrix = p1.matrix,
+               colors = colfunc(50), 
+               textMatrix = NULL,
                setStdMargins = FALSE,
                cex.text = 1,
                zlim = c(-0.6,0.6),
-               main = paste("Module-trait relationships - phase 1"))
-dev.off()
-```
+               font.lab.x = 2, #bold x labels
+               font.lab.y = 2, #bold y labels
+               #main = paste("Module-trait relationships")
+               )
 
+# Separator between Phase I (columns 1–2) and Phase II (columns 3–6)
+phase_boundary <- mean(labPos$xMid[c(2, 3)])
 
-```{r}
-# this heatmap looks better
-p1.text <-  as.matrix(signif(moduleTraitPvalue_str, 3))
-pa = cluster::pam(p1.text, k = 1)
-col_fun = colorRamp2(c(-0.5, 0, 0.5), c("blue", "white", "red"))
-pdf("outputs/phase1_heatmap_fancy.pdf", width=5, height=6)
-Heatmap(moduleTraitCor_CA, 
-        name = "gene_cor", 
-        rect_gp = gpar(col = "grey", lwd = 1),
-        column_title = "phase 1 WGCNA treatment", 
-        column_title_gp = gpar(fontsize = 12, fontface = "bold"),
-        # row_title = "WGCNA modules",
-        #row_km = 4, 
-        column_km = 1,
-        row_split = paste0("clstr", pa$clustering),
-        row_gap = unit(5, "mm"),
-        column_gap = unit(5, "mm"),
-        # grid.text(matrix(textMatrix)),
-        # border = TRUE,
-        border = TRUE,
-        col = col_fun,
-        cell_fun = function(j, i, x, y, width, height, fill) {
-          grid.text(sprintf("%.1f", CA.text[i, j]), x, y, gp = gpar(fontsize = 10))
-        })
+abline(
+  v = phase_boundary,
+  col = "black",
+  lwd = 2,
+  xpd = FALSE
+)
+
+# Draw every label exactly once, bolding significant cells
+for (i in 1:nrow(moduleTraitCor)) {
+  for (j in 1:ncol(moduleTraitCor)) {
+    isSig <- moduleTraitPvalue[i, j] < 0.05
+    text(x = labPos$xMid[j], y = labPos$yMid[i],
+         labels = all.matrix[i, j],
+         font = ifelse(isSig, 2, 1), cex = 1, adj = c(0.5, 0.5))
+  }
+}
 dev.off()
 ```

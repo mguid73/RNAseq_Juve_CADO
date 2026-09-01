@@ -96,40 +96,42 @@ While pre-filtering of low count genes isn't necessary, it can be useful for 2 r
 1. reduce size of the `dds` data object (thus increase speed of count modeling).  
 2. improve visualizations by making them a little cleaner
 
->Note: I filtered the whole dataset (both phases, all 72 samples) then I split up the dataset into phases following the filtering. 
-
 ```{r}
 ###filtering values for PoverA
 #set filter values for PoverA (P percent of the samples have counts over A)
-# here P = 0.055 and A = 5 (5.5% of samples would be 4 out of 72 samples)
-filt <- filterfun(pOverA(0.055,5))
 
+
+## PHASE I
+# here P = 0.167 and A = 10 (16.7% of samples would be 4 out of 24 samples)
+p1_filt <- filterfun(pOverA(0.167,10))
 #create filter for the counts data
-tfil <- genefilter(gene_counts, filt)
-
+p1_tfil <- genefilter(p1_gene_counts, p1_filt)
 #identify transcripts to keep by count filter
-keep <- gene_counts[tfil,]
-
+p1_keep <- p1_gene_counts[p1_tfil,]
 #identify gene names in transcript list to keep
-gn.keep <- rownames(keep)
-
-#data filtered in PoverA, P percent of the samples have counts over A
-filt_gene_counts <- as.data.frame(gene_counts[which(rownames(gene_counts) %in% gn.keep),])
-dim(gene_counts)
-dim(filt_gene_counts)
-#write.csv(filt_gene_counts, file="filtered_gene_count_matrix.csv")
-head(filt_gene_counts,10)
-
-p1_filt_gene_counts <- as.data.frame(p1_gene_counts[which(rownames(p1_gene_counts) %in% gn.keep),])
+p1_gn.keep <- rownames(p1_keep)
+#subset filtered genes 
+p1_filt_gene_counts <- as.data.frame(p1_gene_counts[which(rownames(p1_gene_counts) %in% p1_gn.keep),])
 dim(p1_gene_counts)
 dim(p1_filt_gene_counts)
-#write.csv(p1_filt_gene_counts, file="p1_filtered_gene_count_matrix.csv")
+write.csv(p1_filt_gene_counts, file="data/p1_filtered_gene_count_matrix.csv")
 head(p1_filt_gene_counts,10)
 
-p2_filt_gene_counts <- as.data.frame(p2_gene_counts[which(rownames(p2_gene_counts) %in% gn.keep),])
+
+## PHASE II
+# here P = 0.083 and A = 10 (8.3% of samples would be 4 out of 48 samples)
+p2_filt <- filterfun(pOverA(0.083,10))
+#create filter for the counts data
+p2_tfil <- genefilter(p2_gene_counts, p2_filt)
+#identify transcripts to keep by count filter
+p2_keep <- p2_gene_counts[p2_tfil,]
+#identify gene names in transcript list to keep
+p2_gn.keep <- rownames(p2_keep)
+#subset filtered genes 
+p2_filt_gene_counts <- as.data.frame(p2_gene_counts[which(rownames(p2_gene_counts) %in% p2_gn.keep),])
 dim(p2_gene_counts)
 dim(p2_filt_gene_counts)
-#write.csv(p2_filt_gene_counts, file="p2_filtered_gene_count_matrix.csv")
+write.csv(p2_filt_gene_counts, file="data/p2_filtered_gene_count_matrix.csv")
 head(p2_filt_gene_counts,10)
 ```
 
@@ -191,10 +193,10 @@ Note: It is important to specific the correct order in the contrasts, with the n
 
 ```{r}
 summary(res1_ashr)
-sum(res1_ashr$padj!=0, na.rm=TRUE) # 39962 total DEGs
-sum(res1_ashr$padj<0.1, na.rm=TRUE) # 531 DEGs pass p<0.1 cutoff
-sum(res1_ashr$padj<0.05, na.rm=TRUE) # 302 DEGs pass p<0.05 cutoff
-sum(res1_ashr$padj<0.001, na.rm=TRUE) # 81 DEGs pass p<0.001 cutoff
+sum(res1_ashr$padj!=0, na.rm=TRUE) # 29883 total DEGs
+sum(res1_ashr$padj<0.1, na.rm=TRUE) # 490 DEGs pass p<0.1 cutoff
+sum(res1_ashr$padj<0.05, na.rm=TRUE) # 262 DEGs pass p<0.05 cutoff
+sum(res1_ashr$padj<0.001, na.rm=TRUE) # 34 DEGs pass p<0.001 cutoff
 ```
 
 subset significant phase I DEGs (padj <0.05)
@@ -268,27 +270,27 @@ Note: It is important to specific the correct order in the contrasts, with the n
 Stress vs Control (PII)
 ```{r}
 summary(res2_stress_ashr)
-sum(res2_stress_ashr$padj!=0, na.rm=TRUE) #45538 DEGs total
-sum(res2_stress_ashr$padj<0.1, na.rm=TRUE) #1101 DEGs pass p<0.1 cutoff
-sum(res2_stress_ashr$padj<0.05, na.rm=TRUE) #763 DEGs pass p<0.05 cutoff
-sum(res2_stress_ashr$padj<0.001, na.rm=TRUE) #130 DEGs pass p<0.001 cutoff
+sum(res2_stress_ashr$padj!=0, na.rm=TRUE) #44996 DEGs total
+sum(res2_stress_ashr$padj<0.1, na.rm=TRUE) #1069 DEGs pass p<0.1 cutoff
+sum(res2_stress_ashr$padj<0.05, na.rm=TRUE) #766 DEGs pass p<0.05 cutoff
+sum(res2_stress_ashr$padj<0.001, na.rm=TRUE) #127 DEGs pass p<0.001 cutoff
 ```
 Naive vs Control (PII)
 ```{r}
 summary(res2_naive_ashr)
-sum(res2_naive_ashr$padj!=0, na.rm=TRUE) #65245 DEGs total
-sum(res2_naive_ashr$padj<0.1, na.rm=TRUE) #623 DEGs pass p<0.1 cutoff
-sum(res2_naive_ashr$padj<0.05, na.rm=TRUE) #449 DEGs pass p<0.05 cutoff
-sum(res2_naive_ashr$padj<0.001, na.rm=TRUE) #206 DEGs pass p<0.001 cutoff
+sum(res2_naive_ashr$padj!=0, na.rm=TRUE) #52877 DEGs total
+sum(res2_naive_ashr$padj<0.1, na.rm=TRUE) #479 DEGs pass p<0.1 cutoff
+sum(res2_naive_ashr$padj<0.05, na.rm=TRUE) #355 DEGs pass p<0.05 cutoff
+sum(res2_naive_ashr$padj<0.001, na.rm=TRUE) #163 DEGs pass p<0.001 cutoff
 ```
 
 Recovery vs Control (PII)
 ```{r}
 summary(res2_recovery_ashr)
-sum(res2_recovery_ashr$padj!=0, na.rm=TRUE) #65245 DEGs total
-sum(res2_recovery_ashr$padj<0.1, na.rm=TRUE) #821 DEGs pass p<0.1 cutoff
-sum(res2_recovery_ashr$padj<0.05, na.rm=TRUE) #587 DEGs pass p<0.05 cutoff
-sum(res2_recovery_ashr$padj<0.001, na.rm=TRUE) #170 DEGs pass p<0.001 cutoff
+sum(res2_recovery_ashr$padj!=0, na.rm=TRUE) #52877 DEGs total
+sum(res2_recovery_ashr$padj<0.1, na.rm=TRUE) #776 DEGs pass p<0.1 cutoff
+sum(res2_recovery_ashr$padj<0.05, na.rm=TRUE) #544 DEGs pass p<0.05 cutoff
+sum(res2_recovery_ashr$padj<0.001, na.rm=TRUE) #162 DEGs pass p<0.001 cutoff
 ```
 
 
@@ -344,16 +346,16 @@ deg1_clean$diffexpressed <- "NO"
 colnames(deg1_clean)
 
 #see how many up- and downregulated significant DEGs there are (regardless of LFC)
-up <- count(deg1_clean$log2FoldChange > 0 & deg1_clean$padj < 0.05); up # UP = 137
-down <- count(deg1_clean$log2FoldChange < 0 & deg1_clean$padj < 0.05); down # DOWN = 165
+up <- count(deg1_clean$log2FoldChange > 0 & deg1_clean$padj < 0.05); up # UP = 122
+down <- count(deg1_clean$log2FoldChange < 0 & deg1_clean$padj < 0.05); down # DOWN = 140
 
 # check we got everyone
-count(deg1_clean$padj<0.05) #302
-total = up + down; total #302
+count(deg1_clean$padj<0.05) #262
+total = up + down; total #262
 
 #see how many up- and downregulated significant DEGs there are with LFC of |1|
-up_lfc1 <- count(deg1_clean$log2FoldChange > 1 & deg1_clean$padj < 0.05); up_lfc1 # UP = 65
-down_lfc1 <- count(deg1_clean$log2FoldChange < -1 & deg1_clean$padj < 0.05); down_lfc1 # DOWN = 98
+up_lfc1 <- count(deg1_clean$log2FoldChange > 1 & deg1_clean$padj < 0.05); up_lfc1 # UP = 39
+down_lfc1 <- count(deg1_clean$log2FoldChange < -1 & deg1_clean$padj < 0.05); down_lfc1 # DOWN = 66
 
 # set "UP" based on p <0.05 and LFC of |1|
 deg1_clean$diffexpressed[deg1_clean$log2FoldChange > 1 & deg1_clean$padj < 0.05] <- "UP"
@@ -390,11 +392,11 @@ vol <- ggplot(data = deg1_clean, aes(x = log2FoldChange, y = -log10(padj), fill 
   #chose a pretty stringent p-value cut off 
   geom_hline(yintercept = -log10(0.05), col = "gray", linetype = 'dashed') +
   geom_point(pch=21, size = 3) +
-  annotate("text", x = -10, y = 10, label = "Downregulated", color = "cornflowerblue", size = 6) +
-  annotate("text", x = 10, y = 10, label = "Upregulated", color = "maroon", size = 6) +
+  annotate("text", x = -10, y = 10, label = "Downregulated", color = "#7A9EA8", size = 6) +
+  annotate("text", x = 10, y = 10, label = "Upregulated", color = "#C47A8A", size = 6) +
   annotate("text", x= 18, y= 30, label = "Phase I Stress", size = 6) +
   # to set the colours of our variable
-  scale_fill_manual(values = c("cornflowerblue", "grey", "maroon")) 
+  scale_fill_manual(values = c("#7A9EA8", "grey", "#C47A8A")) 
                      # to set the labels in case we want to overwrite the categories from the dataframe (UP, DOWN, NO)
                      #labels = c("Downregulated", "Not significant", "Upregulated")) #removed legend
   # Biostatsquid theme
@@ -447,9 +449,9 @@ colnames(deg2_clean)
 #see how many up- and downregulated significant DEGs there are (regardless of LFC)
 up <- count(deg2_clean$log2FoldChange > 0 & deg2_clean$padj < 0.05); up 
 down <- count(deg2_clean$log2FoldChange < 0 & deg2_clean$padj < 0.05); down
-# stress UP = 25 DOWN =738
-# naive UP = 273 DOWN = 176 
-# recovery UP = 214 DOWN = 373
+# stress UP = 23 DOWN =743
+# naive UP = 221 DOWN = 134 
+# recovery UP = 174 DOWN = 370
 
 # check we got everyone
 count(deg2_clean$padj<0.05) 
@@ -458,10 +460,9 @@ total = up + down; total
 #see how many up- and downregulated significant DEGs there are with LFC of |1|
 up_lfc1 <- count(deg2_clean$log2FoldChange > 1 & deg2_clean$padj < 0.05); up_lfc1 
 down_lfc1 <- count(deg2_clean$log2FoldChange < -1 & deg2_clean$padj < 0.05); down_lfc1 
-# stress UP = 16 DOWN = 723
-# naive UP = 268 DOWN = 168 
-# recovery UP = 210 DOWN = 368
-
+# stress UP = 16 DOWN = 730
+# naive UP = 215 DOWN = 124 
+# recovery UP = 168 DOWN = 365
 
 
 # set "UP" based on p <0.05 and |LFC| of 1
@@ -499,11 +500,11 @@ vol <- ggplot(data = deg2_clean, aes(x = log2FoldChange, y = -log10(padj), fill 
   #chose a pretty stringent p-value cut off 
   geom_hline(yintercept = -log10(0.05), col = "gray", linetype = 'dashed') +
   geom_point(pch=21, size = 3) +
-  annotate("text", x = -10, y = 10, label = "Downregulated", color = "cornflowerblue", size = 6) +
-  annotate("text", x = 10, y = 10, label = "Upregulated", color = "maroon", size = 6) +
-  annotate("text", x= 20, y=15, label = paste0("Phase II ", t), size = 6) +
+  annotate("text", x = -10, y = 10, label = "Downregulated", color = "#7A9EA8", size = 6) +
+  annotate("text", x = 10, y = 10, label = "Upregulated", color = "#C47A8A", size = 6) +
+  annotate("text", x= 10, y=25, label = paste0("Phase II ", t), size = 6) +
   # to set the colours of our variable
-  scale_fill_manual(values = c("cornflowerblue", "grey", "maroon")) 
+  scale_fill_manual(values = c("#7A9EA8", "grey", "#C47A8A")) 
                      # to set the labels in case we want to overwrite the categories from the dataframe (UP, DOWN, NO)
                      #labels = c("Downregulated", "Not significant", "Upregulated")) #removed legend
   # Biostatsquid theme
@@ -569,11 +570,11 @@ mat <- mat - rowMeans(mat) #difference in expression compared to average across 
 #mat <- mat[,col.order]
 df2 <- as.data.frame(colData(vsd2)[c("treatment")]) #make dataframe for column naming 
 
-colfunc <- colorRampPalette(c("deepskyblue", "white", "violetred3")) #make function for the color gradient 
+colfunc <- colorRampPalette(c("#7A9EA8", "white", "#C47A8A")) #make function for the color gradient 
 ann_colors <- list( treatment= c(control="#A29BAD", stress ="#D29F13", naive= "#6BA84C", recovery= "#65A6E2"))
 breakss <- c(-2, -1.9, -1.8, -1.7, -1.6, -1.5, -1.4, -1.3, -1.2, -1.1, -1, -.9, -.8, -.7, -.6, -.5, -.4, -.3, -.2, -.1, 0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2) #this looks very extra but this is how the colors in the heatmap were broken up 
 
-png("../de_analysis/heatmaps/updated_phase2_heatmap.png", units= "in", width=20, height=20, res = 600)
+png("../de_analysis/heatmaps/phase2_heatmap.png", units= "in", width=20, height=20, res = 600)
 pheatmap(mat, annotation_col=df2, annotation_colors=ann_colors, annotation_names_col = F, clustering_method = "average", 
          clustering_distance_rows="euclidean", show_rownames =FALSE, cluster_cols=F,
          show_colnames =F, breaks= breakss, color = colfunc(40), annotation_legend = F) 
@@ -617,9 +618,9 @@ Venn diagram comparing Phase 1 and 2 stress!
 #phase 1 - get just gene names
 sig_phase1_genes <- row.names(sig_phase1)
 #phase 2 - get just gene names
-sig_res_stress_genes <- row.names(sig_stress)
+sig_stress_genes <- row.names(sig_stress)
 
-comb <- c(sig_phase1_genes, sig_res_stress_genes) #combine the list
+comb <- c(sig_phase1_genes, sig_stress_genes) #combine the list
 
 comb_list <- dm2[which(rownames(dm2) %in% comb),] #gets rid of any duplicates 
 
@@ -627,14 +628,14 @@ comb_row <- row.names(comb_list) #make just the names of the genes again
 
 
 # Comparing each individual list with the combined list
-sig_res_stress_genes_comp <- comb_row %in% sig_res_stress_genes
+sig_stress_genes_comp <- comb_row %in% sig_stress_genes
 sig_phase1_genes_comp <- comb_row %in% sig_phase1_genes
 
 # Generating venn counts to plot venn diagram 
-counts <- cbind(sig_phase1_genes_comp, sig_res_stress_genes_comp)
+counts <- cbind(sig_phase1_genes_comp, sig_stress_genes_comp)
 ven <- vennCounts(counts)
-png("phase2_venn-diagram-p1&2.png", 1000, 1000)
-vennDiagram(ven, cex=1, names = c("phase1", "phase2"))
+png("venn-diagram-p1&2stress.png", 1000, 1000)
+vennDiagram(ven, cex=1, names = c("phase1", "phase2 stress"))
 dev.off()
 ```
 

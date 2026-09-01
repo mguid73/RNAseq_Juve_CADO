@@ -1,0 +1,19 @@
+"","gene_id","GO_Annotation","Term","Annotated","Significant","Expected","Fisher","ontology","prop.sig.genes"
+"1","LOC111103397","GO:0009408","response to heat",28,1,0.01,0.0094,"Biological Processes",0.0357142857142857
+"2","LOC111103397","GO:0042026","protein refolding",37,1,0.01,0.0124,"Biological Processes",0.027027027027027
+"3","LOC111127320","GO:1902600","proton transmembrane transport",82,1,0.03,0.0274,"Biological Processes",0.0121951219512195
+"4","LOC111129936","GO:0035082","axoneme assembly",37,2,0.01,0.0038,"Biological Processes",0.0540540540540541
+"5","LOC111129936","GO:0044458","motile cilium assembly",6,1,0,0.002,"Biological Processes",0.166666666666667
+"6","LOC111129936","GO:0060294","cilium movement involved in cell motility",20,1,0.01,0.0067,"Biological Processes",0.05
+"7","LOC111134321","GO:0003341","cilium movement",55,2,0.02,0.0094,"Biological Processes",0.0363636363636364
+"8","LOC111134321","GO:0036158","outer dynein arm assembly",13,1,0,0.0044,"Biological Processes",0.0769230769230769
+"9","LOC111129936","GO:0001534","radial spoke",5,1,0,0.0018,"Cellular Components",0.2
+"10","LOC111129936","GO:0005930","axoneme",55,3,0.02,7.9e-05,"Cellular Components",0.0545454545454545
+"11","LOC111134321","GO:0005930","axoneme",55,3,0.02,7.9e-05,"Cellular Components",0.0545454545454545
+"12","LOC111137068","GO:0005930","axoneme",55,3,0.02,7.9e-05,"Cellular Components",0.0545454545454545
+"13","LOC111137068","GO:0030175","filopodium",4,1,0,0.0015,"Cellular Components",0.25
+"14","LOC111103397","GO:0044183","protein folding chaperone",184,1,0.04,0.037,"Molecular Functions",0.00543478260869565
+"15","LOC111119903","GO:0005230","extracellular ligand-gated monoatomic ion channel activity",234,1,0.05,0.0469,"Molecular Functions",0.00427350427350427
+"16","LOC111119903","GO:0030594","neurotransmitter receptor activity",241,1,0.05,0.0482,"Molecular Functions",0.004149377593361
+"17","LOC111127320","GO:0015252","proton channel activity",45,1,0.01,0.0091,"Molecular Functions",0.0222222222222222
+"18","LOC111137068","GO:0045504","dynein heavy chain binding",15,1,0,0.0031,"Molecular Functions",0.0666666666666667

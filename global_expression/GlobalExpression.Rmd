@@ -31,7 +31,7 @@ library(limma)
 ## Load in data
 ```{r}
 # load in metadata
-sample_info <- read.csv("juve_cado_metadata_w_batches.csv", header=TRUE, sep=",", row.names=1)
+sample_info <- read.csv("../de_analysis/juve_cado_metadata_w_batches.csv", header=TRUE, sep=",", row.names=1)
 head(sample_info)
 tail(sample_info)
 ```
@@ -39,7 +39,7 @@ tail(sample_info)
 ```{r}
 # load in gene count matrix and set the row names header as "gene_id"
 #gene_counts <- as.data.frame(read.csv("gene_count_matrix.csv", row.names="gene_id"))
-gene_counts <- read.csv("gene_count_matrix.csv", row.names = 1, check.names = FALSE)
+gene_counts <- read.csv("../de_analysis/gene_count_matrix.csv", row.names = 1, check.names = FALSE)
 head(rownames(gene_counts))
 head(gene_counts[,1:6])
 ```
@@ -82,20 +82,16 @@ While pre-filtering of low count genes isn't necessary, it can be useful for 2 r
 1. reduce size of the `dds` data object (thus increase speed of count modeling).  
 2. improve visualizations by making them a little cleaner
 
->Note: I filtered the whole dataset (both phases, all 72 samples) then I split up the dataset into phases following the filtering. 
 
 ```{r}
 ###filtering values for PoverA
 #set filter values for PoverA (P percent of the samples have counts over A)
 # here P = 0.055 and A = 5 (5.5% of samples would be 4 out of 72 samples)
 filt <- filterfun(pOverA(0.055,5))
-
 #create filter for the counts data
 tfil <- genefilter(gene_counts, filt)
-
 #identify transcripts to keep by count filter
 keep <- gene_counts[tfil,]
-
 #identify gene names in transcript list to keep
 gn.keep <- rownames(keep)
 
@@ -105,17 +101,42 @@ dim(gene_counts)
 dim(filt_gene_counts)
 #write.csv(filt_gene_counts, file="filtered_gene_count_matrix.csv")
 head(filt_gene_counts,10)
+```
 
-p1_filt_gene_counts <- as.data.frame(p1_gene_counts[which(rownames(p1_gene_counts) %in% gn.keep),])
+```{r}
+###filtering values for PoverA
+#set filter values for PoverA (P percent of the samples have counts over A)
+
+## PHASE I
+# here P = 0.167 and A = 10 (16.7% of samples would be 4 out of 24 samples)
+p1_filt <- filterfun(pOverA(0.167,10))
+#create filter for the counts data
+p1_tfil <- genefilter(p1_gene_counts, p1_filt)
+#identify transcripts to keep by count filter
+p1_keep <- p1_gene_counts[p1_tfil,]
+#identify gene names in transcript list to keep
+p1_gn.keep <- rownames(p1_keep)
+#subset filtered genes 
+p1_filt_gene_counts <- as.data.frame(p1_gene_counts[which(rownames(p1_gene_counts) %in% p1_gn.keep),])
 dim(p1_gene_counts)
 dim(p1_filt_gene_counts)
-#write.csv(p1_filt_gene_counts, file="p1_filtered_gene_count_matrix.csv")
+#write.csv(p1_filt_gene_counts, file="data/p1_filtered_gene_count_matrix.csv")
 head(p1_filt_gene_counts,10)
 
-p2_filt_gene_counts <- as.data.frame(p2_gene_counts[which(rownames(p2_gene_counts) %in% gn.keep),])
+## PHASE II
+# here P = 0.083 and A = 10 (8.3% of samples would be 4 out of 48 samples)
+p2_filt <- filterfun(pOverA(0.083,10))
+#create filter for the counts data
+p2_tfil <- genefilter(p2_gene_counts, p2_filt)
+#identify transcripts to keep by count filter
+p2_keep <- p2_gene_counts[p2_tfil,]
+#identify gene names in transcript list to keep
+p2_gn.keep <- rownames(p2_keep)
+#subset filtered genes 
+p2_filt_gene_counts <- as.data.frame(p2_gene_counts[which(rownames(p2_gene_counts) %in% p2_gn.keep),])
 dim(p2_gene_counts)
 dim(p2_filt_gene_counts)
-#write.csv(p2_filt_gene_counts, file="p2_filtered_gene_count_matrix.csv")
+#write.csv(p2_filt_gene_counts, file="data/p2_filtered_gene_count_matrix.csv")
 head(p2_filt_gene_counts,10)
 ```
 
@@ -247,6 +268,7 @@ assay(global_vsdds_1) <- mat1
 # plot
 plotPCA(global_vsdds_1, intgroup = "treatment")
 ```
+
 Let's get a better look with a fancier biplot
 ```{r}
 # get PCA data from DESeq2
@@ -279,7 +301,7 @@ ggplot(pcaData,
     panel.background = element_rect(fill = alpha("white", 0.1))
     )
 
-#ggsave("pca_plots/p1_global_pca_5batch.png", last_plot())
+ggsave("global_pca/p1_global_pca.png", last_plot())
 ```
 
 
@@ -342,5 +364,5 @@ ggplot(pcaData,
     panel.background = element_rect(fill = alpha("white", 0.1))
     )
 
-#ggsave("pca_plots/p2_global_pca_5batch.png", last_plot())
+ggsave("global_pca/p2_global_pca.png", last_plot())
 ```

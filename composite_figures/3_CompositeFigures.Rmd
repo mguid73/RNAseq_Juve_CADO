@@ -14,55 +14,58 @@ Using these DESeq2 datasets for both PCA and Heatmaps
 
 ## PHASE I
 ```{r}
-# prettier pca
-pcaData <- plotPCA(vsd1, intgroup=c("treatment"), returnData=TRUE)
+# get PCA data from DESeq2
+pcaData <- plotPCA(global_vsdds_1,
+                   intgroup = c("treatment"),
+                   returnData = TRUE)
+
 percentVar <- round(100 * attr(pcaData, "percentVar"))
-percentVar
-pca1 <- ggplot(pcaData, aes(PC1, PC2, color=treatment, label=name)) +
-  geom_point(aes(fill=treatment), pch = 21, size = 7, color= "black") +
-  #geom_text() +
-  #coord_fixed() + 
-  ylab("PC2: 15% Variance Explained") +
-  xlab("PC1:35% Variance Explained") +
-  labs(title = "PCA of 298 significant DEGs") +
-  annotate("text", x = -3, y = 1, label = "control", color = "#A29BAD", fontface="bold", size = 6) +
-  annotate("text", x = 3, y = 2.5, label = "stress", color = "#D29F13", fontface="bold", size = 6) +
-  #theme_linedraw() +
-  scale_fill_manual(values = c(control="#A29BAD", stress ="#D29F13")) +
-  theme_minimal(base_size = 12) +
+
+pca1<- ggplot(pcaData,
+       aes(x = PC1, y = PC2,
+           fill = treatment))+   # fill by treatment
+  geom_point(aes(fill=treatment), size = 4, alpha=.75, shape=21) +
+  scale_fill_manual(values = c(
+    control  = "#A29BAD",
+    stress   = "#D29F13"
+  )) +
+  coord_fixed() +
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
   theme(
-    legend.position = "none",
+    #legend.position = "none",
     panel.grid.minor = element_blank(),
     panel.grid.major.x = element_blank(),
     panel.grid.major.y = element_blank(),
-    plot.title=element_text(face ="bold", hjust = 0.5, size = 12, color="black"),
-    axis.title=element_text(face="bold", size=12, color="black"),
-    axis.text=element_text(size=12, color="black"), 
-    axis.text.x = element_text(size = 12),
+    axis.title=element_text(face="bold", size=20, color="black"),
+    axis.text=element_text(size=20, color="black"), 
+    axis.text.x = element_text(size = 20),
     panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
-    #panel.background = element_rect(fill = alpha("white", 0.1))
+    panel.background = element_rect(fill = alpha("white", 0.1))
     )
-print(pca1)
 ```
 
 ## PHASE II
 ```{r}
-# prettier pca
-pcaData <- plotPCA(vsd2, intgroup=c("treatment"), returnData=TRUE)
+# get PCA data from DESeq2
+pcaData <- plotPCA(global_vsdds_2,
+                   intgroup = c("treatment"),
+                   returnData = TRUE)
+
 percentVar <- round(100 * attr(pcaData, "percentVar"))
-percentVar
-pca2 <- ggplot(pcaData, aes(PC1, PC2, color=treatment, label=name)) +
-  geom_point(aes(fill=treatment), pch = 21, size = 7, color= "black") +
-  #geom_text() +
-  #coord_fixed() + 
-  ylab("PC2: 8% Variance Explained") +
-  xlab("PC1:33% Variance Explained") +
-  labs(title = "PCA of 1468 significant DEGs") +
-  #theme_linedraw() +
-  annotate("text", x = -15, y = 20, label = "control", color = "#A29BAD", fontface="bold", size = 6) +
-  annotate("text", x = 50, y = 10, label = "stress", color = "#D29F13", fontface="bold", size = 6) +
-  annotate("text", x = -30, y = -10, label = "naive", color = "#6BA84C", fontface="bold", size = 6) +
-  annotate("text", x = 5, y = -38, label = "recovery", color = "#65A6E2", fontface="bold", size = 6) +
+
+pca2 <- ggplot(pcaData,
+       aes(x = PC1, y = PC2,
+           fill = treatment)) +     # 
+  geom_point(aes(fill=treatment), size = 5, alpha=.75, shape = 21, color = "black") +
+  #coord_fixed() +
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+  labs(title = "Phase II global gene expression") +
+  annotate("text", x = -20, y = -23, label = "Control", color = "#A29BAD", fontface="bold", size = 5) +
+  annotate("text", x = 27, y = 23, label = "Stress", color = "#D29F13", fontface="bold", size = 5) +
+  annotate("text", x = -5, y = -15, label = "Naïve", color = "#6BA84C", fontface="bold", size = 5) +
+  annotate("text", x = -10, y = 18, label = "Recovery", color = "#65A6E2", fontface="bold", size = 5) +
   scale_fill_manual(values = c(control="#A29BAD", stress ="#D29F13", naive= "#6BA84C", recovery= "#65A6E2")) +
   theme_minimal(base_size = 12) +
   theme(
@@ -70,43 +73,44 @@ pca2 <- ggplot(pcaData, aes(PC1, PC2, color=treatment, label=name)) +
     panel.grid.minor = element_blank(),
     panel.grid.major.x = element_blank(),
     panel.grid.major.y = element_blank(),
-    plot.title=element_text(face = "bold", hjust = 0.5, size=12, color="black"),
+    plot.title=element_text(face = "bold", hjust = 0.5, size=16, color="black"),
     axis.title=element_text(face = "bold", size=12, color="black"),
     axis.text=element_text(size=12, color="black"), 
     axis.text.x = element_text(size = 12),
     panel.border = element_rect(color = "black", fill = NA, linewidth = 1)
     #panel.background = element_rect(fill = alpha("white", 0.1))
     ); print(pca2)
-
-#ggsave("pca_plots/Phase2_PCA_glam.png", plot = pca2, width = 8, height =8, units = "in", dpi = 300)
 ```
 
 
 
 # Heatmaps
-## PHASE I
-```{r}
-sig.num <- sum(combine1$padj <0.00001, na.rm=T) #set the p value cut off very low here, 54 of 298
-sum(combine1$padj <0.00001, na.rm=T)
-sum(combine1$padj!=0)
-topVarGenes <- head(order(rowVars(assay(vsd1)),decreasing=TRUE),sig.num) #sort by decreasing sig
-mat <- assay(vsd1)[ topVarGenes, ] #make an expression object
-mat <- mat - rowMeans(mat) #difference in expression compared to average across all samples
-#col.order <- c("CASE_J03", "CASE_J09", "CASE_J12", "CASE_J13", "CA_J06",   "CA_J08",   "CA_J11",   "CA_J18",   "CON_J02",  "CON_J05" , "CON_J10" , "SE_J01" ,  "SE_J04",   "SE_J07")
-#mat <- mat[,col.order]
-df1 <- as.data.frame(colData(vsd1)[c("treatment")]) #make dataframe for column naming 
-
-
-colfunc <- colorRampPalette(c("deepskyblue", "white", "violetred3")) #make function for the color gradient 
-ann_colors <- list( treatment= c(control="#A29BAD", stress ="#D29F13"))
-breakss <- c(-2, -1.9, -1.8, -1.7, -1.6, -1.5, -1.4, -1.3, -1.2, -1.1, -1, -.9, -.8, -.7, -.6, -.5, -.4, -.3, -.2, -.1, 0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2) #this looks very extra but this is how the colors in the heatmap were broken up 
-
-heatmap1 <- pheatmap(mat, annotation_col=df1, annotation_colors=ann_colors, annotation_names_col = F, clustering_method = "average", 
-         clustering_distance_rows="euclidean", show_rownames =FALSE, cluster_cols=F,
-         show_colnames =F, breaks= breakss, color = colfunc(40), annotation_legend = F) 
-```
 
 ## PHASE II
+```{r}
+#read in significant data sets for each treatment
+sig_stress <- subset(res2_stress_ashr, padj<0.05)
+sig_naive <- subset(res2_naive_ashr, padj<0.05)
+sig_recovery <- subset(res2_recovery_ashr, padj<0.05)
+
+#combine significant DEGs for all treatment contrasts
+combine2 <- rbind(sig_stress, sig_naive, sig_recovery)
+combine_list2 <- dm2[which(rownames(dm2) %in% rownames(combine2)),] #combined list from the original matrix so dupicates are removed 
+summary(combine_list2)
+#combine_rlog <- rlog(combine_list, blind=FALSE) #setting blind to FALSE takes into account levels and contrasts
+vsd2 <- varianceStabilizingTransformation(combine_list2, blind=FALSE)
+dim(combine_list2)
+View(combine_list2)
+```
+
+limma removeBatchEffect()
+```{r}
+mat <- assay(vsd2)
+mm <- model.matrix(~treatment, colData(vsd2))
+mat <- limma::removeBatchEffect(mat, batch=vsd2$batch, design=mm)
+assay(vsd2) <- mat
+```
+
 ```{r}
 library(ggplotify)
 sig.num <- sum(combine2$padj <0.00001, na.rm=T) #set the p value cut off very low here, 1174 of 9060
@@ -127,6 +131,7 @@ heatmap2 <- pheatmap(mat, annotation_col=df2, annotation_colors=ann_colors, anno
          clustering_distance_rows="euclidean", show_rownames =FALSE, cluster_cols=F,
          show_colnames =F, breaks= breakss, color = colfunc(40), annotation_legend = F)
 
+# create label for color bars 
 # tab <- table(df2$treatment)
 # labels <- names(tab)
 # counts <- as.numeric(tab)
@@ -161,7 +166,7 @@ heatmap2 <- pheatmap(mat, annotation_col=df2, annotation_colors=ann_colors, anno
 print(heatmap2)
 
 # Export to PNG at a specific size
-ggsave("heatmaps/heatmap_glam.png", plot = heatmap2, width = 8, height =8, units = "in", dpi = 300)
+ggsave("../de_analysis/heatmaps/phase2_heatmap_glam.png", plot = heatmap2, width = 8, height =8, units = "in", dpi = 300)
 ```
 
 
@@ -283,11 +288,11 @@ vol_str2 <- ggplot(data = deg2_str_clean, aes(x = log2FoldChange, y = -log10(pad
   #chose a pretty stringent p-value cut off 
   geom_hline(yintercept = -log10(0.001), col = "gray", linetype = 'dashed') +
   geom_point(pch=21, size = 3) +
-  annotate("text", x = -10, y = 10, label = "Downregulated", color = "cornflowerblue", size = 6) +
-  annotate("text", x = 10, y = 10, label = "Upregulated", color = "maroon", size = 6) +
+  annotate("text", x = -10, y = 10, label = "Downregulated", color = "#7A9EA8", size = 6) +
+  annotate("text", x = 10, y = 10, label = "Upregulated", color = "#C47A8A", size = 6) +
   annotate("text", x= -20, y= 28, label = "Stress", size = 10) +
   # to set the colours of our variable
-  scale_fill_manual(values = c("cornflowerblue", "grey", "maroon")) 
+  scale_fill_manual(values = c("#7A9EA8", "grey", "#C47A8A")) 
                      # to set the labels in case we want to overwrite the categories from the dataframe (UP, DOWN, NO)
                      #labels = c("Downregulated", "Not significant", "Upregulated")) #removed legend
   # Biostatsquid theme
@@ -314,11 +319,11 @@ vol_rec2 <- ggplot(data = deg2_rec_clean, aes(x = log2FoldChange, y = -log10(pad
   #chose a pretty stringent p-value cut off 
   geom_hline(yintercept = -log10(0.001), col = "gray", linetype = 'dashed') +
   geom_point(pch=21, size = 3) +
-  annotate("text", x = -10, y = 10, label = "Downregulated", color = "cornflowerblue", size = 6) +
-  annotate("text", x = 10, y = 10, label = "Upregulated", color = "maroon", size = 6) +
+  annotate("text", x = -10, y = 10, label = "Downregulated", color = "#7A9EA8", size = 6) +
+  annotate("text", x = 10, y = 10, label = "Upregulated", color = "#C47A8A", size = 6) +
   annotate("text", x= -20, y= 28, label = "Stress", size = 10) +
   # to set the colours of our variable
-  scale_fill_manual(values = c("cornflowerblue", "grey", "maroon")) 
+  scale_fill_manual(values = c("#7A9EA8", "grey", "#C47A8A")) 
                      # to set the labels in case we want to overwrite the categories from the dataframe (UP, DOWN, NO)
                      #labels = c("Downregulated", "Not significant", "Upregulated")) #removed legend
   # Biostatsquid theme
@@ -345,11 +350,11 @@ vol_nai2 <- ggplot(data = deg2_nai_clean, aes(x = log2FoldChange, y = -log10(pad
   #chose a pretty stringent p-value cut off 
   geom_hline(yintercept = -log10(0.001), col = "gray", linetype = 'dashed') +
   geom_point(pch=21, size = 3) +
-  annotate("text", x = -10, y = 10, label = "Downregulated", color = "cornflowerblue", size = 6) +
-  annotate("text", x = 10, y = 10, label = "Upregulated", color = "maroon", size = 6) +
+  annotate("text", x = -10, y = 10, label = "Downregulated", color = "#7A9EA8", size = 6) +
+  annotate("text", x = 10, y = 10, label = "Upregulated", color = "#C47A8A", size = 6) +
   annotate("text", x= -20, y= 28, label = "Stress", size = 10) +
   # to set the colours of our variable
-  scale_fill_manual(values = c("cornflowerblue", "grey", "maroon")) 
+  scale_fill_manual(values = c("#7A9EA8", "grey", "#C47A8A")) 
                      # to set the labels in case we want to overwrite the categories from the dataframe (UP, DOWN, NO)
                      #labels = c("Downregulated", "Not significant", "Upregulated")) #removed legend
   # Biostatsquid theme
@@ -439,10 +444,11 @@ library(patchwork)
 library(png)
 library(grid)
 
+getwd()
 # Load your PNG
-vd <- readPNG("outputs/venn_diagram_w_title.png")
-ht <- readPNG("heatmaps/Phase2_heatmap_glam_labeled_w_title.png")
-pd <- readPNG("outputs/path_diagram_w_titles.png")
+vd <- readPNG("../de_analysis/venn_diagrams/venn_diagram_w_title.png")
+ht <- readPNG("../de_analysis/heatmaps/phase2_heatmap_glam_labeled_w_title.png")
+pd <- readPNG("path_diagram_w_titles.png")
 
 # Convert each PNG to a ggplot object
 vd <- ggplot() +
@@ -466,12 +472,13 @@ AAABBCCCC
 DDDDDCCCC
 DDDDDCCCC
 "
+
 ge_phase2 <- (pca2 | vd | ht | pd) +
   plot_layout(design = phase2_design) +
   plot_annotation(tag_levels = "a", tag_suffix = ")")
 print(ge_phase2)
 
 # Export to PNG at a specific size
-ggsave("../Composite_Figures/Phase2_GE.png", plot = ge_phase2, width = 16, height =8, units = "in", dpi = 300)
+ggsave("Figure4_Phase2_DEG.png", plot = ge_phase2, width = 16, height =8, units = "in", dpi = 300)
 ```
 

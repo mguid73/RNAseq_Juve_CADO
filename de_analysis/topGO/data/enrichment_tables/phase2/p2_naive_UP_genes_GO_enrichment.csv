@@ -1,0 +1,20 @@
+"","gene_id","GO_Annotation","Term","Annotated","Significant","Expected","Fisher","ontology","prop.sig.genes"
+"1","LOC111108150","GO:0000724","double-strand break repair via homologous recombination",159,3,0.24,0.0016,"Biological Processes",0.0188679245283019
+"2","LOC111119666","GO:0090161","Golgi ribbon formation",2,1,0,0.003,"Biological Processes",0.5
+"3","LOC111120602","GO:0030100","regulation of endocytosis",13,1,0.02,0.0192,"Biological Processes",0.0769230769230769
+"4","LOC111120602","GO:0032012","regulation of ARF protein signal transduction",12,1,0.02,0.0177,"Biological Processes",0.0833333333333333
+"5","LOC111121716","GO:0000724","double-strand break repair via homologous recombination",159,3,0.24,0.0016,"Biological Processes",0.0188679245283019
+"6","LOC111121716","GO:0007131","reciprocal meiotic recombination",34,1,0.05,0.0494,"Biological Processes",0.0294117647058824
+"7","LOC111128971","GO:0006382","adenosine to inosine editing",5,1,0.01,0.0074,"Biological Processes",0.2
+"8","LOC111129947","GO:0000724","double-strand break repair via homologous recombination",159,3,0.24,0.0016,"Biological Processes",0.0188679245283019
+"9","LOC111134680","GO:0006890","retrograde vesicle-mediated transport, Golgi to ER",23,1,0.03,0.0337,"Biological Processes",0.0434782608695652
+"10","LOC111136999","GO:0071880","adenylate cyclase-activating adrenergic receptor signaling pathway",21,1,0.03,0.0308,"Biological Processes",0.0476190476190476
+"11","LOC111120602","GO:0000139","Golgi membrane",121,2,0.17,0.012,"Cellular Components",0.0165289256198347
+"12","LOC111133635","GO:0043025","neuronal cell body",29,1,0.04,0.04,"Cellular Components",0.0344827586206897
+"13","LOC111134680","GO:0000139","Golgi membrane",121,2,0.17,0.012,"Cellular Components",0.0165289256198347
+"14","LOC111121716","GO:0015616","DNA translocase activity",5,1,0.01,0.0076,"Molecular Functions",0.2
+"15","LOC111128971","GO:0003725","double-stranded RNA binding",25,1,0.04,0.0376,"Molecular Functions",0.04
+"16","LOC111128971","GO:0003726","double-stranded RNA adenosine deaminase activity",4,1,0.01,0.0061,"Molecular Functions",0.25
+"17","LOC111128971","GO:0008251","tRNA-specific adenosine deaminase activity",6,1,0.01,0.0091,"Molecular Functions",0.166666666666667
+"18","LOC111133635","GO:0016286","small conductance calcium-activated potassium channel activity",10,1,0.02,0.0152,"Molecular Functions",0.1
+"19","LOC111136999","GO:0001591","dopamine neurotransmitter receptor activity, coupled via Gi/Go",3,1,0,0.0046,"Molecular Functions",0.333333333333333

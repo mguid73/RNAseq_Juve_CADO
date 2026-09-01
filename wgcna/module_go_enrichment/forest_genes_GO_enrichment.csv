@@ -1,0 +1,114 @@
+"","gene_id","GO_Annotation","Term","Annotated","Significant","Expected","Fisher","ontology","prop.sig.genes"
+"1","LOC111100040","GO:0010960","magnesium ion homeostasis",2,1,0.01,0.0062,"Biological Processes",0.5
+"2","LOC111100230","GO:0006357","regulation of transcription by RNA polymerase II",865,9,2.69,0.0059,"Biological Processes",0.0104046242774566
+"3","LOC111100230","GO:0030154","cell differentiation",470,4,1.46,0.0204,"Biological Processes",0.00851063829787234
+"4","LOC111103593","GO:0035567","non-canonical Wnt signaling pathway",10,1,0.03,0.0307,"Biological Processes",0.1
+"5","LOC111104407","GO:0006880","intracellular sequestering of iron ion",4,1,0.01,0.0124,"Biological Processes",0.25
+"6","LOC111105807","GO:0006357","regulation of transcription by RNA polymerase II",865,9,2.69,0.0059,"Biological Processes",0.0104046242774566
+"7","LOC111106200","GO:0000226","microtubule cytoskeleton organization",245,3,0.76,0.0405,"Biological Processes",0.0122448979591837
+"8","LOC111106649","GO:0008285","negative regulation of cell population proliferation",15,1,0.05,0.0457,"Biological Processes",0.0666666666666667
+"9","LOC111118092","GO:0006357","regulation of transcription by RNA polymerase II",865,9,2.69,0.0059,"Biological Processes",0.0104046242774566
+"10","LOC111118493","GO:0006357","regulation of transcription by RNA polymerase II",865,9,2.69,0.0059,"Biological Processes",0.0104046242774566
+"11","LOC111118849","GO:0000184","nuclear-transcribed mRNA catabolic process, nonsense-mediated decay",18,2,0.06,0.0014,"Biological Processes",0.111111111111111
+"12","LOC111118849","GO:0016310","phosphorylation",563,5,1.75,0.0405,"Biological Processes",0.0088809946714032
+"13","LOC111119359","GO:0006412","translation",662,5,2.06,0.042,"Biological Processes",0.00755287009063444
+"14","LOC111120889","GO:0009653","anatomical structure morphogenesis",239,3,0.74,0.0166,"Biological Processes",0.0125523012552301
+"15","LOC111120889","GO:0030154","cell differentiation",470,4,1.46,0.0204,"Biological Processes",0.00851063829787234
+"16","LOC111123994","GO:0010608","post-transcriptional regulation of gene expression",381,2,1.18,0.0247,"Biological Processes",0.005249343832021
+"17","LOC111124264","GO:0000226","microtubule cytoskeleton organization",245,3,0.76,0.0405,"Biological Processes",0.0122448979591837
+"18","LOC111124992","GO:0042060","wound healing",9,1,0.03,0.0277,"Biological Processes",0.111111111111111
+"19","LOC111124992","GO:0045104","intermediate filament cytoskeleton organization",4,1,0.01,0.0124,"Biological Processes",0.25
+"20","LOC111125017","GO:0006357","regulation of transcription by RNA polymerase II",865,9,2.69,0.0059,"Biological Processes",0.0104046242774566
+"21","LOC111125017","GO:0007179","transforming growth factor beta receptor signaling pathway",12,1,0.04,0.0367,"Biological Processes",0.0833333333333333
+"22","LOC111125017","GO:0009653","anatomical structure morphogenesis",239,3,0.74,0.0166,"Biological Processes",0.0125523012552301
+"23","LOC111125017","GO:0030154","cell differentiation",470,4,1.46,0.0204,"Biological Processes",0.00851063829787234
+"24","LOC111125427","GO:0006895","Golgi to endosome transport",5,1,0.02,0.0155,"Biological Processes",0.2
+"25","LOC111125427","GO:0042742","defense response to bacterium",9,1,0.03,0.0277,"Biological Processes",0.111111111111111
+"26","LOC111125427","GO:0090382","phagosome maturation",4,1,0.01,0.0124,"Biological Processes",0.25
+"27","LOC111128115","GO:0019941","modification-dependent protein catabolic process",757,2,2.35,0.0222,"Biological Processes",0.00264200792602378
+"28","LOC111128758","GO:0006357","regulation of transcription by RNA polymerase II",865,9,2.69,0.0059,"Biological Processes",0.0104046242774566
+"29","LOC111129065","GO:0000395","mRNA 5'-splice site recognition",3,1,0.01,0.0093,"Biological Processes",0.333333333333333
+"30","LOC111129219","GO:0000184","nuclear-transcribed mRNA catabolic process, nonsense-mediated decay",18,2,0.06,0.0014,"Biological Processes",0.111111111111111
+"31","LOC111129868","GO:0000226","microtubule cytoskeleton organization",245,3,0.76,0.0405,"Biological Processes",0.0122448979591837
+"32","LOC111130094","GO:0006412","translation",662,5,2.06,0.042,"Biological Processes",0.00755287009063444
+"33","LOC111130707","GO:0008630","intrinsic apoptotic signaling pathway in response to DNA damage",6,1,0.02,0.0185,"Biological Processes",0.166666666666667
+"34","LOC111130707","GO:0097192","extrinsic apoptotic signaling pathway in absence of ligand",6,1,0.02,0.0185,"Biological Processes",0.166666666666667
+"35","LOC111132903","GO:0006412","translation",662,5,2.06,0.042,"Biological Processes",0.00755287009063444
+"36","LOC111133044","GO:0050806","positive regulation of synaptic transmission",11,1,0.03,0.0337,"Biological Processes",0.0909090909090909
+"37","LOC111133044","GO:0051965","positive regulation of synapse assembly",2,1,0.01,0.0062,"Biological Processes",0.5
+"38","LOC111135192","GO:0033353","S-adenosylmethionine cycle",4,1,0.01,0.0124,"Biological Processes",0.25
+"39","LOC111136714","GO:0006990","positive regulation of transcription from RNA polymerase II promoter involved in unfolded protein re...",2,1,0.01,0.0062,"Biological Processes",0.5
+"40","LOC111137155","GO:0006357","regulation of transcription by RNA polymerase II",865,9,2.69,0.0059,"Biological Processes",0.0104046242774566
+"41","LOC111100230","GO:0005634","nucleus",3442,16,11.4,0.01079,"Cellular Components",0.00464846019755956
+"42","LOC111105526","GO:0005634","nucleus",3442,16,11.4,0.01079,"Cellular Components",0.00464846019755956
+"43","LOC111105807","GO:0005634","nucleus",3442,16,11.4,0.01079,"Cellular Components",0.00464846019755956
+"44","LOC111106649","GO:0005634","nucleus",3442,16,11.4,0.01079,"Cellular Components",0.00464846019755956
+"45","LOC111117050","GO:0005634","nucleus",3442,16,11.4,0.01079,"Cellular Components",0.00464846019755956
+"46","LOC111118092","GO:0005634","nucleus",3442,16,11.4,0.01079,"Cellular Components",0.00464846019755956
+"47","LOC111118849","GO:0005634","nucleus",3442,16,11.4,0.01079,"Cellular Components",0.00464846019755956
+"48","LOC111123994","GO:0005634","nucleus",3442,16,11.4,0.01079,"Cellular Components",0.00464846019755956
+"49","LOC111124992","GO:0005882","intermediate filament",5,1,0.02,0.01645,"Cellular Components",0.2
+"50","LOC111125017","GO:0071144","heteromeric SMAD protein complex",11,1,0.04,0.03585,"Cellular Components",0.0909090909090909
+"51","LOC111125427","GO:0045335","phagocytic vesicle",12,1,0.04,0.03904,"Cellular Components",0.0833333333333333
+"52","LOC111126579","GO:0005634","nucleus",3442,16,11.4,0.01079,"Cellular Components",0.00464846019755956
+"53","LOC111128115","GO:0005634","nucleus",3442,16,11.4,0.01079,"Cellular Components",0.00464846019755956
+"54","LOC111128694","GO:0022625","cytosolic large ribosomal subunit",49,3,0.16,0.00056,"Cellular Components",0.0612244897959184
+"55","LOC111128758","GO:0005634","nucleus",3442,16,11.4,0.01079,"Cellular Components",0.00464846019755956
+"56","LOC111129065","GO:0000243","commitment complex",4,1,0.01,0.01318,"Cellular Components",0.25
+"57","LOC111129065","GO:0071004","U2-type prespliceosome",13,1,0.04,0.04223,"Cellular Components",0.0769230769230769
+"58","LOC111130094","GO:0022625","cytosolic large ribosomal subunit",49,3,0.16,0.00056,"Cellular Components",0.0612244897959184
+"59","LOC111130534","GO:0008091","spectrin",1,1,0,0.00331,"Cellular Components",1
+"60","LOC111130534","GO:0030054","cell junction",497,3,1.65,0.01954,"Cellular Components",0.00603621730382294
+"61","LOC111130534","GO:0042995","cell projection",625,2,2.07,0.02351,"Cellular Components",0.0032
+"62","LOC111132903","GO:0022625","cytosolic large ribosomal subunit",49,3,0.16,0.00056,"Cellular Components",0.0612244897959184
+"63","LOC111136714","GO:0005634","nucleus",3442,16,11.4,0.01079,"Cellular Components",0.00464846019755956
+"64","LOC111137155","GO:0005634","nucleus",3442,16,11.4,0.01079,"Cellular Components",0.00464846019755956
+"65","LOC111100230","GO:0000978","RNA polymerase II cis-regulatory region sequence-specific DNA binding",460,7,1.24,0.00023,"Molecular Functions",0.0152173913043478
+"66","LOC111100230","GO:0000981","DNA-binding transcription factor activity, RNA polymerase II-specific",615,8,1.66,0.00023,"Molecular Functions",0.0130081300813008
+"67","LOC111103593","GO:0017147","Wnt-protein binding",12,1,0.03,0.03195,"Molecular Functions",0.0833333333333333
+"68","LOC111103593","GO:0042813","Wnt receptor activity",6,1,0.02,0.0161,"Molecular Functions",0.166666666666667
+"69","LOC111104407","GO:0008199","ferric iron binding",8,1,0.02,0.02141,"Molecular Functions",0.125
+"70","LOC111105526","GO:0003729","mRNA binding",160,4,0.43,0.00635,"Molecular Functions",0.025
+"71","LOC111105807","GO:0000978","RNA polymerase II cis-regulatory region sequence-specific DNA binding",460,7,1.24,0.00023,"Molecular Functions",0.0152173913043478
+"72","LOC111105807","GO:0000981","DNA-binding transcription factor activity, RNA polymerase II-specific",615,8,1.66,0.00023,"Molecular Functions",0.0130081300813008
+"73","LOC111106049","GO:0003924","GTPase activity",294,3,0.79,0.04506,"Molecular Functions",0.0102040816326531
+"74","LOC111106754","GO:0004674","protein serine/threonine kinase activity",230,4,0.62,0.00344,"Molecular Functions",0.0173913043478261
+"75","LOC111114173","GO:0004441","inositol-1,4-bisphosphate 1-phosphatase activity",1,1,0,0.0027,"Molecular Functions",1
+"76","LOC111117050","GO:0004674","protein serine/threonine kinase activity",230,4,0.62,0.00344,"Molecular Functions",0.0173913043478261
+"77","LOC111118092","GO:0000978","RNA polymerase II cis-regulatory region sequence-specific DNA binding",460,7,1.24,0.00023,"Molecular Functions",0.0152173913043478
+"78","LOC111118092","GO:0000981","DNA-binding transcription factor activity, RNA polymerase II-specific",615,8,1.66,0.00023,"Molecular Functions",0.0130081300813008
+"79","LOC111118384","GO:0004791","thioredoxin-disulfide reductase (NADP) activity",4,1,0.01,0.01076,"Molecular Functions",0.25
+"80","LOC111118493","GO:0000978","RNA polymerase II cis-regulatory region sequence-specific DNA binding",460,7,1.24,0.00023,"Molecular Functions",0.0152173913043478
+"81","LOC111118493","GO:0000981","DNA-binding transcription factor activity, RNA polymerase II-specific",615,8,1.66,0.00023,"Molecular Functions",0.0130081300813008
+"82","LOC111118849","GO:0004674","protein serine/threonine kinase activity",230,4,0.62,0.00344,"Molecular Functions",0.0173913043478261
+"83","LOC111119359","GO:0003735","structural constituent of ribosome",174,4,0.47,0.00125,"Molecular Functions",0.0229885057471264
+"84","LOC111120889","GO:0000978","RNA polymerase II cis-regulatory region sequence-specific DNA binding",460,7,1.24,0.00023,"Molecular Functions",0.0152173913043478
+"85","LOC111120889","GO:0000981","DNA-binding transcription factor activity, RNA polymerase II-specific",615,8,1.66,0.00023,"Molecular Functions",0.0130081300813008
+"86","LOC111123003","GO:0019903","protein phosphatase binding",10,1,0.03,0.02669,"Molecular Functions",0.1
+"87","LOC111123003","GO:0045294","alpha-catenin binding",1,1,0,0.0027,"Molecular Functions",1
+"88","LOC111123994","GO:0003730","mRNA 3'-UTR binding",18,1,0.05,0.04755,"Molecular Functions",0.0555555555555556
+"89","LOC111124264","GO:0003924","GTPase activity",294,3,0.79,0.04506,"Molecular Functions",0.0102040816326531
+"90","LOC111124264","GO:0005200","structural constituent of cytoskeleton",18,2,0.05,0.00107,"Molecular Functions",0.111111111111111
+"91","LOC111124319","GO:0005518","collagen binding",5,1,0.01,0.01344,"Molecular Functions",0.2
+"92","LOC111124319","GO:0038062","protein tyrosine kinase collagen receptor activity",1,1,0,0.0027,"Molecular Functions",1
+"93","LOC111125017","GO:0000978","RNA polymerase II cis-regulatory region sequence-specific DNA binding",460,7,1.24,0.00023,"Molecular Functions",0.0152173913043478
+"94","LOC111125017","GO:0000981","DNA-binding transcription factor activity, RNA polymerase II-specific",615,8,1.66,0.00023,"Molecular Functions",0.0130081300813008
+"95","LOC111125017","GO:0070411","I-SMAD binding",11,1,0.03,0.02933,"Molecular Functions",0.0909090909090909
+"96","LOC111125105","GO:0004674","protein serine/threonine kinase activity",230,4,0.62,0.00344,"Molecular Functions",0.0173913043478261
+"97","LOC111125427","GO:0003924","GTPase activity",294,3,0.79,0.04506,"Molecular Functions",0.0102040816326531
+"98","LOC111128115","GO:0031386","protein tag activity",9,1,0.02,0.02406,"Molecular Functions",0.111111111111111
+"99","LOC111128694","GO:0003735","structural constituent of ribosome",174,4,0.47,0.00125,"Molecular Functions",0.0229885057471264
+"100","LOC111129521","GO:0003729","mRNA binding",160,4,0.43,0.00635,"Molecular Functions",0.025
+"101","LOC111130094","GO:0003735","structural constituent of ribosome",174,4,0.47,0.00125,"Molecular Functions",0.0229885057471264
+"102","LOC111130534","GO:0005200","structural constituent of cytoskeleton",18,2,0.05,0.00107,"Molecular Functions",0.111111111111111
+"103","LOC111130707","GO:0042803","protein homodimerization activity",18,1,0.05,0.04755,"Molecular Functions",0.0555555555555556
+"104","LOC111131007","GO:0003729","mRNA binding",160,4,0.43,0.00635,"Molecular Functions",0.025
+"105","LOC111131007","GO:1990247","N6-methyladenosine-containing RNA binding",3,1,0.01,0.00808,"Molecular Functions",0.333333333333333
+"106","LOC111132903","GO:0003735","structural constituent of ribosome",174,4,0.47,0.00125,"Molecular Functions",0.0229885057471264
+"107","LOC111133044","GO:0001540","amyloid-beta binding",4,1,0.01,0.01076,"Molecular Functions",0.25
+"108","LOC111133044","GO:0019894","kinesin binding",8,1,0.02,0.02141,"Molecular Functions",0.125
+"109","LOC111133044","GO:0042988","X11-like protein binding",2,1,0.01,0.0054,"Molecular Functions",0.5
+"110","LOC111135192","GO:0004013","adenosylhomocysteinase activity",2,1,0.01,0.0054,"Molecular Functions",0.5
+"111","LOC111136714","GO:0000981","DNA-binding transcription factor activity, RNA polymerase II-specific",615,8,1.66,0.00023,"Molecular Functions",0.0130081300813008
+"112","LOC111137155","GO:0000978","RNA polymerase II cis-regulatory region sequence-specific DNA binding",460,7,1.24,0.00023,"Molecular Functions",0.0152173913043478
+"113","LOC111137155","GO:0000981","DNA-binding transcription factor activity, RNA polymerase II-specific",615,8,1.66,0.00023,"Molecular Functions",0.0130081300813008
