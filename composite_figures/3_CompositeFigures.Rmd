@@ -24,7 +24,7 @@ percentVar <- round(100 * attr(pcaData, "percentVar"))
 pca1<- ggplot(pcaData,
        aes(x = PC1, y = PC2,
            fill = treatment))+   # fill by treatment
-  geom_point(aes(fill=treatment), size = 4, alpha=.75, shape=21) +
+  geom_point(aes(fill=treatment), size = 5, alpha=.75, shape=21) +
   scale_fill_manual(values = c(
     control  = "#A29BAD",
     stress   = "#D29F13"
@@ -32,17 +32,22 @@ pca1<- ggplot(pcaData,
   coord_fixed() +
   xlab(paste0("PC1: ", percentVar[1], "% variance")) +
   ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+  labs(title = "Phase I global gene expression") +
+  annotate("text", x = -10, y = 5, label = "Control", color = "#A29BAD", fontface="bold", size = 5) +
+  annotate("text", x = 17, y = 20, label = "Stress", color = "#D29F13", fontface="bold", size = 5) +
+  theme_minimal(base_size = 20) +
   theme(
-    #legend.position = "none",
+    legend.position = "none",
     panel.grid.minor = element_blank(),
     panel.grid.major.x = element_blank(),
     panel.grid.major.y = element_blank(),
-    axis.title=element_text(face="bold", size=20, color="black"),
-    axis.text=element_text(size=20, color="black"), 
-    axis.text.x = element_text(size = 20),
-    panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
-    panel.background = element_rect(fill = alpha("white", 0.1))
-    )
+    plot.title=element_text(face = "bold", hjust = 0.5, size=12, color="black"),
+    axis.title=element_text(face = "bold", size=12, color="black"),
+    axis.text=element_text(size=12, color="black"), 
+    axis.text.x = element_text(size = 12),
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 1)
+    #panel.background = element_rect(fill = alpha("white", 0.1))
+    );pca1
 ```
 
 ## PHASE II
@@ -176,38 +181,57 @@ ggsave("../de_analysis/heatmaps/phase2_heatmap_glam.png", plot = heatmap2, width
 ## PHASE I
 ```{r}
 # read data
-up_regulated <- read.csv("../volcano_plots/GO_enrichment/p1_UP_genes_GO_enrichment.csv", header = TRUE)
-down_regulated <- read.csv("../volcano_plots/GO_enrichment/p1_DOWN_genes_GO_enrichment.csv", header = TRUE)
+up <- read.csv("../de_analysis/topGO/data/enrichment_tables/phase1/p1_UP_genes_GO_enrichment.csv", header = TRUE)
+down <- read.csv("../de_analysis/topGO/data/enrichment_tables/phase1/p1_DOWN_genes_GO_enrichment.csv", header = TRUE)
 
 # Add regulation direction column
-up_regulated$Regulation <- "Up-regulated"
-down_regulated$Regulation <- "Down-regulated"
+up$Regulation <- "Up-regulated"
+down$Regulation <- "Down-regulated"
+dim(up); dim(down)
+
+#remove duplicate rows
+up <- up[!duplicated(up$GO_Annotation), ]
+down <- down[!duplicated(down$GO_Annotation), ]
+dim(up); dim(down)
 
 # Select top GO terms separately before combining
-top_up <- up_regulated %>%
-  arrange(Fisher) %>%
-  slice_head(n = 5)
+top_number = 5
 
-top_down <- down_regulated %>%
+top_up <- up %>%
   arrange(Fisher) %>%
-  slice_head(n = 5)
+  slice_head(n = top_number)
+
+top_down <- down %>%
+  arrange(Fisher) %>%
+  slice_head(n = top_number)
 
 # Combine the pre-filtered datasets
 combined_data <- rbind(top_up, top_down)
 
-# Prepare data for mirrored barplot
+# log transform 
+combined_data$log10p <- -log10(combined_data$Fisher)
+
+combined_data <- combined_data %>%
+  mutate(Regulation = factor(Regulation, levels = c("Down-regulated", "Up-regulated"))) %>%
+  arrange(Regulation, desc(Fisher)) %>%
+  mutate(order = row_number())
+
+#Prepare data for mirrored barplot
 top_terms_mirror <- combined_data %>%
-  mutate(prop.sig.genes = ifelse(Regulation == "Down-regulated", 
-                                  -prop.sig.genes, 
-                                  prop.sig.genes))
+  mutate(log10p = ifelse(Regulation == "Down-regulated",
+                                  -log10p,
+                                  log10p))
+
+#set colors for term text
+term_colors = c(rep("#7A9EA8", top_number), rep("#C47A8A", top_number))
 
 # Create mirrored barplot
-topGO1 <- ggplot(top_terms_mirror, aes(x = reorder(Term, abs(prop.sig.genes)), 
-                                    y = prop.sig.genes, 
+topGO1 <- ggplot(top_terms_mirror, aes(x = reorder(Term, order),
+                                    y = log10p,
                                     fill = Regulation)) +
   geom_col(width = 0.7, alpha = 0.8) +
   geom_hline(yintercept = 0, color = "black", linewidth = 0.8) +
-  scale_fill_manual(values = c("Up-regulated" = "#C47A8A", 
+  scale_fill_manual(values = c("Up-regulated" = "#C47A8A",
                                 "Down-regulated" = "#7A9EA8")) +
   coord_flip() +
   theme_minimal() +
@@ -219,27 +243,24 @@ topGO1 <- ggplot(top_terms_mirror, aes(x = reorder(Term, abs(prop.sig.genes)),
     axis.title = element_text(face = "bold"),
     axis.text = element_text(color = "black"),
     axis.text.x = element_text(size = 12),
-    axis.text.y = element_text(size = 12),
-    plot.title=element_text(face = "bold", hjust = 0.5, size = 12, color="black")
+    axis.text.y = element_text(size = 11, color = term_colors),
+    plot.title=element_text(face = "bold", hjust =-3.5, size = 12, color="black")
   ) +
   scale_y_continuous(labels = abs) +
   labs(
-    x = "GO terms",
-    y = "Proportion of Significant Genes",
+    x = NULL,
+    y = "-log10(Fisher p-value)",
     title = "Top Enriched GO Terms Among Significant DEGs",
     fill = "Regulation"
-  )
-
-print(topGO1)
+  );print(topGO1)
 ```
-
 
 
 # Volcano plots 
 ## PHASE I
 
 ```{r}
-deg1_clean <- read.csv("../volcano_plots/outputs/PHASE1_volcano_plot_data.csv")
+deg1_clean <- read.csv("../de_analysis/outputs/p1_DEGs.csv")
 
 # Create a basic volcano plot with adjusted p-values (to account for multiple hypothesis testing)
 vol_str1 <- ggplot(data = deg1_clean, aes(x = log2FoldChange, y = -log10(padj), fill = diffexpressed))  +
@@ -424,7 +445,6 @@ ggVennDiagram(venn_list, label = "count") +
 ```{r}
 top_design <- "
 AAB
-AAB
 "
 top_row <- vol_str1 + pca1 +
   plot_layout(design = top_design)
@@ -434,7 +454,7 @@ ge_phase1 <- top_row / free(topGO1) +
   theme(plot.tag = element_text(size = 20, face = "bold"))
 print(ge_phase1)
 # Export to PNG at a specific size
-ggsave("../Composite_Figures/PhaseI_GE.png", plot = ge_phase1, width = 12, height =8, units = "in", dpi = 300)
+ggsave("../manuscript_figures/main/Figure3_Phase1_DEG.png", plot = ge_phase1, width = 10, height =8, units = "in", dpi = 300)
 ```
 
 ## PHASE II
@@ -481,6 +501,6 @@ ge_phase2 <- (pca2 | vd | ht | pd) +
 print(ge_phase2)
 
 # Export to PNG at a specific size
-ggsave("../manuscript_figures/Figure4_Phase2_DEG.png", plot = ge_phase2, width = 16, height =8, units = "in", dpi = 300)
+ggsave("../manuscript_figures/main/Figure4_Phase2_DEG.png", plot = ge_phase2, width = 16, height =8, units = "in", dpi = 300)
 ```
 
